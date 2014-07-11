@@ -10,9 +10,7 @@
 #define _tinyrl_history_h
 
 #include <stdbool.h>
-#include "lub/c_decl.h"
 
-_BEGIN_C_DECL
 /**************************************
  * tinyrl_history_entry class interface
  ************************************** */
@@ -91,6 +89,5 @@ extern tinyrl_history_expand_t
 tinyrl_history_expand(const tinyrl_history_t * instance,
 		      const char *string, char **output);
 
-_END_C_DECL
 #endif				/* _tinyrl_history_h */
 /** @} tinyrl_history */

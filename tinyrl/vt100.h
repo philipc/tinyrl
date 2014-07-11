@@ -22,9 +22,7 @@
 #include <stdio.h>
 #include <stdarg.h>
 
-#include "lub/c_decl.h"
-
-_BEGIN_C_DECL typedef struct _tinyrl_vt100 tinyrl_vt100_t;
+typedef struct _tinyrl_vt100 tinyrl_vt100_t;
 
 /* define the Key codes */
 #define KEY_NUL	0	/**< ^@	Null character */
@@ -118,6 +116,6 @@ extern void tinyrl_vt100_cursor_home(const tinyrl_vt100_t * instance);
 extern void tinyrl_vt100_cursor_save(const tinyrl_vt100_t * instance);
 extern void tinyrl_vt100_cursor_restore(const tinyrl_vt100_t * instance);
 extern void tinyrl_vt100_erase(const tinyrl_vt100_t * instance, unsigned count);
-_END_C_DECL
+
 #endif				/* _tinyrl_vt100_h */
 /** @} tinyrl_vt100 */

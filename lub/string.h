@@ -33,9 +33,6 @@ If a "const char *" is returned then the client has no responsiblity for releasi
 
 #include <stddef.h>
 
-#include "lub/c_decl.h"
-_BEGIN_C_DECL
-
 /**
  * This operation duplicates the specified string.
  *
@@ -235,8 +232,6 @@ void
          */
         char *string
     );
-
- _END_C_DECL
 
 #endif /* _lub_string_h */
 /** @} */

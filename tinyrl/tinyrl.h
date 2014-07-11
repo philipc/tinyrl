@@ -12,10 +12,7 @@
 
 #include <stdbool.h>
 #include <stdio.h>
-#include "lub/c_decl.h"
 #include "tinyrl/history.h"
-
-_BEGIN_C_DECL
 
 typedef struct _tinyrl tinyrl_t;
 typedef enum {
@@ -202,6 +199,5 @@ extern void tinyrl_limit_line_length(
 	 */
 	unsigned length);
 
-_END_C_DECL
 #endif				/* _tinyrl_tinyrl_h */
 /** @} tinyrl_tinyrl */
