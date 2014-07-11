@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 2.6)
 
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wmissing-prototypes -Werror")
+
 include_directories("${PROJECT_SOURCE_DIR}")
 
 add_library(tinyrl tinyrl/tinyrl.c tinyrl/vt100/vt100.c

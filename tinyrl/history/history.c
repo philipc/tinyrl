@@ -22,7 +22,7 @@ struct _tinyrl_history {
 };
 
 /*------------------------------------- */
-void tinyrl_history_init(tinyrl_history_t * this, unsigned stifle)
+static void tinyrl_history_init(tinyrl_history_t * this, unsigned stifle)
 {
 	this->entries = NULL;
 	this->stifle = stifle;
@@ -32,7 +32,7 @@ void tinyrl_history_init(tinyrl_history_t * this, unsigned stifle)
 }
 
 /*------------------------------------- */
-void tinyrl_history_fini(tinyrl_history_t * this)
+static void tinyrl_history_fini(tinyrl_history_t * this)
 {
 	tinyrl_history_entry_t *entry;
 	tinyrl_history_iterator_t iter;

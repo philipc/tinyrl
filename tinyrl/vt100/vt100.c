@@ -137,12 +137,6 @@ int tinyrl_vt100_ieof(const tinyrl_vt100_t * this)
 }
 
 /*-------------------------------------------------------- */
-int tinyrl_vt100_eof(const tinyrl_vt100_t * this)
-{
-	return feof(this->istream);
-}
-
-/*-------------------------------------------------------- */
 unsigned tinyrl_vt100__get_width(const tinyrl_vt100_t * this)
 {
 	this = this;

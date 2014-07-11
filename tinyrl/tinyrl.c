@@ -443,7 +443,7 @@ void tinyrl_delete(tinyrl_t * this)
  * EXPORTED INTERFACE
  *##################################### */
 /*----------------------------------------------------------------------- */
-int tinyrl_getchar(const tinyrl_t * this)
+static int tinyrl_getchar(const tinyrl_t * this)
 {
 	return tinyrl_vt100_getchar(this->term);
 }
@@ -743,7 +743,7 @@ char *tinyrl_readline(tinyrl_t * this, const char *prompt, void *context)
  * possibly reallocating it if necessary. The function returns BOOL_TRUE
  * if the line is successfully extended, BOOL_FALSE if not.
  */
-bool_t tinyrl_extend_line_buffer(tinyrl_t * this, unsigned len)
+static bool_t tinyrl_extend_line_buffer(tinyrl_t * this, unsigned len)
 {
 	bool_t result = BOOL_TRUE;
 	if (this->buffer_size < len) {
@@ -846,7 +846,7 @@ bool_t tinyrl_insert_text(tinyrl_t * this, const char *text)
  * This function uses the setting of print-completions-horizontally to select
  * how the matches are displayed
  */
-void
+static void
 tinyrl_display_matches(const tinyrl_t * this,
 		       char *const *matches, unsigned len, size_t max)
 {
