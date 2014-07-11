@@ -3,7 +3,7 @@
  */
  #include "private.h"
 
- #include "lub/ctype.h"
+ #include <ctype.h>
  
 /*--------------------------------------------------------- */
 int
@@ -13,19 +13,11 @@ lub_string_nocasecmp(const char *cs,
     int result = 0;
     while( (0==result) && *cs && *ct)
     {
-        /*lint -e155 Ignoring { }'ed sequence within an expression, 0 assumed 
-         * MACRO implementation uses braces to prevent multiple increments
-         * when called.
-         */
-        int s = lub_ctype_tolower(*cs++);
-        int t = lub_ctype_tolower(*ct++);
+        int s = tolower(*cs++);
+        int t = tolower(*ct++);
 
         result = s - t;
     }
-    /*lint -e774 Boolean within 'if' always evealuates to True 
-     * not the case because of tolower() evaluating to 0 under lint
-     * (see above)
-     */
     if(0 == result)
     {
         /* account for different string lengths */

@@ -5,7 +5,7 @@
  */
  #include "private.h"
  
- #include "lub/ctype.h"
+ #include <ctype.h>
  
 /*--------------------------------------------------------- */
 const char *
@@ -20,15 +20,7 @@ lub_string_nocasestr(const char *cs,
         const char *q = cs;
 
         p = ct;
-        /*lint -e155 Ignoring { }'ed sequence within an expression, 0 assumed 
-         * MACRO implementation uses braces to prevent multiple increments
-         * when called.
-         */
-        /*lint -e506 Constant value Boolean
-         * not the case because of tolower() evaluating to 0 under lint
-         * (see above)
-         */
-        while(*p && *q && (lub_ctype_tolower(*p) == lub_ctype_tolower(*q)))
+        while(*p && *q && (tolower(*p) == tolower(*q)))
         {
             p++,q++;
         }
