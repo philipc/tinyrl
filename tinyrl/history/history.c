@@ -130,9 +130,9 @@ remove_entries(tinyrl_history_t * this, unsigned start, unsigned end)
    Search the current history buffer for the specified 
    line and if found remove it.
    */
-static bool_t remove_duplicate(tinyrl_history_t * this, const char *line)
+static bool remove_duplicate(tinyrl_history_t * this, const char *line)
 {
-	bool_t result = BOOL_FALSE;
+	bool result = false;
 	unsigned i;
 
 	for (i = 0; i < this->length; i++) {
@@ -140,7 +140,7 @@ static bool_t remove_duplicate(tinyrl_history_t * this, const char *line)
 		if (0 == strcmp(line, tinyrl_history_entry__get_line(entry))) {
 			free_entries(this, i, i);
 			remove_entries(this, i, i);
-			result = BOOL_TRUE;
+			result = true;
 			break;
 		}
 	}
@@ -167,7 +167,7 @@ static void append_entry(tinyrl_history_t * this, const char *line)
    */
 static void add_n_replace(tinyrl_history_t * this, const char *line)
 {
-	if (BOOL_FALSE == remove_duplicate(this, line)) {
+	if (!remove_duplicate(this, line)) {
 		/* free the oldest entry */
 		free_entries(this, 0, 0);
 		/* shuffle the array */
@@ -261,9 +261,9 @@ unsigned tinyrl_history_unstifle(tinyrl_history_t * this)
 }
 
 /*------------------------------------- */
-bool_t tinyrl_history_is_stifled(const tinyrl_history_t * this)
+bool tinyrl_history_is_stifled(const tinyrl_history_t * this)
 {
-	return this->stifle ? BOOL_TRUE : BOOL_FALSE;
+	return this->stifle != 0;
 }
 
 /*

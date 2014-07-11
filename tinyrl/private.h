@@ -1,3 +1,4 @@
+#include <stdbool.h>
 #include <termios.h>
 
 #include "tinyrl/tinyrl.h"
@@ -11,9 +12,9 @@ struct _tinyrl {
 	size_t prompt_size;
 	char *buffer;
 	size_t buffer_size;
-	bool_t done;
-	bool_t completion_over;
-	bool_t completion_error_over;
+	bool done;
+	bool completion_over;
+	bool completion_error_over;
 	unsigned point;
 	unsigned end;
 	tinyrl_completion_func_t *attempted_completion_function;
@@ -30,9 +31,9 @@ struct _tinyrl {
 				 * to tinyrl_readline()
 				 */
 	char echo_char;
-	bool_t echo_enabled;
+	bool echo_enabled;
 	struct termios default_termios;
-	bool_t isatty;
+	bool isatty;
 	char *last_buffer;	/* hold record of the previous 
 				   buffer for redisplay purposes */
 	unsigned last_point;	/* hold record of the previous 

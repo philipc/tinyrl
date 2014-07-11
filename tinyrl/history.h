@@ -9,8 +9,8 @@
 #ifndef _tinyrl_history_h
 #define _tinyrl_history_h
 
+#include <stdbool.h>
 #include "lub/c_decl.h"
-#include "lub/types.h"
 
 _BEGIN_C_DECL
 /**************************************
@@ -69,7 +69,7 @@ extern tinyrl_history_entry_t *tinyrl_history_remove(tinyrl_history_t *
 extern void tinyrl_history_clear(tinyrl_history_t * instance);
 extern void tinyrl_history_stifle(tinyrl_history_t * instance, unsigned stifle);
 extern unsigned tinyrl_history_unstifle(tinyrl_history_t * instance);
-extern bool_t tinyrl_history_is_stifled(const tinyrl_history_t * instance);
+extern bool tinyrl_history_is_stifled(const tinyrl_history_t * instance);
 
 /*
    INFORMATION ABOUT THE HISTORY LIST 

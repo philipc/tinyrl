@@ -23,7 +23,6 @@
 #include <stdarg.h>
 
 #include "lub/c_decl.h"
-#include "lub/types.h"
 
 _BEGIN_C_DECL typedef struct _tinyrl_vt100 tinyrl_vt100_t;
 

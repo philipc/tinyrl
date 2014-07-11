@@ -10,8 +10,8 @@
 #ifndef _tinyrl_tinyrl_h
 #define _tinyrl_tinyrl_h
 
+#include <stdbool.h>
 #include <stdio.h>
-#include "lub/types.h"
 #include "lub/c_decl.h"
 #include "tinyrl/history.h"
 
@@ -61,11 +61,11 @@ typedef char **tinyrl_completion_func_t(tinyrl_t * instance,
 					unsigned start, unsigned end);
 /**
  * \return
- * - BOOL_TRUE if the action associated with the key has
+ * - true if the action associated with the key has
  *   been performed successfully
- * - BOOL_FALSE if the action was not successful
+ * - false if the action was not successful
  */
-typedef bool_t tinyrl_key_func_t(tinyrl_t * instance, int key);
+typedef bool tinyrl_key_func_t(tinyrl_t * instance, int key);
 
 /* exported functions */
 extern tinyrl_t *tinyrl_new(FILE * instream,
@@ -88,7 +88,7 @@ extern void tinyrl_completion_over(tinyrl_t * instance);
 
 extern void tinyrl_completion_error_over(tinyrl_t * instance);
 
-extern bool_t tinyrl_is_completion_error_over(const tinyrl_t * instance);
+extern bool tinyrl_is_completion_error_over(const tinyrl_t * instance);
 
 extern void *tinyrl__get_context(const tinyrl_t * instance);
 
@@ -101,7 +101,7 @@ extern const char *tinyrl__get_line(const tinyrl_t * instance);
 
 extern void tinyrl__set_istream(tinyrl_t * instance, FILE * istream);
 
-extern bool_t tinyrl__get_isatty(const tinyrl_t * instance);
+extern bool tinyrl__get_isatty(const tinyrl_t * instance);
 
 extern FILE *tinyrl__get_istream(const tinyrl_t * instance);
 
@@ -109,7 +109,7 @@ extern FILE *tinyrl__get_ostream(const tinyrl_t * instance);
 
 extern char *tinyrl_readline(tinyrl_t * instance,
 			     const char *prompt, void *context);
-extern bool_t
+extern bool
 tinyrl_bind_key(tinyrl_t * instance, int key, tinyrl_key_func_t * fn);
 extern void tinyrl_delete_matches(char **instance);
 extern char **tinyrl_completion(tinyrl_t * instance,
@@ -122,7 +122,7 @@ extern void tinyrl_ding(const tinyrl_t * instance);
 
 extern void tinyrl_reset_line_state(tinyrl_t * instance);
 
-extern bool_t tinyrl_insert_text(tinyrl_t * instance, const char *text);
+extern bool tinyrl_insert_text(tinyrl_t * instance, const char *text);
 extern void
 tinyrl_delete_text(tinyrl_t * instance, unsigned start, unsigned end);
 extern void tinyrl_redisplay(tinyrl_t * instance);
@@ -184,7 +184,7 @@ extern void tinyrl_enable_echo(
 /**
  * Indicate whether the current insertion point is quoting or not
  */
-extern bool_t tinyrl_is_quoting(
+extern bool tinyrl_is_quoting(
 	/** 
 	 * The instance on which to operate
 	 */
