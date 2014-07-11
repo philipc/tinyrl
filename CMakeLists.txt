@@ -8,3 +8,6 @@ add_library(tinyrl tinyrl/tinyrl.c tinyrl/vt100/vt100.c
 	lub/string/string_cat.c lub/string/string_catn.c
 	lub/string/string_nocasecmp.c lub/string/string_nocasestr.c
 	lub/ctype/ctype_tolower.c)
+
+add_executable(example example.c)
+target_link_libraries(example tinyrl)
