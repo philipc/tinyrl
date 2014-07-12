@@ -89,6 +89,12 @@ extern void *tinyrl__get_context(const tinyrl_t * instance);
  */
 extern const char *tinyrl__get_line(const tinyrl_t * instance);
 
+extern unsigned tinyrl__get_point(const tinyrl_t * instance);
+
+extern unsigned tinyrl__get_end(const tinyrl_t * instance);
+
+extern unsigned tinyrl__get_width(const tinyrl_t * instance);
+
 extern void tinyrl__set_istream(tinyrl_t * instance, FILE * istream);
 
 extern bool tinyrl__get_isatty(const tinyrl_t * instance);

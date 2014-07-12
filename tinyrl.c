@@ -864,7 +864,7 @@ tinyrl_display_matches(const tinyrl_t * this,
 		       char *const *matches, unsigned len, size_t max)
 {
 	unsigned r, c;
-	unsigned width = tinyrl_vt100__get_width(this->term);
+	unsigned width = tinyrl__get_width(this);
 	unsigned cols = width / (max + 1);	/* allow for a space between words */
 	unsigned rows = len / cols + 1;
 
@@ -876,8 +876,7 @@ tinyrl_display_matches(const tinyrl_t * this,
 			for (c = 0; c < cols && len; c++) {
 				const char *match = *matches++;
 				len--;
-				tinyrl_vt100_printf(this->term, "%-*s ", max,
-						    match);
+				tinyrl_printf(this, "%-*s ", max, match);
 			}
 			tinyrl_crlf(this);
 		}
@@ -1078,28 +1077,29 @@ tinyrl_match_e tinyrl_complete(tinyrl_t * this, bool with_extensions,
 {
 	tinyrl_match_e result = TINYRL_NO_MATCH;
 	char **matches = NULL;
+	const char *line;
 	unsigned start, end;
 	bool completion = false;
 	bool prefix = false;
 
 	/* find the start and end of the current word */
-	start = end = this->point;
-	while (start && !isspace(this->line[start - 1])) {
+	line = tinyrl__get_line(this);
+	start = end = tinyrl__get_point(this);
+	while (start && !isspace(line[start - 1])) {
 		start--;
 	}
 
 	/* try and complete the current line buffer */
-	matches = complete_fn(this, this->line, start, end);
+	matches = complete_fn(this, line, start, end);
 	if (matches) {
 		/* identify and insert a common prefix if there is one */
 		if (0 !=
-		    strncmp(matches[0], &this->line[start],
-			    strlen(matches[0]))) {
+		    strncmp(matches[0], line + start, strlen(matches[0]))) {
 			/* 
 			 * delete the original text not including 
 			 * the current insertion point character 
 			 */
-			if (this->end != end) {
+			if (tinyrl__get_end(this) != end) {
 				end--;
 			}
 			tinyrl_delete_text(this, start, end);
@@ -1163,6 +1163,24 @@ void *tinyrl__get_context(const tinyrl_t * this)
 const char *tinyrl__get_line(const tinyrl_t * this)
 {
 	return this->line;
+}
+
+/*--------------------------------------------------------- */
+unsigned tinyrl__get_point(const tinyrl_t * this)
+{
+	return this->point;
+}
+
+/*--------------------------------------------------------- */
+unsigned tinyrl__get_end(const tinyrl_t * this)
+{
+	return this->end;
+}
+
+/*--------------------------------------------------------- */
+unsigned tinyrl__get_width(const tinyrl_t * this)
+{
+	return tinyrl_vt100__get_width(this->term);
 }
 
 /*--------------------------------------------------------- */
