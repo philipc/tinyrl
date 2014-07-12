@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "tinyrl.h"
+#include "complete.h"
 
 static char **complete(tinyrl_t * t, const char *text,
 		       unsigned start, unsigned end)

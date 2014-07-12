@@ -15,37 +15,6 @@
 #include "history.h"
 
 typedef struct _tinyrl tinyrl_t;
-typedef enum {
-	/**
-	 * no possible completions were found
-	 */
-	TINYRL_NO_MATCH = 0,
-	/**
-	 * the provided string was already an exact match
-	 */
-	TINYRL_MATCH,
-	/**
-	 * the provided string was ambiguous and produced
-	 * more than one possible completion
-	 */
-	TINYRL_AMBIGUOUS,
-	/**
-	 * the provided string was unambiguous and a 
-	 * completion was performed
-	 */
-	TINYRL_COMPLETED_MATCH,
-	/**
-	 * the provided string was ambiguous but a partial
-	 * completion was performed.
-	 */
-	TINYRL_COMPLETED_AMBIGUOUS,
-	/**
-	 * the provided string was an exact match for one
-	 * possible value but there are other exetensions
-	 * of the string available.
-	 */
-	TINYRL_MATCH_WITH_EXTENSIONS
-} tinyrl_match_e;
 
 /* virtual methods */
 typedef char *tinyrl_compentry_func_t(tinyrl_t * instance,
@@ -53,9 +22,6 @@ typedef char *tinyrl_compentry_func_t(tinyrl_t * instance,
 				      unsigned offset, unsigned state);
 typedef int tinyrl_hook_func_t(tinyrl_t * instance);
 
-typedef char **tinyrl_completion_func_t(tinyrl_t * instance,
-					const char *text,
-					unsigned start, unsigned end);
 /**
  * \return
  * - true if the action associated with the key has
@@ -107,12 +73,6 @@ extern char *tinyrl_readline(tinyrl_t * instance,
 			     const char *prompt, void *context);
 extern bool
 tinyrl_bind_key(tinyrl_t * instance, int key, tinyrl_key_func_t * fn);
-extern void tinyrl_delete_matches(char **instance);
-extern char **tinyrl_completion(tinyrl_t * instance,
-				const char *line,
-				unsigned start,
-				unsigned end,
-				tinyrl_compentry_func_t * generator);
 extern void tinyrl_crlf(const tinyrl_t * instance);
 extern void tinyrl_ding(const tinyrl_t * instance);
 
@@ -125,29 +85,6 @@ extern void tinyrl_redisplay(tinyrl_t * instance);
 
 extern void
 tinyrl_replace_line(tinyrl_t * instance, const char *text, int clear_undo);
-
-/**
- * Complete the current word in the input buffer, displaying
- * a prompt to clarify any abiguity if necessary.
- *
- * \return
- * - the type of match performed.
- * \post
- * - If the current word is ambiguous then a list of 
- *   possible completions will be displayed.
- */
-tinyrl_match_e tinyrl_complete(tinyrl_t * this, bool with_extensions,
-			       tinyrl_completion_func_t *complete_fn);
-
-/**
- * Complete the current word in the input buffer, displaying
- * a prompt to clarify any abiguity or extra extensions if necessary.
- *
- * These callback should be bound to the key that is used for
- * completion using tinyrl_bind_key().
- */
-bool tinyrl_complete_key(tinyrl_t * this,
-			 tinyrl_completion_func_t *complete_fn);
 
 /**
  * Disable echoing of input characters when a line in input.
