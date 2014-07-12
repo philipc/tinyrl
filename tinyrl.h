@@ -81,12 +81,6 @@ extern const char *tinyrl__get_prompt(const tinyrl_t * instance);
 
 extern void tinyrl_done(tinyrl_t * instance);
 
-extern void tinyrl_completion_over(tinyrl_t * instance);
-
-extern void tinyrl_completion_error_over(tinyrl_t * instance);
-
-extern bool tinyrl_is_completion_error_over(const tinyrl_t * instance);
-
 extern void *tinyrl__get_context(const tinyrl_t * instance);
 
 /**

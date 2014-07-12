@@ -29,8 +29,6 @@ struct _tinyrl {
 	char *buffer;
 	size_t buffer_size;
 	bool done;
-	bool completion_over;
-	bool completion_error_over;
 	unsigned point;
 	unsigned end;
 	tinyrl_completion_func_t *attempted_completion_function;
@@ -414,7 +412,6 @@ tinyrl_init(tinyrl_t * this,
 	this->buffer = NULL;
 	this->buffer_size = 0;
 	this->done = false;
-	this->completion_over = false;
 	this->point = 0;
 	this->end = 0;
 	this->attempted_completion_function = complete_fn;
@@ -1098,15 +1095,10 @@ tinyrl_do_complete(tinyrl_t * this, bool with_extensions)
 	}
 
 	if (this->attempted_completion_function) {
-		this->completion_over = false;
-		this->completion_error_over = false;
 		/* try and complete the current line buffer */
 		matches = this->attempted_completion_function(this,
 							      this->line,
 							      start, end);
-	}
-	if ((NULL == matches) && !this->completion_over) {
-		/* insert default completion call here... */
 	}
 
 	if (matches) {
@@ -1200,24 +1192,6 @@ const char *tinyrl__get_line(const tinyrl_t * this)
 tinyrl_history_t *tinyrl__get_history(const tinyrl_t * this)
 {
 	return this->history;
-}
-
-/*--------------------------------------------------------- */
-void tinyrl_completion_over(tinyrl_t * this)
-{
-	this->completion_over = true;
-}
-
-/*--------------------------------------------------------- */
-void tinyrl_completion_error_over(tinyrl_t * this)
-{
-	this->completion_error_over = true;
-}
-
-/*--------------------------------------------------------- */
-bool tinyrl_is_completion_error_over(const tinyrl_t * this)
-{
-	return this->completion_error_over;
 }
 
 /*--------------------------------------------------------- */
