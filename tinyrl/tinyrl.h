@@ -12,7 +12,7 @@
 
 #include <stdbool.h>
 #include <stdio.h>
-#include "tinyrl/history.h"
+#include "history.h"
 
 typedef struct _tinyrl tinyrl_t;
 typedef enum {

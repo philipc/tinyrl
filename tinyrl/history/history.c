@@ -9,7 +9,7 @@
 
 #include <stdlib.h>
 
-#include "tinyrl/history.h"
+#include "history.h"
 
 struct _tinyrl_history_entry {
 	char *line;

@@ -17,8 +17,8 @@
 #include <termios.h>
 #include <unistd.h>
 
-#include "tinyrl/tinyrl.h"
-#include "tinyrl/vt100.h"
+#include "tinyrl.h"
+#include "vt100.h"
 
 /* define the class member data and virtual methods */
 struct _tinyrl {

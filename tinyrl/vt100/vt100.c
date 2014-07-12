@@ -3,7 +3,7 @@
 #include <unistd.h>
 #include <fcntl.h>
 
-#include "tinyrl/vt100.h"
+#include "vt100.h"
 
 struct _tinyrl_vt100 {
 	FILE *istream;
