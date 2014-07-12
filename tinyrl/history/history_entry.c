@@ -18,7 +18,7 @@ entry_init(tinyrl_history_entry_t * this, const char *line, unsigned index)
 /*------------------------------------- */
 static void entry_fini(tinyrl_history_entry_t * this)
 {
-	lub_string_free(this->line);
+	free(this->line);
 	this->line = NULL;
 }
 

@@ -10,7 +10,7 @@
 augment those found in the standard ANSI-C library.
 
 As a rule of thumb if a function returns "char *" then the calling client becomes responsible for invoking 
-lub_string_free() to release the dynamically allocated memory.
+free() to release the dynamically allocated memory.
 
 If a "const char *" is returned then the client has no responsiblity for releasing memory.
 */
@@ -43,7 +43,7 @@ If a "const char *" is returned then the client has no responsiblity for releasi
  * A dynamically allocated string containing the same content as that specified.
  *
  * \post 
- * - The client is responsible for calling lub_string_free() with the
+ * - The client is responsible for calling free() with the
  *   returned string when they are finished using it.
  */
 char *
@@ -126,7 +126,7 @@ void
  * A dynamically allocated string containing the same content as that specified.
  *
  * \post 
- * - The client is responsible for calling lub_string_free() with the
+ * - The client is responsible for calling free() with the
  *   returned string when they are finished using it.
  */
 char *
@@ -212,27 +212,6 @@ const char *
         const char *ct
     );
         
-/**
- * This operation releases the resources associated with a dynamically allocated
- * string.
- *
- * \pre 
- * - The calling client must have responsibility for the passed string.
- * 
- * \return
- * none
- *
- * \post 
- * - The string is no longer usable, any references to it must be discarded.
- */
-void
-    lub_string_free(
-        /**
-         * The string to be released
-         */
-        char *string
-    );
-
 #endif /* _lub_string_h */
 /** @} */
 

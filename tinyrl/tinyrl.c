@@ -121,7 +121,7 @@ static bool tinyrl_key_end_of_line(tinyrl_t * this, int key)
 static bool tinyrl_key_kill(tinyrl_t * this, int key)
 {
 	/* release any old kill string */
-	lub_string_free(this->kill_string);
+	free(this->kill_string);
 
 	/* store the killed string */
 	this->kill_string = lub_string_dup(&this->buffer[this->point]);
@@ -334,11 +334,11 @@ static void tinyrl_fini(tinyrl_t * this)
 	tinyrl_vt100_delete(this->term);
 
 	/* free up any dynamic strings */
-	lub_string_free(this->buffer);
+	free(this->buffer);
 	this->buffer = NULL;
-	lub_string_free(this->kill_string);
+	free(this->kill_string);
 	this->kill_string = NULL;
-	lub_string_free(this->last_buffer);
+	free(this->last_buffer);
 	this->last_buffer = NULL;
 }
 
@@ -569,7 +569,7 @@ void tinyrl_redisplay(tinyrl_t * this)
 	(void)tinyrl_vt100_oflush(this->term);
 
 	/* set up the last line buffer */
-	lub_string_free(this->last_buffer);
+	free(this->last_buffer);
 	this->last_buffer = lub_string_dup(this->line);
 	this->last_point = this->point;
 }
@@ -655,7 +655,7 @@ char *tinyrl_readline(tinyrl_t * this, const char *prompt, void *context)
 		size_t len = sizeof(buffer);
 
 		/* manually reset the line state without redisplaying */
-		lub_string_free(this->last_buffer);
+		free(this->last_buffer);
 		this->last_buffer = NULL;
 
 		while ((sizeof(buffer) == len) &&
@@ -979,7 +979,7 @@ char **tinyrl_completion(tinyrl_t * this,
 		offset++;
 	}
 	/* be a good memory citizen */
-	lub_string_free(text);
+	free(text);
 
 	if (matches) {
 		matches[offset] = NULL;
@@ -1018,7 +1018,7 @@ void tinyrl_ding(const tinyrl_t * this)
 void tinyrl_reset_line_state(tinyrl_t * this)
 {
 	/* start from scratch */
-	lub_string_free(this->last_buffer);
+	free(this->last_buffer);
 	this->last_buffer = NULL;
 
 	tinyrl_redisplay(this);
