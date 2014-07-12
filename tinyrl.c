@@ -883,7 +883,7 @@ bool tinyrl_bind_key(tinyrl_t * this, int key, tinyrl_key_func_t * fn)
 {
 	bool result = false;
 
-	if ((key >= 0) && (key < 256)) {
+	if ((key >= 0) && (key < NUM_HANDLERS)) {
 		/* set the key handling function */
 		this->handlers[key] = fn;
 		result = true;
