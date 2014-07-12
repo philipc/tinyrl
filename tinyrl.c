@@ -31,7 +31,6 @@ struct _tinyrl {
 	bool done;
 	unsigned point;
 	unsigned end;
-	int state;
 	char *kill_string;
 #define NUM_HANDLERS 256
 	tinyrl_key_func_t *handlers[NUM_HANDLERS];
@@ -389,7 +388,6 @@ tinyrl_init(tinyrl_t * this, FILE * instream, FILE * outstream,
 	this->done = false;
 	this->point = 0;
 	this->end = 0;
-	this->state = 0;
 	this->kill_string = NULL;
 	this->echo_char = '\0';
 	this->echo_enabled = true;
