@@ -32,7 +32,6 @@ struct _tinyrl {
 	unsigned point;
 	unsigned end;
 	int state;
-#define RL_STATE_COMPLETING (0x00000001)
 	char *kill_string;
 #define NUM_HANDLERS 256
 	tinyrl_key_func_t *handlers[NUM_HANDLERS];
