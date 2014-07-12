@@ -1,7 +1,7 @@
 /* tinyrl_history_entry.c */
 #include "private.h"
-#include "lub/string.h"
 #include <stdlib.h>
+#include <string.h>
 
 struct _tinyrl_history_entry {
 	char *line;
@@ -11,7 +11,7 @@ struct _tinyrl_history_entry {
 static void
 entry_init(tinyrl_history_entry_t * this, const char *line, unsigned index)
 {
-	this->line = lub_string_dup(line);
+	this->line = strdup(line);
 	this->index = index;
 }
 

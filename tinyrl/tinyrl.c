@@ -62,7 +62,7 @@ static void changed_line(tinyrl_t * this)
 	if (this->line != this->buffer) {
 		/* replace the current buffer with the new details */
 		free(this->buffer);
-		this->line = this->buffer = lub_string_dup(this->line);
+		this->line = this->buffer = strdup(this->line);
 		this->buffer_size = strlen(this->buffer);
 		assert(this->line);
 	}
@@ -124,7 +124,7 @@ static bool tinyrl_key_kill(tinyrl_t * this, int key)
 	free(this->kill_string);
 
 	/* store the killed string */
-	this->kill_string = lub_string_dup(&this->buffer[this->point]);
+	this->kill_string = strdup(&this->buffer[this->point]);
 
 	/* delete the text to the end of the line */
 	tinyrl_delete_text(this, this->point, this->end);
@@ -570,7 +570,7 @@ void tinyrl_redisplay(tinyrl_t * this)
 
 	/* set up the last line buffer */
 	free(this->last_buffer);
-	this->last_buffer = lub_string_dup(this->line);
+	this->last_buffer = strdup(this->line);
 	this->last_point = this->point;
 }
 
@@ -598,7 +598,7 @@ char *tinyrl_readline(tinyrl_t * this, const char *prompt, void *context)
 	this->done = false;
 	this->point = 0;
 	this->end = 0;
-	this->buffer = lub_string_dup("");
+	this->buffer = strdup("");
 	this->buffer_size = strlen(this->buffer);
 	this->line = this->buffer;
 	this->prompt = prompt;
@@ -707,7 +707,7 @@ char *tinyrl_readline(tinyrl_t * this, const char *prompt, void *context)
 	 * history entry or our internal buffer
 	 */
 	{
-		char *result = this->line ? lub_string_dup(this->line) : NULL;
+		char *result = this->line ? strdup(this->line) : NULL;
 
 		/* free our internal buffer */
 		free(this->buffer);
@@ -944,7 +944,7 @@ char **tinyrl_completion(tinyrl_t * this,
 	char **matches = NULL;
 	char *match;
 	/* duplicate the string upto the insertion point */
-	char *text = lub_string_dupn(line, end);
+	char *text = strndup(line, end);
 
 	/* now try and find possible completions */
 	while ((match = entry_func(this, text, start, state++))) {
@@ -965,7 +965,7 @@ char **tinyrl_completion(tinyrl_t * this,
 		 */
 		if (1 == offset) {
 			/* let's be optimistic */
-			matches[0] = lub_string_dup(match);
+			matches[0] = strdup(match);
 		} else {
 			char *p = matches[0];
 			size_t match_len = strlen(p);

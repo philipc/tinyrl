@@ -6,7 +6,6 @@ include_directories("${PROJECT_SOURCE_DIR}")
 
 add_library(tinyrl tinyrl/tinyrl.c tinyrl/vt100/vt100.c
 	tinyrl/history/history.c tinyrl/history/history_entry.c
-	lub/string/string_dup.c lub/string/string_dupn.c
 	lub/string/string_cat.c lub/string/string_catn.c
 	lub/string/string_nocasecmp.c lub/string/string_nocasestr.c)
 

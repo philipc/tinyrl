@@ -34,26 +34,6 @@ If a "const char *" is returned then the client has no responsiblity for releasi
 #include <stddef.h>
 
 /**
- * This operation duplicates the specified string.
- *
- * \pre 
- * - none
- * 
- * \return 
- * A dynamically allocated string containing the same content as that specified.
- *
- * \post 
- * - The client is responsible for calling free() with the
- *   returned string when they are finished using it.
- */
-char *
-    lub_string_dup(
-        /** 
-         * The string to duplicate
-         */
-        const char *string
-    );
-/**
  * This operation concatinates the specified text onto an existing string.
  *
  * \pre 
@@ -114,31 +94,6 @@ void
          * The length of text to be appended
          */
         size_t      length
-    );
-/**
- * This operation dupicates a specified length of some text into a
- * new string.
- *
- * \pre 
- * - none
- * 
- * \return 
- * A dynamically allocated string containing the same content as that specified.
- *
- * \post 
- * - The client is responsible for calling free() with the
- *   returned string when they are finished using it.
- */
-char *
-    lub_string_dupn(
-        /** 
-         * The string containing the text to duplicate
-         */
-        const char *string,
-        /** 
-         * The length of text to be duplicated
-         */
-        unsigned length
     );
 /**
  * This operation returns a pointer to the last (space separated) word in the
