@@ -25,7 +25,6 @@ struct _tinyrl {
 	const char *line;
 	unsigned max_line_length;
 	const char *prompt;
-	size_t prompt_size;
 	char *buffer;
 	size_t buffer_size;
 	bool done;
@@ -382,7 +381,6 @@ tinyrl_init(tinyrl_t * this, FILE * instream, FILE * outstream,
 	this->line = NULL;
 	this->max_line_length = 0;
 	this->prompt = NULL;
-	this->prompt_size = 0;
 	this->buffer = NULL;
 	this->buffer_size = 0;
 	this->done = false;
@@ -606,7 +604,6 @@ char *tinyrl_readline(tinyrl_t * this, const char *prompt, void *context)
 	this->buffer_size = strlen(this->buffer);
 	this->line = this->buffer;
 	this->prompt = prompt;
-	this->prompt_size = strlen(prompt);
 	this->context = context;
 
 	if (this->isatty) {
