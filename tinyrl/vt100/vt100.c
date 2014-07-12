@@ -3,7 +3,12 @@
 #include <unistd.h>
 #include <fcntl.h>
 
-#include "private.h"
+#include "tinyrl/vt100.h"
+
+struct _tinyrl_vt100 {
+	FILE *istream;
+	FILE *ostream;
+};
 
 typedef struct {
 	const char terminator;
