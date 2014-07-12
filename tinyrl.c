@@ -340,7 +340,7 @@ static bool tinyrl_key_escape(tinyrl_t * this, int key)
 }
 
 /*-------------------------------------------------------- */
-static bool tinyrl_key_tab(tinyrl_t * this, int key)
+bool tinyrl_complete_key(tinyrl_t * this, int key)
 {
 	tinyrl_match_e status = tinyrl_complete_with_extensions(this);
 
@@ -403,7 +403,6 @@ tinyrl_init(tinyrl_t * this,
 	this->handlers[KEY_ENQ] = tinyrl_key_end_of_line;
 	this->handlers[KEY_VT] = tinyrl_key_kill;
 	this->handlers[KEY_EM] = tinyrl_key_yank;
-	this->handlers[KEY_HT] = tinyrl_key_tab;
 
 	this->line = NULL;
 	this->max_line_length = 0;

@@ -19,12 +19,18 @@ static char **complete(tinyrl_t * t, const char *text,
 	return NULL;
 }
 
+static bool complete_key(tinyrl_t * this, int key)
+{
+	return tinyrl_complete_key(this, key);
+}
+
 int main(int argc, char *argv[])
 {
 	tinyrl_t *t;
 	char *line;
 
 	t = tinyrl_new(stdin, stdout, 0, complete);
+	tinyrl_bind_key(t, '\t', complete_key);
 
 	for (;;) {
 		line = tinyrl_readline(t, "> ", NULL);
