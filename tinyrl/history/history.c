@@ -8,7 +8,6 @@
 #include <assert.h>
 
 #include "private.h"
-#include "lub/string.h"
 #include <stdlib.h>
 
 #include "tinyrl/history.h"
@@ -283,75 +282,6 @@ tinyrl_history_entry_t *tinyrl_history_get(const tinyrl_history_t * this,
 		entry = NULL;
 	}
 	return entry;
-}
-
-/*------------------------------------- */
-tinyrl_history_expand_t
-tinyrl_history_expand(const tinyrl_history_t * this,
-		      const char *string, char **output)
-{
-	tinyrl_history_expand_t result = tinyrl_history_NO_EXPANSION;	/* no expansion */
-	const char *p, *start;
-	char *buffer = NULL;
-	unsigned len;
-
-	for (p = string, start = string, len = 0; *p; p++, len++) {
-		/* perform pling substitution */
-		if (*p == '!') {
-			/* assume the last command to start with... */
-			unsigned offset = this->current_index - 1;
-			unsigned skip;
-			tinyrl_history_entry_t *entry;
-
-			/* this could be an escape sequence */
-			if (p[1] != '!') {
-				int tmp;
-				/* read the numeric identifier */
-				if (0 == sscanf(p, "!%d", &tmp)) {
-					/* error so ignore it */
-					break;
-				}
-
-				if (tmp < 0) {
-					/* this is a relative reference */
-					/*lint -e737 Loss of sign in promotion from int to unsigend int */
-					offset += tmp;	/* adding a negative substracts... */
-					/*lint +e737 */
-				} else {
-					/* this is an absolute reference */
-					offset = (unsigned)tmp;
-				}
-			}
-			if (len > 0) {
-				/* we need to add in some previous plain text */
-				lub_string_catn(&buffer, start, len);
-			}
-
-			/* skip the escaped chars */
-			p += skip = strspn(p, "!-0123456789");
-
-			/* try and find the history entry */
-			entry = tinyrl_history_get(this, offset);
-			if (NULL != entry) {
-				/* reset the non-escaped references */
-				start = p;
-				len = 0;
-				/* add the expanded text to the buffer */
-				result = tinyrl_history_EXPANDED;
-				lub_string_cat(&buffer,
-					       tinyrl_history_entry__get_line
-					       (entry));
-			} else {
-				/* we simply leave the unexpanded sequence */
-				len += skip;
-			}
-		}
-	}
-	/* add any left over plain text */
-	lub_string_catn(&buffer, start, len);
-	*output = buffer;
-
-	return result;
 }
 
 /*-------------------------------------*/

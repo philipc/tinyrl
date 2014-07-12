@@ -77,17 +77,5 @@ extern tinyrl_history_entry_t **tinyrl_history_list(const tinyrl_history_t *
 extern tinyrl_history_entry_t *tinyrl_history_get(const tinyrl_history_t *
 						  instance, unsigned offset);
 
-/*
- * HISTORY EXPANSION 
- */
-typedef enum {
-	tinyrl_history_NO_EXPANSION,
-	tinyrl_history_EXPANDED
-} tinyrl_history_expand_t;
-
-extern tinyrl_history_expand_t
-tinyrl_history_expand(const tinyrl_history_t * instance,
-		      const char *string, char **output);
-
 #endif				/* _tinyrl_history_h */
 /** @} tinyrl_history */
