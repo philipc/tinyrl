@@ -15,8 +15,6 @@
 /* POSIX HEADERS */
 #include <unistd.h>
 
-#include "lub/string.h"
-
 #include "private.h"
 
 /*----------------------------------------------------------------------- */
@@ -1090,7 +1088,7 @@ tinyrl_do_complete(tinyrl_t * this, bool with_extensions)
 			}
 			completion = true;
 		}
-		if (0 == lub_string_nocasecmp(matches[0], matches[1])) {
+		if (0 == strcmp(matches[0], matches[1])) {
 			/* this is just a prefix string */
 			prefix = true;
 		}
