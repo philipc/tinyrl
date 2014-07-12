@@ -34,68 +34,6 @@ If a "const char *" is returned then the client has no responsiblity for releasi
 #include <stddef.h>
 
 /**
- * This operation concatinates the specified text onto an existing string.
- *
- * \pre 
- * - 'string_ptr' must contain reference to NULL or to a dynamically 
- *   allocated string.
- * 
- * \post 
- * - The old string referenced by 'string_ptr' will be automatically released
- * - 'string_ptr' will be updated to point to a dynamically allocated string 
- *   containing the concatinated text.
- * - If there is insufficient resource to extend the string then it will not
- *   be extended.
- * - The client maintains responsibility for releasing the string reference
- *   by string_ptr when they are finished using it.
- */
-void
-    lub_string_cat(
-        /** 
-         * A pointer to the string to concatinate
-         */
-        char      **string_ptr,
-        /** 
-         * The text to be appended
-         */
-        const char *text
-    );
-/**
- * This operation concatinates a specified length of some text onto an
- * existing string.
- *
- * \pre 
- * - 'string_ptr' must contain reference to NULL or to a dynamically allocated
- *   string.
- * 
- * \post 
- * - The old string referenced by 'string_ptr' will be automatically
- *   released.
- * - 'string_ptr' will be updated to point to a dynamically allocated
- *   string containing the concatinated text.
- * - If there is insufficient resource to extend the string then it will not
- *   be extended.
- * - If there length passed in is greater than that of the specified 'text'
- *   then the length of the 'text' will be assumed.
- * - The client maintains responsibility for releasing the string reference
- *   by string_ptr when they are finished using it.
- */
-void
-    lub_string_catn(
-        /** 
-         * A pointer to the string to concatinate
-         */
-        char      **string_ptr,
-        /** 
-         * The text to be appended
-         */
-        const char *text,
-        /** 
-         * The length of text to be appended
-         */
-        size_t      length
-    );
-/**
  * This operation returns a pointer to the last (space separated) word in the
  * specified string.
  *
