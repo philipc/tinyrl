@@ -21,7 +21,7 @@ static char **complete(tinyrl_t * t, const char *text,
 
 static bool complete_key(tinyrl_t * this, int key)
 {
-	return tinyrl_complete_key(this, key);
+	return tinyrl_complete_key(this, complete);
 }
 
 int main(int argc, char *argv[])
@@ -29,7 +29,7 @@ int main(int argc, char *argv[])
 	tinyrl_t *t;
 	char *line;
 
-	t = tinyrl_new(stdin, stdout, 0, complete);
+	t = tinyrl_new(stdin, stdout, 0);
 	tinyrl_bind_key(t, '\t', complete_key);
 
 	for (;;) {

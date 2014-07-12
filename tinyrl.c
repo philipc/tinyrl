@@ -31,7 +31,6 @@ struct _tinyrl {
 	bool done;
 	unsigned point;
 	unsigned end;
-	tinyrl_completion_func_t *attempted_completion_function;
 	int state;
 #define RL_STATE_COMPLETING (0x00000001)
 	char *kill_string;
@@ -340,9 +339,10 @@ static bool tinyrl_key_escape(tinyrl_t * this, int key)
 }
 
 /*-------------------------------------------------------- */
-bool tinyrl_complete_key(tinyrl_t * this, int key)
+bool tinyrl_complete_key(tinyrl_t * this,
+			 tinyrl_completion_func_t *complete_fn)
 {
-	tinyrl_match_e status = tinyrl_complete(this, true);
+	tinyrl_match_e status = tinyrl_complete(this, true, complete_fn);
 
 	switch (status) {
 	case TINYRL_COMPLETED_MATCH:
@@ -379,10 +379,8 @@ static void tinyrl_fini(tinyrl_t * this)
 
 /*-------------------------------------------------------- */
 static void
-tinyrl_init(tinyrl_t * this,
-	    FILE * instream,
-	    FILE * outstream,
-	    unsigned stifle, tinyrl_completion_func_t * complete_fn)
+tinyrl_init(tinyrl_t * this, FILE * instream, FILE * outstream,
+	    unsigned stifle)
 {
 	int i;
 
@@ -413,7 +411,6 @@ tinyrl_init(tinyrl_t * this,
 	this->done = false;
 	this->point = 0;
 	this->end = 0;
-	this->attempted_completion_function = complete_fn;
 	this->state = 0;
 	this->kill_string = NULL;
 	this->echo_char = '\0';
@@ -608,15 +605,13 @@ void tinyrl_redisplay(tinyrl_t * this)
 }
 
 /*----------------------------------------------------------------------- */
-tinyrl_t *tinyrl_new(FILE * instream,
-		     FILE * outstream,
-		     unsigned stifle, tinyrl_completion_func_t * complete_fn)
+tinyrl_t *tinyrl_new(FILE * instream, FILE * outstream, unsigned stifle)
 {
 	tinyrl_t *this = NULL;
 
 	this = malloc(sizeof(tinyrl_t));
 	if (NULL != this) {
-		tinyrl_init(this, instream, outstream, stifle, complete_fn);
+		tinyrl_init(this, instream, outstream, stifle);
 	}
 
 	return this;
@@ -1078,7 +1073,8 @@ void tinyrl_replace_line(tinyrl_t * this, const char *text, int clear_undo)
 }
 
 /*-------------------------------------------------------- */
-tinyrl_match_e tinyrl_complete(tinyrl_t * this, bool with_extensions)
+tinyrl_match_e tinyrl_complete(tinyrl_t * this, bool with_extensions,
+			       tinyrl_completion_func_t *complete_fn)
 {
 	tinyrl_match_e result = TINYRL_NO_MATCH;
 	char **matches = NULL;
@@ -1092,13 +1088,8 @@ tinyrl_match_e tinyrl_complete(tinyrl_t * this, bool with_extensions)
 		start--;
 	}
 
-	if (this->attempted_completion_function) {
-		/* try and complete the current line buffer */
-		matches = this->attempted_completion_function(this,
-							      this->line,
-							      start, end);
-	}
-
+	/* try and complete the current line buffer */
+	matches = complete_fn(this, this->line, start, end);
 	if (matches) {
 		/* identify and insert a common prefix if there is one */
 		if (0 !=

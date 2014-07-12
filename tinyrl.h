@@ -67,8 +67,7 @@ typedef bool tinyrl_key_func_t(tinyrl_t * instance, int key);
 /* exported functions */
 extern tinyrl_t *tinyrl_new(FILE * instream,
 			    FILE * outstream,
-			    unsigned stifle,
-			    tinyrl_completion_func_t * complete_fn);
+			    unsigned stifle);
 
 /*lint -esym(534,tinyrl_printf)  Ignoring return value of function */
 extern int tinyrl_printf(const tinyrl_t * instance, const char *fmt, ...);
@@ -131,7 +130,8 @@ tinyrl_replace_line(tinyrl_t * instance, const char *text, int clear_undo);
  * - If the current word is ambiguous then a list of 
  *   possible completions will be displayed.
  */
-tinyrl_match_e tinyrl_complete(tinyrl_t * instance, bool with_extensions);
+tinyrl_match_e tinyrl_complete(tinyrl_t * this, bool with_extensions,
+			       tinyrl_completion_func_t *complete_fn);
 
 /**
  * Complete the current word in the input buffer, displaying
@@ -140,7 +140,8 @@ tinyrl_match_e tinyrl_complete(tinyrl_t * instance, bool with_extensions);
  * These callback should be bound to the key that is used for
  * completion using tinyrl_bind_key().
  */
-bool tinyrl_complete_key(tinyrl_t * instance, int key);
+bool tinyrl_complete_key(tinyrl_t * this,
+			 tinyrl_completion_func_t *complete_fn);
 
 /**
  * Disable echoing of input characters when a line in input.
