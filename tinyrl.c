@@ -342,7 +342,7 @@ static bool tinyrl_key_escape(tinyrl_t * this, int key)
 /*-------------------------------------------------------- */
 bool tinyrl_complete_key(tinyrl_t * this, int key)
 {
-	tinyrl_match_e status = tinyrl_complete_with_extensions(this);
+	tinyrl_match_e status = tinyrl_complete(this, true);
 
 	switch (status) {
 	case TINYRL_COMPLETED_MATCH:
@@ -1078,8 +1078,7 @@ void tinyrl_replace_line(tinyrl_t * this, const char *text, int clear_undo)
 }
 
 /*-------------------------------------------------------- */
-static tinyrl_match_e
-tinyrl_do_complete(tinyrl_t * this, bool with_extensions)
+tinyrl_match_e tinyrl_complete(tinyrl_t * this, bool with_extensions)
 {
 	tinyrl_match_e result = TINYRL_NO_MATCH;
 	char **matches = NULL;
@@ -1161,18 +1160,6 @@ tinyrl_do_complete(tinyrl_t * this, bool with_extensions)
 		tinyrl_redisplay(this);
 	}
 	return result;
-}
-
-/*-------------------------------------------------------- */
-tinyrl_match_e tinyrl_complete_with_extensions(tinyrl_t * this)
-{
-	return tinyrl_do_complete(this, true);
-}
-
-/*-------------------------------------------------------- */
-tinyrl_match_e tinyrl_complete(tinyrl_t * this)
-{
-	return tinyrl_do_complete(this, false);
 }
 
 /*-------------------------------------------------------- */

@@ -131,22 +131,7 @@ tinyrl_replace_line(tinyrl_t * instance, const char *text, int clear_undo);
  * - If the current word is ambiguous then a list of 
  *   possible completions will be displayed.
  */
-extern tinyrl_match_e tinyrl_complete(tinyrl_t * instance);
-
-/**
- * Complete the current word in the input buffer, displaying
- * a prompt to clarify any abiguity or extra extensions if necessary.
- *
- * \return
- * - the type of match performed.
- * \post
- * - If the current word is ambiguous then a list of 
- *   possible completions will be displayed.
- * - If the current word is complete but there are extra
- *   completions which are an extension of that word then
- *   a list of these will be displayed.
- */
-extern tinyrl_match_e tinyrl_complete_with_extensions(tinyrl_t * instance);
+tinyrl_match_e tinyrl_complete(tinyrl_t * instance, bool with_extensions);
 
 /**
  * Complete the current word in the input buffer, displaying
