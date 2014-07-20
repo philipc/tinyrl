@@ -122,8 +122,6 @@ static bool tinyrl_key_interrupt(tinyrl_t * this, int key)
 {
 	tinyrl_delete_text(this, 0, this->end);
 	this->done = true;
-	/* keep the compiler happy */
-	key = key;
 
 	return true;
 }
@@ -133,8 +131,6 @@ static bool tinyrl_key_start_of_line(tinyrl_t * this, int key)
 {
 	/* set the insertion point to the start of the line */
 	this->point = 0;
-	/* keep the compiler happy */
-	key = key;
 	return true;
 }
 
@@ -143,8 +139,6 @@ static bool tinyrl_key_end_of_line(tinyrl_t * this, int key)
 {
 	/* set the insertion point to the end of the line */
 	this->point = this->end;
-	/* keep the compiler happy */
-	key = key;
 	return true;
 }
 
@@ -159,8 +153,6 @@ static bool tinyrl_key_kill(tinyrl_t * this, int key)
 
 	/* delete the text to the end of the line */
 	tinyrl_delete_text(this, this->point, this->end);
-	/* keep the compiler happy */
-	key = key;
 	return true;
 }
 
@@ -172,8 +164,6 @@ static bool tinyrl_key_yank(tinyrl_t * this, int key)
 		/* insert the kill string at the current insertion point */
 		result = tinyrl_insert_text(this, this->kill_string);
 	}
-	/* keep the compiler happy */
-	key = key;
 	return result;
 }
 
@@ -182,8 +172,6 @@ static bool tinyrl_key_crlf(tinyrl_t * this, int key)
 {
 	tinyrl_crlf(this);
 	this->done = true;
-	/* keep the compiler happy */
-	key = key;
 	return true;
 }
 
@@ -207,8 +195,6 @@ static bool tinyrl_key_up(tinyrl_t * this, int key)
 		this->point = this->end = strlen(this->line);
 		result = true;
 	}
-	/* keep the compiler happy */
-	key = key;
 	return result;
 }
 
@@ -233,8 +219,6 @@ static bool tinyrl_key_down(tinyrl_t * this, int key)
 		this->point = this->end = strlen(this->line);
 		result = true;
 	}
-	/* keep the compiler happy */
-	key = key;
 	return result;
 }
 
@@ -246,8 +230,6 @@ static bool tinyrl_key_left(tinyrl_t * this, int key)
 		this->point--;
 		result = true;
 	}
-	/* keep the compiler happy */
-	key = key;
 	return result;
 }
 
@@ -259,8 +241,6 @@ static bool tinyrl_key_right(tinyrl_t * this, int key)
 		this->point++;
 		result = true;
 	}
-	/* keep the compiler happy */
-	key = key;
 	return result;
 }
 
@@ -273,8 +253,6 @@ static bool tinyrl_key_backspace(tinyrl_t * this, int key)
 		tinyrl_delete_text(this, this->point, this->point + 1);
 		result = true;
 	}
-	/* keep the compiler happy */
-	key = key;
 	return result;
 }
 
@@ -286,8 +264,6 @@ static bool tinyrl_key_delete(tinyrl_t * this, int key)
 		tinyrl_delete_text(this, this->point, this->point + 1);
 		result = true;
 	}
-	/* keep the compiler happy */
-	key = key;
 	return result;
 }
 
@@ -297,10 +273,6 @@ static bool tinyrl_key_clear_screen(tinyrl_t * this, int key)
 	tinyrl_vt100_clear_screen(this->term);
 	tinyrl_vt100_cursor_home(this->term);
 	tinyrl_reset_line_state(this);
-
-	/* keep the compiler happy */
-	key = key;
-	this = this;
 	return true;
 }
 
@@ -310,14 +282,10 @@ static bool tinyrl_key_erase_line(tinyrl_t * this, int key)
 
 	tinyrl_delete_text(this, 0, this->point);
 	this->point = 0;
-
-	/* keep the compiler happy */
-	key = key;
-	this = this;
-
 	return true;
-}/*-------------------------------------------------------- */
+}
 
+/*-------------------------------------------------------- */
 static bool tinyrl_key_escape(tinyrl_t * this, int key)
 {
 	switch (tinyrl_vt100_escape_decode(this->term)) {
