@@ -42,7 +42,7 @@ void tinyrl_delete_matches(char **matches)
  * format on Readline's output stream. matches is the list of strings,
  * in argv format, such as a list of completion matches.
  */
-static void tinyrl_display_matches(const tinyrl_t * this, char *const *matches)
+void tinyrl_display_matches(const tinyrl_t * this, char *const *matches)
 {
 	char *const *m;
 	unsigned max, len;
@@ -76,8 +76,7 @@ static void tinyrl_display_matches(const tinyrl_t * this, char *const *matches)
 
 /*-------------------------------------------------------- */
 tinyrl_match_e tinyrl_complete(
-	tinyrl_t * this, bool with_extensions, unsigned start,
-	char **matches)
+	tinyrl_t * this, unsigned start, char **matches)
 {
 	tinyrl_match_e result = TINYRL_NO_MATCH;
 	char *common;
@@ -133,24 +132,10 @@ tinyrl_match_e tinyrl_complete(
 			} else {
 				result = TINYRL_AMBIGUOUS;
 			}
-			if (with_extensions || !prefix) {
-				/* Either we always want to show extensions or
-				 * we haven't been able to complete the current line
-				 * and there is just a prefix, so let the user see the options
-				 */
-				tinyrl_crlf(this);
-				tinyrl_display_matches(this, matches);
-				tinyrl_reset_line_state(this);
-			}
 		} else {
 			result =
 				completion ? TINYRL_COMPLETED_MATCH : TINYRL_MATCH;
 		}
-		/* free the memory */
-		tinyrl_delete_matches(matches);
-
-		/* redisplay the line */
-		tinyrl_redisplay(this);
 	}
 	return result;
 }

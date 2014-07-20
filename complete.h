@@ -37,19 +37,15 @@ typedef enum {
 
 char **tinyrl_add_match(char **matches, const char *match);
 void tinyrl_delete_matches(char **matches);
+void tinyrl_display_matches(const tinyrl_t * this, char *const *matches);
 
 /**
- * Complete the current word in the input buffer, displaying
- * a prompt to clarify any abiguity if necessary.
+ * Complete the current word in the input buffer.
  *
  * \return
  * - the type of match performed.
- * \post
- * - If the current word is ambiguous then a list of 
- *   possible completions will be displayed.
  */
 tinyrl_match_e tinyrl_complete(
-	tinyrl_t * this, bool with_extensions, unsigned start,
-	char **matches);
+	tinyrl_t * this, unsigned start, char **matches);
 
 #endif
