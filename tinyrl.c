@@ -104,12 +104,6 @@ struct _tinyrl {
 
 #define KEY_DEL 127 /**< Delete (not a real control character...) */
 
-/*lint -esym(534,tinyrl_vt100_printf) Ignoring return value of function */
-extern int tinyrl_vt100_printf(const tinyrl_t * instance, const char *fmt, ...);
-extern int
-tinyrl_vt100_vprintf(const tinyrl_t * instance,
-		     const char *fmt, va_list args);
-
 extern int tinyrl_vt100_oflush(const tinyrl_t * instance);
 extern int tinyrl_vt100_ierror(const tinyrl_t * instance);
 extern int tinyrl_vt100_oerror(const tinyrl_t * instance);
@@ -224,26 +218,6 @@ tinyrl_vt100_escape_t tinyrl_vt100_escape_decode(const tinyrl_t * this)
 }
 
 /*-------------------------------------------------------- */
-int tinyrl_vt100_printf(const tinyrl_t * this, const char *fmt, ...)
-{
-	va_list args;
-	int len;
-
-	va_start(args, fmt);
-	len = tinyrl_vt100_vprintf(this, fmt, args);
-	va_end(args);
-
-	return len;
-}
-
-/*-------------------------------------------------------- */
-int
-tinyrl_vt100_vprintf(const tinyrl_t * this, const char *fmt, va_list args)
-{
-	return vfprintf(this->ostream, fmt, args);
-}
-
-/*-------------------------------------------------------- */
 int tinyrl_vt100_getchar(const tinyrl_t * this)
 {
 	return getc(this->istream);
@@ -284,110 +258,110 @@ unsigned tinyrl_vt100__get_width(const tinyrl_t * this)
 /*-------------------------------------------------------- */
 void tinyrl_vt100_ding(const tinyrl_t * this)
 {
-	tinyrl_vt100_printf(this, "%c", KEY_BEL);
+	tinyrl_printf(this, "%c", KEY_BEL);
 	(void)tinyrl_vt100_oflush(this);
 }
 
 /*-------------------------------------------------------- */
 void tinyrl_vt100_attribute_reset(const tinyrl_t * this)
 {
-	tinyrl_vt100_printf(this, "%c[0m", KEY_ESC);
+	tinyrl_printf(this, "%c[0m", KEY_ESC);
 }
 
 /*-------------------------------------------------------- */
 void tinyrl_vt100_attribute_bright(const tinyrl_t * this)
 {
-	tinyrl_vt100_printf(this, "%c[1m", KEY_ESC);
+	tinyrl_printf(this, "%c[1m", KEY_ESC);
 }
 
 /*-------------------------------------------------------- */
 void tinyrl_vt100_attribute_dim(const tinyrl_t * this)
 {
-	tinyrl_vt100_printf(this, "%c[2m", KEY_ESC);
+	tinyrl_printf(this, "%c[2m", KEY_ESC);
 }
 
 /*-------------------------------------------------------- */
 void tinyrl_vt100_attribute_underscore(const tinyrl_t * this)
 {
-	tinyrl_vt100_printf(this, "%c[4m", KEY_ESC);
+	tinyrl_printf(this, "%c[4m", KEY_ESC);
 }
 
 /*-------------------------------------------------------- */
 void tinyrl_vt100_attribute_blink(const tinyrl_t * this)
 {
-	tinyrl_vt100_printf(this, "%c[5m", KEY_ESC);
+	tinyrl_printf(this, "%c[5m", KEY_ESC);
 }
 
 /*-------------------------------------------------------- */
 void tinyrl_vt100_attribute_reverse(const tinyrl_t * this)
 {
-	tinyrl_vt100_printf(this, "%c[7m", KEY_ESC);
+	tinyrl_printf(this, "%c[7m", KEY_ESC);
 }
 
 /*-------------------------------------------------------- */
 void tinyrl_vt100_attribute_hidden(const tinyrl_t * this)
 {
-	tinyrl_vt100_printf(this, "%c[8m", KEY_ESC);
+	tinyrl_printf(this, "%c[8m", KEY_ESC);
 }
 
 /*-------------------------------------------------------- */
 void tinyrl_vt100_erase_line(const tinyrl_t * this)
 {
-	tinyrl_vt100_printf(this, "%c[2K", KEY_ESC);
+	tinyrl_printf(this, "%c[2K", KEY_ESC);
 }
 
 /*-------------------------------------------------------- */
 void tinyrl_vt100_clear_screen(const tinyrl_t * this)
 {
-	tinyrl_vt100_printf(this, "%c[2J", KEY_ESC);
+	tinyrl_printf(this, "%c[2J", KEY_ESC);
 }
 
 /*-------------------------------------------------------- */
 void tinyrl_vt100_cursor_save(const tinyrl_t * this)
 {
-	tinyrl_vt100_printf(this, "%c7", KEY_ESC);
+	tinyrl_printf(this, "%c7", KEY_ESC);
 }
 
 /*-------------------------------------------------------- */
 void tinyrl_vt100_cursor_restore(const tinyrl_t * this)
 {
-	tinyrl_vt100_printf(this, "%c8", KEY_ESC);
+	tinyrl_printf(this, "%c8", KEY_ESC);
 }
 
 /*-------------------------------------------------------- */
 void tinyrl_vt100_cursor_forward(const tinyrl_t * this, unsigned count)
 {
-	tinyrl_vt100_printf(this, "%c[%dC", KEY_ESC, count);
+	tinyrl_printf(this, "%c[%dC", KEY_ESC, count);
 }
 
 /*-------------------------------------------------------- */
 void tinyrl_vt100_cursor_back(const tinyrl_t * this, unsigned count)
 {
-	tinyrl_vt100_printf(this, "%c[%dD", KEY_ESC, count);
+	tinyrl_printf(this, "%c[%dD", KEY_ESC, count);
 }
 
 /*-------------------------------------------------------- */
 void tinyrl_vt100_cursor_up(const tinyrl_t * this, unsigned count)
 {
-	tinyrl_vt100_printf(this, "%c[%dA", KEY_ESC, count);
+	tinyrl_printf(this, "%c[%dA", KEY_ESC, count);
 }
 
 /*-------------------------------------------------------- */
 void tinyrl_vt100_cursor_down(const tinyrl_t * this, unsigned count)
 {
-	tinyrl_vt100_printf(this, "%c[%dB", KEY_ESC, count);
+	tinyrl_printf(this, "%c[%dB", KEY_ESC, count);
 }
 
 /*-------------------------------------------------------- */
 void tinyrl_vt100_cursor_home(const tinyrl_t * this)
 {
-	tinyrl_vt100_printf(this, "%c[H", KEY_ESC);
+	tinyrl_printf(this, "%c[H", KEY_ESC);
 }
 
 /*-------------------------------------------------------- */
 void tinyrl_vt100_erase(const tinyrl_t * this, unsigned count)
 {
-	tinyrl_vt100_printf(this, "%c[%dP", KEY_ESC, count);
+	tinyrl_printf(this, "%c[%dP", KEY_ESC, count);
 }
 
 /*-------------------------------------------------------- */
@@ -730,7 +704,7 @@ int tinyrl_printf(const tinyrl_t * this, const char *fmt, ...)
 	int len;
 
 	va_start(args, fmt);
-	len = tinyrl_vt100_vprintf(this, fmt, args);
+	len = vfprintf(this->ostream, fmt, args);
 	va_end(args);
 
 	return len;
@@ -765,14 +739,13 @@ static void tinyrl_internal_print(const tinyrl_t * this, const char *text)
 {
 	if (this->echo_enabled) {
 		/* simply echo the line */
-		tinyrl_vt100_printf(this, "%s", text);
+		tinyrl_printf(this, "%s", text);
 	} else {
 		/* replace the line with echo char if defined */
 		if (this->echo_char) {
 			unsigned i = strlen(text);
 			while (i--) {
-				tinyrl_vt100_printf(this, "%c",
-						    this->echo_char);
+				tinyrl_printf(this, "%c", this->echo_char);
 			}
 		}
 	}
@@ -858,7 +831,7 @@ void tinyrl_redisplay(tinyrl_t * this)
 			}
 		} else {
 			/* simply display the prompt and the line */
-			tinyrl_vt100_printf(this, "%s", this->prompt);
+			tinyrl_printf(this, "%s", this->prompt);
 			tinyrl_internal_print(this, this->line);
 			if (this->point < line_len) {
 				/* move the cursor to the insertion point */
@@ -1195,7 +1168,7 @@ bool tinyrl_bind_key(tinyrl_t * this, int key, tinyrl_key_func_t * fn)
 /*-------------------------------------------------------- */
 void tinyrl_crlf(const tinyrl_t * this)
 {
-	tinyrl_vt100_printf(this, "\n");
+	tinyrl_printf(this, "\n");
 }
 
 /*-------------------------------------------------------- */
