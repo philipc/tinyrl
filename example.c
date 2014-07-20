@@ -7,17 +7,14 @@
 static char **complete(tinyrl_t * t, const char *text,
 		       unsigned start, unsigned end)
 {
-	char **ret;
+	char **matches = NULL;;
 
 	if (start == end || text[start] == 'h') {
-		ret = malloc(3 * sizeof(*ret));
-		ret[0] = strdup("help");
-		ret[1] = strdup("hello");
-		ret[2] = NULL;
-		return ret;
+		matches = tinyrl_add_match(matches, "help");
+		matches = tinyrl_add_match(matches, "hello");
 	}
 
-	return NULL;
+	return matches;
 }
 
 static bool complete_key(tinyrl_t * t, int key)

@@ -35,7 +35,8 @@ typedef enum {
 	TINYRL_MATCH_WITH_EXTENSIONS
 } tinyrl_match_e;
 
-extern void tinyrl_delete_matches(char **instance);
+char **tinyrl_add_match(char **matches, const char *match);
+void tinyrl_delete_matches(char **matches);
 extern char **tinyrl_completion(tinyrl_t * instance,
 				const char *line,
 				unsigned start,

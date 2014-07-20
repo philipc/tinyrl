@@ -73,15 +73,34 @@ char **tinyrl_completion(tinyrl_t * this,
 }
 
 /*-------------------------------------------------------- */
-void tinyrl_delete_matches(char **this)
+char **tinyrl_add_match(char **matches, const char *match)
 {
-	char **matches = this;
-	while (*matches) {
+	size_t len;
+	char **m;
+
+	len = 0;
+	if (matches) {
+		for (m = matches; *m; m++)
+			len++;
+	}
+
+	/* Allocate memory for new match, plus terminator */
+	matches = realloc(matches, (len + 2) * sizeof(*matches));
+	matches[len] = strdup(match);
+	matches[len+1] = NULL;
+	return matches;
+}
+
+/*-------------------------------------------------------- */
+void tinyrl_delete_matches(char **matches)
+{
+	char **m;
+	for (m = matches; *m; m++) {
 		/* release the memory for each contained string */
-		free(*matches++);
+		free(*m);
 	}
 	/* release the memory for the array */
-	free(this);
+	free(matches);
 }
 
 /*----------------------------------------------------------------------- */
