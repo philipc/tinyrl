@@ -106,7 +106,6 @@ struct _tinyrl {
 
 static tinyrl_vt100_escape_t
 tinyrl_vt100_escape_decode(const tinyrl_t * instance);
-static void tinyrl_vt100_ding(const tinyrl_t * instance);
 static void tinyrl_vt100_clear_screen(const tinyrl_t * instance);
 static void
 tinyrl_vt100_cursor_back(const tinyrl_t * instance, unsigned count);
@@ -189,13 +188,6 @@ tinyrl_vt100_escape_t tinyrl_vt100_escape_decode(const tinyrl_t * this)
 	}
 
 	return result;
-}
-
-/*-------------------------------------------------------- */
-void tinyrl_vt100_ding(const tinyrl_t * this)
-{
-	tinyrl_printf(this, "%c", KEY_BEL);
-	fflush(this->ostream);
 }
 
 /*-------------------------------------------------------- */
@@ -1021,7 +1013,8 @@ void tinyrl_crlf(const tinyrl_t * this)
  */
 void tinyrl_ding(const tinyrl_t * this)
 {
-	tinyrl_vt100_ding(this);
+	tinyrl_printf(this, "%c", KEY_BEL);
+	fflush(this->ostream);
 }
 
 /*-------------------------------------------------------- */
