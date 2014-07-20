@@ -20,24 +20,24 @@ static char **complete(tinyrl_t * t, const char *text,
 	return NULL;
 }
 
-static bool complete_key(tinyrl_t * this, int key)
+static bool complete_key(tinyrl_t * t, int key)
 {
 	tinyrl_match_e status;
 	const char *line;
 	unsigned start;
 
 	/* find the start of the current word */
-	line = tinyrl__get_line(this);
-	start = tinyrl__get_point(this);
+	line = tinyrl__get_line(t);
+	start = tinyrl__get_point(t);
 	while (start && !isspace(line[start - 1])) {
 		start--;
 	}
 
-	status = tinyrl_complete(this, true, start, complete);
+	status = tinyrl_complete(t, true, start, complete);
 	switch (status) {
 	case TINYRL_COMPLETED_MATCH:
 	case TINYRL_MATCH:
-		return tinyrl_insert_text(this, " ");
+		return tinyrl_insert_text(t, " ");
 	case TINYRL_NO_MATCH:
 	case TINYRL_MATCH_WITH_EXTENSIONS:
 	case TINYRL_AMBIGUOUS:
