@@ -117,26 +117,22 @@ tinyrl_display_matches(const tinyrl_t * this,
 }
 
 /*-------------------------------------------------------- */
-tinyrl_match_e tinyrl_complete(tinyrl_t * this, bool with_extensions,
-			       tinyrl_completion_func_t *complete_fn)
+tinyrl_match_e tinyrl_complete(
+	tinyrl_t * this, bool with_extensions, unsigned start,
+	tinyrl_completion_func_t *complete_fn)
 {
 	tinyrl_match_e result = TINYRL_NO_MATCH;
 	char **matches = NULL;
 	char *common;
 	const char *line;
-	unsigned start, end, len;
+	unsigned end, len;
 	bool completion = false;
 	bool prefix = false;
 	int i;
 
-	/* find the start and end of the current word */
-	line = tinyrl__get_line(this);
-	start = end = tinyrl__get_point(this);
-	while (start && !isspace(line[start - 1])) {
-		start--;
-	}
-
 	/* try and complete the current line buffer */
+	line = tinyrl__get_line(this);
+	end = tinyrl__get_point(this);
 	matches = complete_fn(this, line, start, end);
 	if (matches) {
 		/* identify and insert a common prefix if there is one */

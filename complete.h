@@ -56,7 +56,8 @@ extern char **tinyrl_completion(tinyrl_t * instance,
  * - If the current word is ambiguous then a list of 
  *   possible completions will be displayed.
  */
-tinyrl_match_e tinyrl_complete(tinyrl_t * this, bool with_extensions,
-			       tinyrl_completion_func_t *complete_fn);
+tinyrl_match_e tinyrl_complete(
+	tinyrl_t * this, bool with_extensions, unsigned start,
+	tinyrl_completion_func_t *complete_fn);
 
 #endif
