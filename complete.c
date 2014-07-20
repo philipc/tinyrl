@@ -124,7 +124,7 @@ tinyrl_match_e tinyrl_complete(tinyrl_t * this, bool with_extensions,
 	tinyrl_match_e result = TINYRL_NO_MATCH;
 	char **matches = NULL;
 	const char *line;
-	unsigned start, end;
+	unsigned start, end, len;
 	bool completion = false;
 	bool prefix = false;
 	int i;
@@ -140,16 +140,16 @@ tinyrl_match_e tinyrl_complete(tinyrl_t * this, bool with_extensions,
 	matches = complete_fn(this, line, start, end);
 	if (matches) {
 		/* identify and insert a common prefix if there is one */
-		if (0 !=
-		    strncmp(matches[0], line + start, strlen(matches[0]))) {
+		len = strlen(matches[0]);
+		if (end - start < len
+		    || strncmp(line + start, matches[0], len) != 0) {
 			/* 
 			 * delete the original text not including 
 			 * the current insertion point character 
 			 */
-			if (tinyrl__get_end(this) != end) {
-				end--;
+			if (end > start) {
+				tinyrl_delete_text(this, start, end - 1);
 			}
-			tinyrl_delete_text(this, start, end);
 			if (!tinyrl_insert_text(this, matches[0])) {
 				return TINYRL_NO_MATCH;
 			}

@@ -8,7 +8,7 @@ static char **complete(tinyrl_t * t, const char *text,
 {
 	char **ret;
 
-	if (text[start] == 'h') {
+	if (start == end || text[start] == 'h') {
 		ret = malloc(4 * sizeof(*ret));
 		ret[0] = strdup("hel");
 		ret[1] = strdup("help");
