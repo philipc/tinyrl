@@ -59,14 +59,4 @@ extern char **tinyrl_completion(tinyrl_t * instance,
 tinyrl_match_e tinyrl_complete(tinyrl_t * this, bool with_extensions,
 			       tinyrl_completion_func_t *complete_fn);
 
-/**
- * Complete the current word in the input buffer, displaying
- * a prompt to clarify any abiguity or extra extensions if necessary.
- *
- * These callback should be bound to the key that is used for
- * completion using tinyrl_bind_key().
- */
-bool tinyrl_complete_key(tinyrl_t * this,
-			 tinyrl_completion_func_t *complete_fn);
-
 #endif

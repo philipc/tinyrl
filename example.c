@@ -21,7 +21,21 @@ static char **complete(tinyrl_t * t, const char *text,
 
 static bool complete_key(tinyrl_t * this, int key)
 {
-	return tinyrl_complete_key(this, complete);
+	tinyrl_match_e status = tinyrl_complete(this, true, complete);
+
+	switch (status) {
+	case TINYRL_COMPLETED_MATCH:
+	case TINYRL_MATCH:
+		return tinyrl_insert_text(this, " ");
+	case TINYRL_NO_MATCH:
+	case TINYRL_MATCH_WITH_EXTENSIONS:
+	case TINYRL_AMBIGUOUS:
+	case TINYRL_COMPLETED_AMBIGUOUS:
+		break;
+	}
+
+	/* let the bell ring */
+	return false;
 }
 
 int main(int argc, char *argv[])

@@ -213,25 +213,3 @@ tinyrl_match_e tinyrl_complete(tinyrl_t * this, bool with_extensions,
 	}
 	return result;
 }
-
-/*-------------------------------------------------------- */
-bool tinyrl_complete_key(tinyrl_t * this,
-			 tinyrl_completion_func_t *complete_fn)
-{
-	tinyrl_match_e status = tinyrl_complete(this, true, complete_fn);
-
-	switch (status) {
-	case TINYRL_COMPLETED_MATCH:
-	case TINYRL_MATCH:
-		return tinyrl_insert_text(this, " ");
-	case TINYRL_NO_MATCH:
-	case TINYRL_MATCH_WITH_EXTENSIONS:
-	case TINYRL_AMBIGUOUS:
-	case TINYRL_COMPLETED_AMBIGUOUS:
-		break;
-	}
-
-	/* let the bell ring */
-	return false;
-}
-
