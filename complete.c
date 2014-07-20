@@ -127,6 +127,7 @@ tinyrl_match_e tinyrl_complete(tinyrl_t * this, bool with_extensions,
 	unsigned start, end;
 	bool completion = false;
 	bool prefix = false;
+	int i;
 
 	/* find the start and end of the current word */
 	line = tinyrl__get_line(this);
@@ -154,9 +155,11 @@ tinyrl_match_e tinyrl_complete(tinyrl_t * this, bool with_extensions,
 			}
 			completion = true;
 		}
-		if (0 == strcmp(matches[0], matches[1])) {
-			/* this is just a prefix string */
-			prefix = true;
+		for (i = 1; matches[i]; i++) {
+			if (strcmp(matches[0], matches[i]) == 0) {
+				/* this is just a prefix string */
+				prefix = true;
+			}
 		}
 		/* is there more than one completion? */
 		if (matches[2] != NULL) {
