@@ -40,19 +40,28 @@ void tinyrl_delete_matches(char **matches)
 /* 
  * A convenience function for displaying a list of strings in columnar
  * format on Readline's output stream. matches is the list of strings,
- * in argv format, such as a list of completion matches. len is the number
- * of strings in matches, and max is the length of the longest string in matches.
- * This function uses the setting of print-completions-horizontally to select
- * how the matches are displayed
+ * in argv format, such as a list of completion matches.
  */
-static void
-tinyrl_display_matches(const tinyrl_t * this,
-		       char *const *matches, unsigned len, size_t max)
+static void tinyrl_display_matches(const tinyrl_t * this, char *const *matches)
 {
+	char *const *m;
+	unsigned max, len;
 	unsigned r, c;
-	unsigned width = tinyrl__get_width(this);
-	unsigned cols = width / (max + 1);	/* allow for a space between words */
-	unsigned rows = len / cols + 1;
+	unsigned width;
+	unsigned cols, rows;
+
+	max = len = 0;
+	for (m = matches; *m; m++) {
+		size_t size = strlen(*m);
+		if (size > max) {
+			max = size;
+		}
+		len++;
+	}
+
+	width = tinyrl__get_width(this);
+	cols = width / (max + 1);	/* allow for a space between words */
+	rows = len / cols + 1;
 
 	/* print out a table of completions */
 	for (r = 0; r < rows && len; r++) {
@@ -117,16 +126,6 @@ tinyrl_match_e tinyrl_complete(
 		free(common);
 		/* is there more than one completion? */
 		if (matches[1] != NULL) {
-			char **tmp = matches;
-			unsigned max, len;
-			max = len = 0;
-			while (*tmp) {
-				size_t size = strlen(*tmp++);
-				len++;
-				if (size > max) {
-					max = size;
-				}
-			}
 			if (completion) {
 				result = TINYRL_COMPLETED_AMBIGUOUS;
 			} else if (prefix) {
@@ -140,7 +139,7 @@ tinyrl_match_e tinyrl_complete(
 				 * and there is just a prefix, so let the user see the options
 				 */
 				tinyrl_crlf(this);
-				tinyrl_display_matches(this, matches, len, max);
+				tinyrl_display_matches(this, matches);
 				tinyrl_reset_line_state(this);
 			}
 		} else {
