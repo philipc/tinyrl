@@ -9,11 +9,10 @@ static char **complete(tinyrl_t * t, const char *text,
 	char **ret;
 
 	if (start == end || text[start] == 'h') {
-		ret = malloc(4 * sizeof(*ret));
-		ret[0] = strdup("hel");
-		ret[1] = strdup("help");
-		ret[2] = strdup("hello");
-		ret[3] = NULL;
+		ret = malloc(3 * sizeof(*ret));
+		ret[0] = strdup("help");
+		ret[1] = strdup("hello");
+		ret[2] = NULL;
 		return ret;
 	}
 

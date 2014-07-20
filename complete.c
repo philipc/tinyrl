@@ -104,7 +104,6 @@ tinyrl_display_matches(const tinyrl_t * this,
 
 	assert(matches);
 	if (matches) {
-		len--, matches++;	/* skip the subtitution string */
 		/* print out a table of completions */
 		for (r = 0; r < rows && len; r++) {
 			for (c = 0; c < cols && len; c++) {
@@ -123,6 +122,7 @@ tinyrl_match_e tinyrl_complete(tinyrl_t * this, bool with_extensions,
 {
 	tinyrl_match_e result = TINYRL_NO_MATCH;
 	char **matches = NULL;
+	char *common;
 	const char *line;
 	unsigned start, end, len;
 	bool completion = false;
@@ -140,9 +140,19 @@ tinyrl_match_e tinyrl_complete(tinyrl_t * this, bool with_extensions,
 	matches = complete_fn(this, line, start, end);
 	if (matches) {
 		/* identify and insert a common prefix if there is one */
-		len = strlen(matches[0]);
+		common = strdup(matches[0]);
+		for (i = 1; matches[i]; i++) {
+			char *p = common;
+			char *q = matches[i];
+			while (*p && tolower(*p) == tolower(*q)) {
+				p++;
+				q++;
+			}
+			*p = '\0';
+		}
+		len = strlen(common);
 		if (end - start < len
-		    || strncmp(line + start, matches[0], len) != 0) {
+		    || strncmp(line + start, common, len) != 0) {
 			/* 
 			 * delete the original text not including 
 			 * the current insertion point character 
@@ -150,19 +160,21 @@ tinyrl_match_e tinyrl_complete(tinyrl_t * this, bool with_extensions,
 			if (end > start) {
 				tinyrl_delete_text(this, start, end - 1);
 			}
-			if (!tinyrl_insert_text(this, matches[0])) {
+			if (!tinyrl_insert_text(this, common)) {
+				free(common);
 				return TINYRL_NO_MATCH;
 			}
 			completion = true;
 		}
-		for (i = 1; matches[i]; i++) {
-			if (strcmp(matches[0], matches[i]) == 0) {
+		for (i = 0; matches[i]; i++) {
+			if (strcmp(common, matches[i]) == 0) {
 				/* this is just a prefix string */
 				prefix = true;
 			}
 		}
+		free(common);
 		/* is there more than one completion? */
-		if (matches[2] != NULL) {
+		if (matches[1] != NULL) {
 			char **tmp = matches;
 			unsigned max, len;
 			max = len = 0;
