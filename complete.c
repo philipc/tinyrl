@@ -54,17 +54,14 @@ tinyrl_display_matches(const tinyrl_t * this,
 	unsigned cols = width / (max + 1);	/* allow for a space between words */
 	unsigned rows = len / cols + 1;
 
-	assert(matches);
-	if (matches) {
-		/* print out a table of completions */
-		for (r = 0; r < rows && len; r++) {
-			for (c = 0; c < cols && len; c++) {
-				const char *match = *matches++;
-				len--;
-				tinyrl_printf(this, "%-*s ", max, match);
-			}
-			tinyrl_crlf(this);
+	/* print out a table of completions */
+	for (r = 0; r < rows && len; r++) {
+		for (c = 0; c < cols && len; c++) {
+			const char *match = *matches++;
+			len--;
+			tinyrl_printf(this, "%-*s ", max, match);
 		}
+		tinyrl_crlf(this);
 	}
 }
 
