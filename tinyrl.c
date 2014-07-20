@@ -106,10 +106,6 @@ struct _tinyrl {
 
 static int tinyrl_vt100_oflush(const tinyrl_t * instance);
 static unsigned tinyrl_vt100__get_width(const tinyrl_t * instance);
-static void
-tinyrl_vt100__set_istream(tinyrl_t * instance, FILE * istream);
-static FILE *tinyrl_vt100__get_istream(const tinyrl_t * instance);
-static FILE *tinyrl_vt100__get_ostream(const tinyrl_t * instance);
 
 static tinyrl_vt100_escape_t
 tinyrl_vt100_escape_decode(const tinyrl_t * instance);
@@ -249,29 +245,11 @@ void tinyrl_vt100_erase(const tinyrl_t * this, unsigned count)
 	tinyrl_printf(this, "%c[%dP", KEY_ESC, count);
 }
 
-/*-------------------------------------------------------- */
-void tinyrl_vt100__set_istream(tinyrl_t * this, FILE * istream)
-{
-	this->istream = istream;
-}
-
-/*-------------------------------------------------------- */
-FILE *tinyrl_vt100__get_istream(const tinyrl_t * this)
-{
-	return this->istream;
-}
-
-/*-------------------------------------------------------- */
-FILE *tinyrl_vt100__get_ostream(const tinyrl_t * this)
-{
-	return this->ostream;
-}
-
 /*----------------------------------------------------------------------- */
 static void tty_set_raw_mode(tinyrl_t * this)
 {
 	struct termios new_termios;
-	int fd = fileno(tinyrl_vt100__get_istream(this));
+	int fd = fileno(this->istream);
 	int status;
 
 	status = tcgetattr(fd, &this->default_termios);
@@ -292,7 +270,7 @@ static void tty_set_raw_mode(tinyrl_t * this)
 /*----------------------------------------------------------------------- */
 static void tty_restore_mode(const tinyrl_t * this)
 {
-	int fd = fileno(tinyrl_vt100__get_istream(this));
+	int fd = fileno(this->istream);
 
 	/* Do the mode switch */
 	(void)tcsetattr(fd, TCSAFLUSH, &this->default_termios);
@@ -774,8 +752,6 @@ tinyrl_t *tinyrl_new(FILE * instream, FILE * outstream, unsigned stifle)
 /*----------------------------------------------------------------------- */
 char *tinyrl_readline(tinyrl_t * this, const char *prompt, void *context)
 {
-	FILE *istream = tinyrl_vt100__get_istream(this);
-
 	/* initialise for reading a line */
 	this->done = false;
 	this->point = 0;
@@ -840,7 +816,7 @@ char *tinyrl_readline(tinyrl_t * this, const char *prompt, void *context)
 		this->last_buffer = NULL;
 
 		while ((sizeof(buffer) == len) &&
-		       (s = fgets(buffer, sizeof(buffer), istream))) {
+		       (s = fgets(buffer, sizeof(buffer), this->istream))) {
 			char *p;
 			/* strip any spurious '\r' or '\n' */
 			p = strchr(buffer, '\r');
@@ -870,7 +846,7 @@ char *tinyrl_readline(tinyrl_t * this, const char *prompt, void *context)
 		 * This is a measure to stop potential task spin on encountering an
 		 * error from fgets.
 		 */
-		if (s == NULL || (this->line[0] == '\0' && feof(istream))) {
+		if (s == NULL || (this->line[0] == '\0' && feof(this->istream))) {
 			/* time to finish the session */
 			this->line = NULL;
 		} else {
@@ -1153,7 +1129,7 @@ void tinyrl_disable_echo(tinyrl_t * this, char echo_char)
 /*--------------------------------------------------------- */
 void tinyrl__set_istream(tinyrl_t * this, FILE * istream)
 {
-	tinyrl_vt100__set_istream(this, istream);
+	this->istream = istream;
 	this->isatty = isatty(fileno(istream));
 }
 
@@ -1166,13 +1142,13 @@ bool tinyrl__get_isatty(const tinyrl_t * this)
 /*-------------------------------------------------------- */
 FILE *tinyrl__get_istream(const tinyrl_t * this)
 {
-	return tinyrl_vt100__get_istream(this);
+	return this->istream;
 }
 
 /*-------------------------------------------------------- */
 FILE *tinyrl__get_ostream(const tinyrl_t * this)
 {
-	return tinyrl_vt100__get_ostream(this);
+	return this->ostream;
 }
 
 /*-------------------------------------------------------- */
