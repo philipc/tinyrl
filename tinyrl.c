@@ -104,16 +104,6 @@ struct _tinyrl {
 
 #define KEY_DEL 127 /**< Delete (not a real control character...) */
 
-static tinyrl_vt100_escape_t
-tinyrl_vt100_escape_decode(const tinyrl_t * instance);
-static void tinyrl_vt100_clear_screen(const tinyrl_t * instance);
-static void
-tinyrl_vt100_cursor_back(const tinyrl_t * instance, unsigned count);
-static void
-tinyrl_vt100_cursor_forward(const tinyrl_t * instance, unsigned count);
-static void tinyrl_vt100_cursor_home(const tinyrl_t * instance);
-static void tinyrl_vt100_erase(const tinyrl_t * instance, unsigned count);
-
 /* This table maps the vt100 escape codes to an enumeration */
 static vt100_decode_t cmds[] = {
 	{'A', tinyrl_vt100_CURSOR_UP},
@@ -141,7 +131,7 @@ static void _tinyrl_vt100_setInputBlocking(const tinyrl_t * this)
 }
 
 /*--------------------------------------------------------- */
-tinyrl_vt100_escape_t tinyrl_vt100_escape_decode(const tinyrl_t * this)
+static tinyrl_vt100_escape_t tinyrl_vt100_escape_decode(const tinyrl_t * this)
 {
 	tinyrl_vt100_escape_t result = tinyrl_vt100_UNKNOWN;
 	char sequence[10], *p = sequence;
@@ -191,31 +181,31 @@ tinyrl_vt100_escape_t tinyrl_vt100_escape_decode(const tinyrl_t * this)
 }
 
 /*-------------------------------------------------------- */
-void tinyrl_vt100_clear_screen(const tinyrl_t * this)
+static void tinyrl_vt100_clear_screen(const tinyrl_t * this)
 {
 	tinyrl_printf(this, "%c[2J", KEY_ESC);
 }
 
 /*-------------------------------------------------------- */
-void tinyrl_vt100_cursor_forward(const tinyrl_t * this, unsigned count)
+static void tinyrl_vt100_cursor_forward(const tinyrl_t * this, unsigned count)
 {
 	tinyrl_printf(this, "%c[%dC", KEY_ESC, count);
 }
 
 /*-------------------------------------------------------- */
-void tinyrl_vt100_cursor_back(const tinyrl_t * this, unsigned count)
+static void tinyrl_vt100_cursor_back(const tinyrl_t * this, unsigned count)
 {
 	tinyrl_printf(this, "%c[%dD", KEY_ESC, count);
 }
 
 /*-------------------------------------------------------- */
-void tinyrl_vt100_cursor_home(const tinyrl_t * this)
+static void tinyrl_vt100_cursor_home(const tinyrl_t * this)
 {
 	tinyrl_printf(this, "%c[H", KEY_ESC);
 }
 
 /*-------------------------------------------------------- */
-void tinyrl_vt100_erase(const tinyrl_t * this, unsigned count)
+static void tinyrl_vt100_erase(const tinyrl_t * this, unsigned count)
 {
 	tinyrl_printf(this, "%c[%dP", KEY_ESC, count);
 }
