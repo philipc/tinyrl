@@ -108,14 +108,6 @@ extern void tinyrl_enable_echo(
 	 */
 	tinyrl_t * instance);
 /**
- * Indicate whether the current insertion point is quoting or not
- */
-extern bool tinyrl_is_quoting(
-	/** 
-	 * The instance on which to operate
-	 */
-	const tinyrl_t * instance);
-/**
  * Limit maximum line length
  */
 extern void tinyrl_limit_line_length(

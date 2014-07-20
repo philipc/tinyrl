@@ -1091,20 +1091,6 @@ const char *tinyrl__get_prompt(const tinyrl_t * this)
 	return this->prompt;
 }
 
-/*-------------------------------------------------------- */
-bool tinyrl_is_quoting(const tinyrl_t * this)
-{
-	bool result = false;
-	/* count the quotes upto the current insertion point */
-	unsigned i = 0;
-	while (i < this->point) {
-		if (this->line[i++] == '"') {
-			result = !result;
-		}
-	}
-	return result;
-}
-
 /*--------------------------------------------------------- */
 void tinyrl_limit_line_length(tinyrl_t * this, unsigned length)
 {
