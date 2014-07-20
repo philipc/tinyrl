@@ -37,11 +37,6 @@ typedef enum {
 
 char **tinyrl_add_match(char **matches, const char *match);
 void tinyrl_delete_matches(char **matches);
-extern char **tinyrl_completion(tinyrl_t * instance,
-				const char *line,
-				unsigned start,
-				unsigned end,
-				tinyrl_compentry_func_t * generator);
 
 /**
  * Complete the current word in the input buffer, displaying

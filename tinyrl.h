@@ -17,9 +17,6 @@
 typedef struct _tinyrl tinyrl_t;
 
 /* virtual methods */
-typedef char *tinyrl_compentry_func_t(tinyrl_t * instance,
-				      const char *text,
-				      unsigned offset, unsigned state);
 typedef int tinyrl_hook_func_t(tinyrl_t * instance);
 
 /**
