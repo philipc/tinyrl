@@ -68,22 +68,8 @@ struct _tinyrl {
 				   cursor position for redisplay purposes */
 };
 
-/* define the Key codes */
-#define KEY_SOH	1	/**< ^A	Start of heading, = console interrupt */
-#define KEY_ETX	3	/**< ^C	End of text */
-#define KEY_EOT	4	/**< ^D	End of transmission, not the same as ETB */
-#define KEY_ENQ	5	/**< ^E	Enquiry, goes with ACK; old HP flow control */
-#define KEY_BEL	7	/**< ^G	Bell, rings the bell... */
-#define KEY_BS	8	/**< ^H	Backspace, works on HP terminals/computers */
-#define KEY_LF	10	/**< ^J	Line Feed */
-#define KEY_VT	11	/**< ^K	Vertical tab */
-#define KEY_FF	12	/**< ^L	Form Feed, page eject */
-#define KEY_CR	13	/**< ^M	Carriage Return*/
-#define KEY_NAK	21	/**< ^U	Negative acknowledge */
-#define KEY_EM	25	/**< ^Y	End of medium, Control-Y interrupt */
-#define KEY_ESC	27	/**< ^[	Escape, next character is not echoed */
-
-#define KEY_DEL 127 /**< Delete (not a real control character...) */
+#define ESCAPE 27
+#define BACKSPACE 127
 
 /* This table maps the vt100 escape codes to an enumeration */
 static vt100_decode_t cmds[] = {
@@ -164,31 +150,31 @@ static tinyrl_vt100_escape_t tinyrl_vt100_escape_decode(const tinyrl_t * this)
 /*-------------------------------------------------------- */
 static void tinyrl_vt100_clear_screen(const tinyrl_t * this)
 {
-	tinyrl_printf(this, "%c[2J", KEY_ESC);
+	tinyrl_printf(this, "\x1b[2J");
 }
 
 /*-------------------------------------------------------- */
 static void tinyrl_vt100_cursor_forward(const tinyrl_t * this, unsigned count)
 {
-	tinyrl_printf(this, "%c[%dC", KEY_ESC, count);
+	tinyrl_printf(this, "\x1b[%dC", count);
 }
 
 /*-------------------------------------------------------- */
 static void tinyrl_vt100_cursor_back(const tinyrl_t * this, unsigned count)
 {
-	tinyrl_printf(this, "%c[%dD", KEY_ESC, count);
+	tinyrl_printf(this, "\x1b[%dD", count);
 }
 
 /*-------------------------------------------------------- */
 static void tinyrl_vt100_cursor_home(const tinyrl_t * this)
 {
-	tinyrl_printf(this, "%c[H", KEY_ESC);
+	tinyrl_printf(this, "\x1b[H");
 }
 
 /*-------------------------------------------------------- */
 static void tinyrl_vt100_erase(const tinyrl_t * this, unsigned count)
 {
-	tinyrl_printf(this, "%c[%dP", KEY_ESC, count);
+	tinyrl_printf(this, "\x1b[%dP", count);
 }
 
 /*----------------------------------------------------------------------- */
@@ -470,19 +456,19 @@ tinyrl_init(tinyrl_t * this, FILE * instream, FILE * outstream,
 		this->handlers[i] = tinyrl_key_default;
 	}
 	/* default handlers */
-	this->handlers[KEY_CR] = tinyrl_key_crlf;
-	this->handlers[KEY_LF] = tinyrl_key_crlf;
-	this->handlers[KEY_ETX] = tinyrl_key_interrupt;
-	this->handlers[KEY_DEL] = tinyrl_key_backspace;
-	this->handlers[KEY_BS] = tinyrl_key_backspace;
-	this->handlers[KEY_EOT] = tinyrl_key_delete;
-	this->handlers[KEY_ESC] = tinyrl_key_escape;
-	this->handlers[KEY_FF] = tinyrl_key_clear_screen;
-	this->handlers[KEY_NAK] = tinyrl_key_erase_line;
-	this->handlers[KEY_SOH] = tinyrl_key_start_of_line;
-	this->handlers[KEY_ENQ] = tinyrl_key_end_of_line;
-	this->handlers[KEY_VT] = tinyrl_key_kill;
-	this->handlers[KEY_EM] = tinyrl_key_yank;
+	this->handlers['\r'] = tinyrl_key_crlf;
+	this->handlers['\n'] = tinyrl_key_crlf;
+	this->handlers[CTRL('C')] = tinyrl_key_interrupt;
+	this->handlers[BACKSPACE] = tinyrl_key_backspace;
+	this->handlers[CTRL('H')] = tinyrl_key_backspace;
+	this->handlers[CTRL('D')] = tinyrl_key_delete;
+	this->handlers[ESCAPE] = tinyrl_key_escape;
+	this->handlers[CTRL('L')] = tinyrl_key_clear_screen;
+	this->handlers[CTRL('U')] = tinyrl_key_erase_line;
+	this->handlers[CTRL('A')] = tinyrl_key_start_of_line;
+	this->handlers[CTRL('E')] = tinyrl_key_end_of_line;
+	this->handlers[CTRL('K')] = tinyrl_key_kill;
+	this->handlers[CTRL('Y')] = tinyrl_key_yank;
 
 	this->line = NULL;
 	this->max_line_length = 0;
@@ -984,7 +970,7 @@ void tinyrl_crlf(const tinyrl_t * this)
  */
 void tinyrl_ding(const tinyrl_t * this)
 {
-	tinyrl_printf(this, "%c", KEY_BEL);
+	tinyrl_printf(this, "\x7");
 	fflush(this->ostream);
 }
 
