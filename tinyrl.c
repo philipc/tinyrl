@@ -852,7 +852,7 @@ void tinyrl_delete_text(tinyrl_t * this, unsigned start, unsigned end)
 
 	/* move any text which is left */
 	memmove(&this->buffer[start],
-		&this->buffer[start + delta], this->end - start);
+		&this->buffer[start + delta], this->end - end);
 
 	/* now adjust the indexs */
 	if (this->point >= start) {
