@@ -694,12 +694,8 @@ char *tinyrl_readline(tinyrl_t * this, const char *prompt, void *context)
 			/* time to finish the session */
 			this->line = NULL;
 		} else {
-			/* call the handler for the newline key */
-			if (!this->handlers[KEY_LF](this, KEY_LF)) {
-				/* an issue has occured */
-				tinyrl_ding(this);
-				this->line = NULL;
-			}
+			tinyrl_crlf(this);
+			this->done = true;
 		}
 	}
 	/*
