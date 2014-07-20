@@ -105,7 +105,6 @@ struct _tinyrl {
 #define KEY_DEL 127 /**< Delete (not a real control character...) */
 
 static int tinyrl_vt100_oflush(const tinyrl_t * instance);
-static int tinyrl_vt100_getchar(const tinyrl_t * instance);
 static unsigned tinyrl_vt100__get_width(const tinyrl_t * instance);
 static void
 tinyrl_vt100__set_istream(tinyrl_t * instance, FILE * istream);
@@ -197,12 +196,6 @@ tinyrl_vt100_escape_t tinyrl_vt100_escape_decode(const tinyrl_t * this)
 	}
 
 	return result;
-}
-
-/*-------------------------------------------------------- */
-int tinyrl_vt100_getchar(const tinyrl_t * this)
-{
-	return getc(this->istream);
 }
 
 /*-------------------------------------------------------- */
@@ -623,7 +616,7 @@ void tinyrl_delete(tinyrl_t * this)
 /*----------------------------------------------------------------------- */
 static int tinyrl_getchar(const tinyrl_t * this)
 {
-	return tinyrl_vt100_getchar(this);
+	return getc(this->istream);
 }
 
 /*----------------------------------------------------------------------- */
