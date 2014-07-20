@@ -104,7 +104,6 @@ struct _tinyrl {
 
 #define KEY_DEL 127 /**< Delete (not a real control character...) */
 
-static int tinyrl_vt100_oflush(const tinyrl_t * instance);
 static unsigned tinyrl_vt100__get_width(const tinyrl_t * instance);
 
 static tinyrl_vt100_escape_t
@@ -195,12 +194,6 @@ tinyrl_vt100_escape_t tinyrl_vt100_escape_decode(const tinyrl_t * this)
 }
 
 /*-------------------------------------------------------- */
-int tinyrl_vt100_oflush(const tinyrl_t * this)
-{
-	return fflush(this->ostream);
-}
-
-/*-------------------------------------------------------- */
 unsigned tinyrl_vt100__get_width(const tinyrl_t * this)
 {
 	this = this;
@@ -212,7 +205,7 @@ unsigned tinyrl_vt100__get_width(const tinyrl_t * this)
 void tinyrl_vt100_ding(const tinyrl_t * this)
 {
 	tinyrl_printf(this, "%c", KEY_BEL);
-	(void)tinyrl_vt100_oflush(this);
+	fflush(this->ostream);
 }
 
 /*-------------------------------------------------------- */
@@ -728,7 +721,7 @@ void tinyrl_redisplay(tinyrl_t * this)
 	;
 
 	/* update the display */
-	(void)tinyrl_vt100_oflush(this);
+	fflush(this->ostream);
 
 	/* set up the last line buffer */
 	free(this->last_buffer);
