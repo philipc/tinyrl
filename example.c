@@ -70,6 +70,9 @@ int main(int argc, char *argv[])
 
 	for (;;) {
 		line = tinyrl_readline(t, "> ", NULL);
+		if (!line)
+			break;
+
 		if (strcmp(line, "exit") == 0) {
 			free(line);
 			break;
