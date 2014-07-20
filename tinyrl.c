@@ -104,42 +104,24 @@ struct _tinyrl {
 
 #define KEY_DEL 127 /**< Delete (not a real control character...) */
 
-extern int tinyrl_vt100_oflush(const tinyrl_t * instance);
-extern int tinyrl_vt100_ierror(const tinyrl_t * instance);
-extern int tinyrl_vt100_oerror(const tinyrl_t * instance);
-extern int tinyrl_vt100_ieof(const tinyrl_t * instance);
-extern int tinyrl_vt100_getchar(const tinyrl_t * instance);
-extern unsigned tinyrl_vt100__get_width(const tinyrl_t * instance);
-extern unsigned tinyrl_vt100__get_height(const tinyrl_t * instance);
-extern void
+static int tinyrl_vt100_oflush(const tinyrl_t * instance);
+static int tinyrl_vt100_getchar(const tinyrl_t * instance);
+static unsigned tinyrl_vt100__get_width(const tinyrl_t * instance);
+static void
 tinyrl_vt100__set_istream(tinyrl_t * instance, FILE * istream);
-extern FILE *tinyrl_vt100__get_istream(const tinyrl_t * instance);
-extern FILE *tinyrl_vt100__get_ostream(const tinyrl_t * instance);
+static FILE *tinyrl_vt100__get_istream(const tinyrl_t * instance);
+static FILE *tinyrl_vt100__get_ostream(const tinyrl_t * instance);
 
-extern tinyrl_vt100_escape_t
+static tinyrl_vt100_escape_t
 tinyrl_vt100_escape_decode(const tinyrl_t * instance);
-extern void tinyrl_vt100_ding(const tinyrl_t * instance);
-extern void tinyrl_vt100_attribute_reset(const tinyrl_t * instance);
-extern void tinyrl_vt100_attribute_bright(const tinyrl_t * instance);
-extern void tinyrl_vt100_attribute_dim(const tinyrl_t * instance);
-extern void tinyrl_vt100_attribute_underscore(const tinyrl_t * instance);
-extern void tinyrl_vt100_attribute_blink(const tinyrl_t * instance);
-extern void tinyrl_vt100_attribute_reverse(const tinyrl_t * instance);
-extern void tinyrl_vt100_attribute_hidden(const tinyrl_t * instance);
-extern void tinyrl_vt100_erase_line(const tinyrl_t * instance);
-extern void tinyrl_vt100_clear_screen(const tinyrl_t * instance);
-extern void
+static void tinyrl_vt100_ding(const tinyrl_t * instance);
+static void tinyrl_vt100_clear_screen(const tinyrl_t * instance);
+static void
 tinyrl_vt100_cursor_back(const tinyrl_t * instance, unsigned count);
-extern void
+static void
 tinyrl_vt100_cursor_forward(const tinyrl_t * instance, unsigned count);
-extern void
-tinyrl_vt100_cursor_up(const tinyrl_t * instance, unsigned count);
-extern void
-tinyrl_vt100_cursor_down(const tinyrl_t * instance, unsigned count);
-extern void tinyrl_vt100_cursor_home(const tinyrl_t * instance);
-extern void tinyrl_vt100_cursor_save(const tinyrl_t * instance);
-extern void tinyrl_vt100_cursor_restore(const tinyrl_t * instance);
-extern void tinyrl_vt100_erase(const tinyrl_t * instance, unsigned count);
+static void tinyrl_vt100_cursor_home(const tinyrl_t * instance);
+static void tinyrl_vt100_erase(const tinyrl_t * instance, unsigned count);
 
 /* This table maps the vt100 escape codes to an enumeration */
 static vt100_decode_t cmds[] = {
@@ -230,24 +212,6 @@ int tinyrl_vt100_oflush(const tinyrl_t * this)
 }
 
 /*-------------------------------------------------------- */
-int tinyrl_vt100_ierror(const tinyrl_t * this)
-{
-	return ferror(this->istream);
-}
-
-/*-------------------------------------------------------- */
-int tinyrl_vt100_oerror(const tinyrl_t * this)
-{
-	return ferror(this->ostream);
-}
-
-/*-------------------------------------------------------- */
-int tinyrl_vt100_ieof(const tinyrl_t * this)
-{
-	return feof(this->istream);
-}
-
-/*-------------------------------------------------------- */
 unsigned tinyrl_vt100__get_width(const tinyrl_t * this)
 {
 	this = this;
@@ -263,69 +227,9 @@ void tinyrl_vt100_ding(const tinyrl_t * this)
 }
 
 /*-------------------------------------------------------- */
-void tinyrl_vt100_attribute_reset(const tinyrl_t * this)
-{
-	tinyrl_printf(this, "%c[0m", KEY_ESC);
-}
-
-/*-------------------------------------------------------- */
-void tinyrl_vt100_attribute_bright(const tinyrl_t * this)
-{
-	tinyrl_printf(this, "%c[1m", KEY_ESC);
-}
-
-/*-------------------------------------------------------- */
-void tinyrl_vt100_attribute_dim(const tinyrl_t * this)
-{
-	tinyrl_printf(this, "%c[2m", KEY_ESC);
-}
-
-/*-------------------------------------------------------- */
-void tinyrl_vt100_attribute_underscore(const tinyrl_t * this)
-{
-	tinyrl_printf(this, "%c[4m", KEY_ESC);
-}
-
-/*-------------------------------------------------------- */
-void tinyrl_vt100_attribute_blink(const tinyrl_t * this)
-{
-	tinyrl_printf(this, "%c[5m", KEY_ESC);
-}
-
-/*-------------------------------------------------------- */
-void tinyrl_vt100_attribute_reverse(const tinyrl_t * this)
-{
-	tinyrl_printf(this, "%c[7m", KEY_ESC);
-}
-
-/*-------------------------------------------------------- */
-void tinyrl_vt100_attribute_hidden(const tinyrl_t * this)
-{
-	tinyrl_printf(this, "%c[8m", KEY_ESC);
-}
-
-/*-------------------------------------------------------- */
-void tinyrl_vt100_erase_line(const tinyrl_t * this)
-{
-	tinyrl_printf(this, "%c[2K", KEY_ESC);
-}
-
-/*-------------------------------------------------------- */
 void tinyrl_vt100_clear_screen(const tinyrl_t * this)
 {
 	tinyrl_printf(this, "%c[2J", KEY_ESC);
-}
-
-/*-------------------------------------------------------- */
-void tinyrl_vt100_cursor_save(const tinyrl_t * this)
-{
-	tinyrl_printf(this, "%c7", KEY_ESC);
-}
-
-/*-------------------------------------------------------- */
-void tinyrl_vt100_cursor_restore(const tinyrl_t * this)
-{
-	tinyrl_printf(this, "%c8", KEY_ESC);
 }
 
 /*-------------------------------------------------------- */
@@ -338,18 +242,6 @@ void tinyrl_vt100_cursor_forward(const tinyrl_t * this, unsigned count)
 void tinyrl_vt100_cursor_back(const tinyrl_t * this, unsigned count)
 {
 	tinyrl_printf(this, "%c[%dD", KEY_ESC, count);
-}
-
-/*-------------------------------------------------------- */
-void tinyrl_vt100_cursor_up(const tinyrl_t * this, unsigned count)
-{
-	tinyrl_printf(this, "%c[%dA", KEY_ESC, count);
-}
-
-/*-------------------------------------------------------- */
-void tinyrl_vt100_cursor_down(const tinyrl_t * this, unsigned count)
-{
-	tinyrl_printf(this, "%c[%dB", KEY_ESC, count);
 }
 
 /*-------------------------------------------------------- */
