@@ -158,7 +158,7 @@ tinyrl_match_e tinyrl_complete(tinyrl_t * this, bool with_extensions,
 			 * the current insertion point character 
 			 */
 			if (end > start) {
-				tinyrl_delete_text(this, start, end - 1);
+				tinyrl_delete_text(this, start, end);
 			}
 			if (!tinyrl_insert_text(this, common)) {
 				free(common);

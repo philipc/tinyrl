@@ -270,7 +270,7 @@ static bool tinyrl_key_backspace(tinyrl_t * this, int key)
 	bool result = false;
 	if (this->point) {
 		this->point--;
-		tinyrl_delete_text(this, this->point, this->point);
+		tinyrl_delete_text(this, this->point, this->point + 1);
 		result = true;
 	}
 	/* keep the compiler happy */
@@ -283,7 +283,7 @@ static bool tinyrl_key_delete(tinyrl_t * this, int key)
 {
 	bool result = false;
 	if (this->point < this->end) {
-		tinyrl_delete_text(this, this->point, this->point);
+		tinyrl_delete_text(this, this->point, this->point + 1);
 		result = true;
 	}
 	/* keep the compiler happy */
@@ -825,7 +825,7 @@ bool tinyrl_insert_text(tinyrl_t * this, const char *text)
 
 /*----------------------------------------------------------------------- */
 /*
- * Delete the text between start and end in the current line. (inclusive)
+ * Delete the text in the interval [start, end-1] in the current line.
  * This adjusts the rl_point and rl_end indexes appropriately.
  */
 void tinyrl_delete_text(tinyrl_t * this, unsigned start, unsigned end)
@@ -839,38 +839,25 @@ void tinyrl_delete_text(tinyrl_t * this, unsigned start, unsigned end)
 	changed_line(this);
 
 	/* make sure we play it safe */
-	if (start > end) {
-		unsigned tmp = end;
-		start = end;
-		end = tmp;
-	}
 	if (end > this->end) {
 		end = this->end;
 	}
 
-	delta = (end - start) + 1;
+	delta = end - start;
 
-	/* move any text which is left */
+	/* move any text which is left, including terminator */
 	memmove(&this->buffer[start],
-		&this->buffer[start + delta], this->end - end);
+		&this->buffer[start + delta], this->end - end + 1);
 
 	/* now adjust the indexs */
-	if (this->point >= start) {
-		if (this->point > end) {
-			/* move the insertion point back appropriately */
-			this->point -= delta;
-		} else {
-			/* move the insertion point to the start */
-			this->point = start;
-		}
+	if (this->point > end) {
+		/* move the insertion point back appropriately */
+		this->point -= delta;
+	} else if (this->point > start) {
+		/* move the insertion point to the start */
+		this->point = start;
 	}
-	if (this->end > end) {
-		this->end -= delta;
-	} else {
-		this->end = start;
-	}
-	/* put a terminator at the end of the buffer */
-	this->buffer[this->end] = '\0';
+	this->end -= delta;
 }
 
 /*----------------------------------------------------------------------- */
