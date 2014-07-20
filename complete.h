@@ -35,10 +35,6 @@ typedef enum {
 	TINYRL_MATCH_WITH_EXTENSIONS
 } tinyrl_match_e;
 
-typedef char **tinyrl_completion_func_t(tinyrl_t * instance,
-					const char *text,
-					unsigned start, unsigned end);
-
 extern void tinyrl_delete_matches(char **instance);
 extern char **tinyrl_completion(tinyrl_t * instance,
 				const char *line,
@@ -58,6 +54,6 @@ extern char **tinyrl_completion(tinyrl_t * instance,
  */
 tinyrl_match_e tinyrl_complete(
 	tinyrl_t * this, bool with_extensions, unsigned start,
-	tinyrl_completion_func_t *complete_fn);
+	char **matches);
 
 #endif

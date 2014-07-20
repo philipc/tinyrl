@@ -119,10 +119,9 @@ tinyrl_display_matches(const tinyrl_t * this,
 /*-------------------------------------------------------- */
 tinyrl_match_e tinyrl_complete(
 	tinyrl_t * this, bool with_extensions, unsigned start,
-	tinyrl_completion_func_t *complete_fn)
+	char **matches)
 {
 	tinyrl_match_e result = TINYRL_NO_MATCH;
-	char **matches = NULL;
 	char *common;
 	const char *line;
 	unsigned end, len;
@@ -130,10 +129,8 @@ tinyrl_match_e tinyrl_complete(
 	bool prefix = false;
 	int i;
 
-	/* try and complete the current line buffer */
 	line = tinyrl__get_line(this);
 	end = tinyrl__get_point(this);
-	matches = complete_fn(this, line, start, end);
 	if (matches) {
 		/* identify and insert a common prefix if there is one */
 		common = strdup(matches[0]);
