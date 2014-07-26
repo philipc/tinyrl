@@ -4,15 +4,20 @@
 #include "tinyrl.h"
 #include "complete.h"
 
+static char **add_match(char **matches, const char *match,
+			const char *text, unsigned len)
+{
+	if (!len || strncmp(match, text, len) == 0)
+		matches = tinyrl_add_match(matches, match);
+	return matches;
+}
+
 static char **complete(const char *text, unsigned len)
 {
 	char **matches = NULL;
 
-	if (!len || text[0] == 'h') {
-		matches = tinyrl_add_match(matches, "hello");
-		matches = tinyrl_add_match(matches, "help");
-	}
-
+	matches = add_match(matches, "hello", text, len);
+	matches = add_match(matches, "help", text, len);
 	return matches;
 }
 
