@@ -5,13 +5,13 @@
 #include "complete.h"
 
 static char **complete(tinyrl_t * t, const char *text,
-		       unsigned start, unsigned end)
+		       unsigned len)
 {
-	char **matches = NULL;;
+	char **matches = NULL;
 
-	if (start == end || text[start] == 'h') {
-		matches = tinyrl_add_match(matches, "help");
+	if (!len || text[0] == 'h') {
 		matches = tinyrl_add_match(matches, "hello");
+		matches = tinyrl_add_match(matches, "help");
 	}
 
 	return matches;
@@ -20,21 +20,23 @@ static char **complete(tinyrl_t * t, const char *text,
 static bool complete_key(tinyrl_t * t, int key)
 {
 	tinyrl_match_e status;
-	const char *line;
+	const char *text;
 	unsigned start;
-	unsigned end;
+	unsigned len;
 	char **matches;
 	bool ret = false;
 
 	/* find the start of the current word */
-	line = tinyrl__get_line(t);
-	start = end = tinyrl__get_point(t);
-	while (start && !isspace(line[start - 1])) {
+	text = tinyrl__get_line(t);
+	start = len = tinyrl__get_point(t);
+	while (start && !isspace(text[start - 1])) {
 		start--;
 	}
+	text += start;
+	len -= start;
 
 	/* try and complete the word */
-	matches = complete(t, line, start, end);
+	matches = complete(t, text, len);
 	if (!matches)
 		return false;
 
