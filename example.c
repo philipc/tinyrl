@@ -4,8 +4,7 @@
 #include "tinyrl.h"
 #include "complete.h"
 
-static char **complete(tinyrl_t * t, const char *text,
-		       unsigned len)
+static char **complete(const char *text, unsigned len)
 {
 	char **matches = NULL;
 
@@ -36,7 +35,7 @@ static bool complete_key(tinyrl_t * t, int key)
 	len -= start;
 
 	/* try and complete the word */
-	matches = complete(t, text, len);
+	matches = complete(text, len);
 	if (!matches)
 		return false;
 
