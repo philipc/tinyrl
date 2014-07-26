@@ -16,8 +16,9 @@ static char **complete(const char *text, unsigned len)
 {
 	char **matches = NULL;
 
-	matches = add_match(matches, "hello", text, len);
+	matches = add_match(matches, "exit", text, len);
 	matches = add_match(matches, "help", text, len);
+	matches = add_match(matches, "hello", text, len);
 	return matches;
 }
 
