@@ -93,57 +93,58 @@ bool tinyrl_complete(
 	bool prefix = false;
 	int i;
 
+	if (!matches)
+		return false;
+
 	line = tinyrl__get_line(this);
 	end = tinyrl__get_point(this);
-	if (matches) {
-		/* identify and insert a common prefix if there is one */
-		common = strdup(matches[0]);
-		for (i = 1; matches[i]; i++) {
-			char *p = common;
-			char *q = matches[i];
-			while (*p && tolower(*p) == tolower(*q)) {
-				p++;
-				q++;
-			}
-			*p = '\0';
+	/* identify and insert a common prefix if there is one */
+	common = strdup(matches[0]);
+	for (i = 1; matches[i]; i++) {
+		char *p = common;
+		char *q = matches[i];
+		while (*p && tolower(*p) == tolower(*q)) {
+			p++;
+			q++;
 		}
-		len = strlen(common);
-		if (end - start < len
-		    || strncmp(line + start, common, len) != 0) {
-			/* 
-			 * delete the original text not including 
-			 * the current insertion point character 
-			 */
-			if (end > start) {
-				tinyrl_delete_text(this, start, end);
-			}
-			if (!tinyrl_insert_text(this, common)) {
-				free(common);
-				return false;
-			}
-			tinyrl_redisplay(this);
-			completion = true;
+		*p = '\0';
+	}
+	len = strlen(common);
+	if (end - start < len
+	    || strncmp(line + start, common, len) != 0) {
+		/* 
+		 * delete the original text not including 
+		 * the current insertion point character 
+		 */
+		if (end > start) {
+			tinyrl_delete_text(this, start, end);
 		}
-		for (i = 0; matches[i]; i++) {
-			if (strcmp(common, matches[i]) == 0) {
-				/* this is just a prefix string */
-				prefix = true;
-			}
+		if (!tinyrl_insert_text(this, common)) {
+			free(common);
+			return false;
 		}
-		free(common);
+		tinyrl_redisplay(this);
+		completion = true;
+	}
+	for (i = 0; matches[i]; i++) {
+		if (strcmp(common, matches[i]) == 0) {
+			/* this is just a prefix string */
+			prefix = true;
+		}
+	}
+	free(common);
 
-		/* is there more than one completion? */
-		if (matches[1] == NULL)
-			return true;
-		/* is the prefix valid? */
-		if (prefix && allow_prefix)
-			return true;
-		/* display matches if no progress was made */
-		if (!completion) {
-			tinyrl_crlf(this);
-			tinyrl_display_matches(this, matches);
-			tinyrl_reset_line_state(this);
-		}
+	/* is there more than one completion? */
+	if (matches[1] == NULL)
+		return true;
+	/* is the prefix valid? */
+	if (prefix && allow_prefix)
+		return true;
+	/* display matches if no progress was made */
+	if (!completion) {
+		tinyrl_crlf(this);
+		tinyrl_display_matches(this, matches);
+		tinyrl_reset_line_state(this);
 	}
 	return false;
 }
