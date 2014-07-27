@@ -88,16 +88,14 @@ bool tinyrl_complete(
 {
 	const char *line;
 	unsigned end, len;
-	bool completion = false;
+	bool completion;
 	bool prefix;
 	int i;
 
 	if (!matches)
 		return false;
 
-	line = tinyrl__get_line(this);
-	end = tinyrl__get_point(this);
-	/* identify and insert a common prefix if there is one */
+	/* identify common prefix */
 	len = strlen(matches[0]);
 	prefix = true;
 	for (i = 1; matches[i]; i++) {
@@ -110,6 +108,10 @@ bool tinyrl_complete(
 			prefix = !matches[i][len];
 		}
 	}
+
+	/* insert common prefix */
+	line = tinyrl__get_line(this);
+	end = tinyrl__get_point(this);
 	if (end - start < len
 	    || strncmp(line + start, matches[0], len) != 0) {
 		tinyrl_delete_text(this, start, end);
@@ -117,19 +119,24 @@ bool tinyrl_complete(
 			return false;
 		tinyrl_redisplay(this);
 		completion = true;
+	} else {
+		completion = false;
 	}
 
-	/* is there more than one completion? */
-	if (matches[1] == NULL)
+	/* is there only one completion? */
+	if (!matches[1])
 		return true;
+
 	/* is the prefix valid? */
 	if (prefix && allow_prefix)
 		return true;
+
 	/* display matches if no progress was made */
 	if (!completion) {
 		tinyrl_crlf(this);
 		tinyrl_display_matches(this, matches);
 		tinyrl_reset_line_state(this);
 	}
+
 	return false;
 }
