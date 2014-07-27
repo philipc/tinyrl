@@ -112,13 +112,7 @@ bool tinyrl_complete(
 	len = strlen(common);
 	if (end - start < len
 	    || strncmp(line + start, common, len) != 0) {
-		/* 
-		 * delete the original text not including 
-		 * the current insertion point character 
-		 */
-		if (end > start) {
-			tinyrl_delete_text(this, start, end);
-		}
+		tinyrl_delete_text(this, start, end);
 		if (!tinyrl_insert_text(this, common)) {
 			free(common);
 			return false;

@@ -916,22 +916,16 @@ void tinyrl_delete_text(tinyrl_t * this, unsigned start, unsigned end)
 {
 	unsigned delta;
 
-	/* 
-	 * If the client wants to change the line ensure that the line and buffer
-	 * references are in sync
-	 */
+	if (end == start)
+		return;
+
 	changed_line(this);
 
-	/* make sure we play it safe */
-	if (end > this->end) {
-		end = this->end;
-	}
-
-	delta = end - start;
-
 	/* move any text which is left, including terminator */
+	delta = end - start;
 	memmove(&this->buffer[start],
-		&this->buffer[start + delta], this->end - end + 1);
+		&this->buffer[start + delta], this->end + 1 - end);
+	this->end -= delta;
 
 	/* now adjust the indexs */
 	if (this->point > end) {
@@ -941,7 +935,6 @@ void tinyrl_delete_text(tinyrl_t * this, unsigned start, unsigned end)
 		/* move the insertion point to the start */
 		this->point = start;
 	}
-	this->end -= delta;
 }
 
 /*----------------------------------------------------------------------- */
