@@ -20,10 +20,9 @@ char **tinyrl_add_match(
 		return matches;
 
 	len = 0;
-	if (matches) {
+	if (matches)
 		for (m = matches; *m; m++)
 			len++;
-	}
 
 	/* Allocate memory for new match, plus terminator */
 	matches = realloc(matches, (len + 2) * sizeof(*matches));
@@ -36,11 +35,9 @@ char **tinyrl_add_match(
 void tinyrl_delete_matches(char **matches)
 {
 	char **m;
-	for (m = matches; *m; m++) {
-		/* release the memory for each contained string */
+
+	for (m = matches; *m; m++)
 		free(*m);
-	}
-	/* release the memory for the array */
 	free(matches);
 }
 
@@ -53,31 +50,25 @@ void tinyrl_delete_matches(char **matches)
 void tinyrl_display_matches(const tinyrl_t * this, char *const *matches)
 {
 	char *const *m;
-	unsigned max, len;
-	unsigned r, c;
-	unsigned width;
-	unsigned cols, rows;
+	size_t max;
+	size_t c, cols;
 
-	max = len = 0;
+	/* find maximum completion length */
+	max = 0;
 	for (m = matches; *m; m++) {
 		size_t size = strlen(*m);
-		if (size > max) {
+		if (max < size)
 			max = size;
-		}
-		len++;
 	}
 
-	width = tinyrl__get_width(this);
-	cols = width / (max + 1);	/* allow for a space between words */
-	rows = len / cols + 1;
+	/* allow for a space between words */
+	cols = tinyrl__get_width(this) / (max + 1);
 
 	/* print out a table of completions */
-	for (r = 0; r < rows && len; r++) {
-		for (c = 0; c < cols && len; c++) {
-			const char *match = *matches++;
-			len--;
-			tinyrl_printf(this, "%-*s ", max, match);
-		}
+	m = matches;
+	for (m = matches; *m; ) {
+		for (c = 0; c < cols && *m; c++, m++)
+			tinyrl_printf(this, "%-*s ", max, *m);
 		tinyrl_crlf(this);
 	}
 }
