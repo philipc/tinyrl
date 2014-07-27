@@ -12,58 +12,27 @@
 #include <stdbool.h>
 
 /**************************************
- * tinyrl_history_entry class interface
- ************************************** */
-typedef struct _tinyrl_history_entry tinyrl_history_entry_t;
-
-extern const char *tinyrl_history_entry__get_line(const tinyrl_history_entry_t *
-						  instance);
-extern unsigned tinyrl_history_entry__get_index(const tinyrl_history_entry_t *
-						instance);
-
-/**************************************
  * tinyrl_history class interface
  ************************************** */
 typedef struct _tinyrl_history tinyrl_history_t;
 
-/**
- * This type is used for the iteration of history entries
- */
-typedef struct _tinyrl_history_iterator tinyrl_history_iterator_t;
-/**
- * CLIENTS MUST NOT USE THESE FIELDS DIRECTLY
- */
-struct _tinyrl_history_iterator {
-	const tinyrl_history_t *history;
-	unsigned offset;
-};
-
 extern tinyrl_history_t *tinyrl_history_new(unsigned stifle);
 
 extern void tinyrl_history_delete(tinyrl_history_t * instance);
-
 extern void tinyrl_history_add(tinyrl_history_t * instance, const char *line);
 
-extern tinyrl_history_entry_t *tinyrl_history_getfirst(const tinyrl_history_t *
-						       instance,
-						       tinyrl_history_iterator_t
-						       * iter);
-extern tinyrl_history_entry_t *tinyrl_history_getlast(const tinyrl_history_t *
-						      instance,
-						      tinyrl_history_iterator_t
-						      * iter);
-
-extern tinyrl_history_entry_t *tinyrl_history_getnext(tinyrl_history_iterator_t
-						      * iter);
-
-extern tinyrl_history_entry_t
-*tinyrl_history_getprevious(tinyrl_history_iterator_t * iter);
+extern const char *tinyrl_history_getfirst(const tinyrl_history_t *instance);
+extern const char *tinyrl_history_getlast(const tinyrl_history_t *instance,
+					  unsigned *offset);
+extern const char *tinyrl_history_getnext(const tinyrl_history_t *instance,
+					  unsigned *offset);
+extern const char *tinyrl_history_getprevious(const tinyrl_history_t *instance,
+					      unsigned *offset);
 
 /*
    HISTORY LIST MANAGEMENT 
    */
-extern tinyrl_history_entry_t *tinyrl_history_remove(tinyrl_history_t *
-						     instance, unsigned offset);
+extern char *tinyrl_history_remove(tinyrl_history_t *instance, unsigned offset);
 extern void tinyrl_history_clear(tinyrl_history_t * instance);
 extern void tinyrl_history_stifle(tinyrl_history_t * instance, unsigned stifle);
 extern unsigned tinyrl_history_unstifle(tinyrl_history_t * instance);
@@ -72,10 +41,9 @@ extern bool tinyrl_history_is_stifled(const tinyrl_history_t * instance);
 /*
    INFORMATION ABOUT THE HISTORY LIST 
    */
-extern tinyrl_history_entry_t **tinyrl_history_list(const tinyrl_history_t *
-						    instance);
-extern tinyrl_history_entry_t *tinyrl_history_get(const tinyrl_history_t *
-						  instance, unsigned offset);
+extern const char **tinyrl_history_list(const tinyrl_history_t *instance);
+extern const char *tinyrl_history_get(const tinyrl_history_t *instance,
+				      unsigned offset);
 
 #endif				/* _tinyrl_history_h */
 /** @} tinyrl_history */

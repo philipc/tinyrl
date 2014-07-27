@@ -11,104 +11,37 @@
 
 #include "history.h"
 
-struct _tinyrl_history_entry {
-	char *line;
-	unsigned index;
-};
-
 struct _tinyrl_history {
-	tinyrl_history_entry_t **entries;	/* pointer entries */
+	char **entries;	/* pointer entries */
 	unsigned length;	/* Number of elements within this array */
 	unsigned size;		/* Number of slots allocated in this array */
-	unsigned current_index;
 	unsigned stifle;
 };
 
 /*------------------------------------- */
-static void
-entry_init(tinyrl_history_entry_t * this, const char *line, unsigned index)
-{
-	this->line = strdup(line);
-	this->index = index;
-}
-
-/*------------------------------------- */
-static void entry_fini(tinyrl_history_entry_t * this)
-{
-	free(this->line);
-	this->line = NULL;
-}
-
-/*------------------------------------- */
-static tinyrl_history_entry_t *tinyrl_history_entry_new(const char *line,
-						 unsigned index)
-{
-	tinyrl_history_entry_t *this = malloc(sizeof(tinyrl_history_entry_t));
-	if (NULL != this) {
-		entry_init(this, line, index);
-	}
-	return this;
-}
-
-/*------------------------------------- */
-static void tinyrl_history_entry_delete(tinyrl_history_entry_t * this)
-{
-	entry_fini(this);
-	free(this);
-}
-
-/*------------------------------------- */
-const char *tinyrl_history_entry__get_line(const tinyrl_history_entry_t * this)
-{
-	return this->line;
-}
-
-/*------------------------------------- */
-unsigned tinyrl_history_entry__get_index(const tinyrl_history_entry_t * this)
-{
-	return this->index;
-}
-
-/*------------------------------------- */
-static void tinyrl_history_init(tinyrl_history_t * this, unsigned stifle)
-{
-	this->entries = NULL;
-	this->stifle = stifle;
-	this->current_index = 1;
-	this->length = 0;
-	this->size = 0;
-}
-
-/*------------------------------------- */
-static void tinyrl_history_fini(tinyrl_history_t * this)
-{
-	tinyrl_history_entry_t *entry;
-	tinyrl_history_iterator_t iter;
-
-	/* release the resource associated with each entry */
-	for (entry = tinyrl_history_getfirst(this, &iter);
-	     entry; entry = tinyrl_history_getnext(&iter)) {
-		tinyrl_history_entry_delete(entry);
-	}
-	/* release the list */
-	free(this->entries);
-	this->entries = NULL;
-}
-
-/*------------------------------------- */
 tinyrl_history_t *tinyrl_history_new(unsigned stifle)
 {
-	tinyrl_history_t *this = malloc(sizeof(tinyrl_history_t));
-	if (NULL != this) {
-		tinyrl_history_init(this, stifle);
-	}
+	tinyrl_history_t *this;
+       
+	this = malloc(sizeof(*this));
+	if (!this)
+		return NULL;
+
+	this->entries = NULL;
+	this->stifle = stifle;
+	this->length = 0;
+	this->size = 0;
 	return this;
 }
 
 /*------------------------------------- */
 void tinyrl_history_delete(tinyrl_history_t * this)
 {
-	tinyrl_history_fini(this);
+	unsigned i;
+
+	for (i = 0; i < this->length; i++)
+		free(this->entries[i]);
+	free(this->entries);
 	free(this);
 }
 
@@ -119,8 +52,7 @@ void tinyrl_history_delete(tinyrl_history_t * this)
 /* insert a new entry at the current offset */
 static void insert_entry(tinyrl_history_t * this, const char *line)
 {
-	tinyrl_history_entry_t *new_entry =
-		tinyrl_history_entry_new(line, this->current_index++);
+	char *new_entry = strdup(line);
 	assert(this->length);
 	assert(this->entries);
 	if (new_entry) {
@@ -141,11 +73,8 @@ free_entries(const tinyrl_history_t * this, unsigned start, unsigned end)
 	assert(start <= end);
 	assert(end < this->length);
 
-	for (i = start; i <= end; i++) {
-		tinyrl_history_entry_t *entry = this->entries[i];
-		tinyrl_history_entry_delete(entry);
-		entry = NULL;
-	}
+	for (i = start; i <= end; i++)
+		free(this->entries[i]);
 }
 
 /*------------------------------------- */
@@ -167,7 +96,7 @@ remove_entries(tinyrl_history_t * this, unsigned start, unsigned end)
 		/* move the remaining entries down to close the array */
 		memmove(&this->entries[start],
 			&this->entries[end + 1],
-			sizeof(tinyrl_history_entry_t *) * num_entries);
+			sizeof(*this->entries) * num_entries);
 	}
 	/* now fix up the length variables */
 	this->length -= delta;
@@ -184,8 +113,7 @@ static bool remove_duplicate(tinyrl_history_t * this, const char *line)
 	unsigned i;
 
 	for (i = 0; i < this->length; i++) {
-		tinyrl_history_entry_t *entry = this->entries[i];
-		if (0 == strcmp(line, tinyrl_history_entry__get_line(entry))) {
+		if (strcmp(line, this->entries[i]) == 0) {
 			free_entries(this, i, i);
 			remove_entries(this, i, i);
 			result = true;
@@ -232,11 +160,10 @@ static void add_n_grow(tinyrl_history_t * this, const char *line)
 	if (this->size == this->length) {
 		/* increment the history memory by 10 entries each time we grow */
 		unsigned new_size = this->size + 10;
-		size_t nbytes;
-		tinyrl_history_entry_t **new_entries;
+		char **new_entries;
 
-		nbytes = sizeof(tinyrl_history_entry_t *) * new_size;
-		new_entries = realloc(this->entries, nbytes);
+		new_entries = realloc(this->entries,
+				      sizeof(*this->entries) * new_size);
 		if (NULL != new_entries) {
 			this->size = new_size;
 			this->entries = new_entries;
@@ -257,10 +184,9 @@ void tinyrl_history_add(tinyrl_history_t * this, const char *line)
 }
 
 /*------------------------------------- */
-tinyrl_history_entry_t *tinyrl_history_remove(tinyrl_history_t * this,
-					      unsigned offset)
+char *tinyrl_history_remove(tinyrl_history_t *this, unsigned offset)
 {
-	tinyrl_history_entry_t *result = NULL;
+	char *result = NULL;
 
 	if (offset < this->length) {
 		result = this->entries[offset];
@@ -317,73 +243,56 @@ bool tinyrl_history_is_stifled(const tinyrl_history_t * this)
 /*
    INFORMATION ABOUT THE HISTORY LIST 
    */
-tinyrl_history_entry_t *tinyrl_history_get(const tinyrl_history_t * this,
-					   unsigned position)
+const char *tinyrl_history_get(const tinyrl_history_t * this,
+			       unsigned position)
 {
-	unsigned i;
-	tinyrl_history_entry_t *entry = NULL;
-	for (i = 0; i < this->length; i++) {
-		entry = this->entries[i];
-		if (position == tinyrl_history_entry__get_index(entry)) {
-			/* found it */
-			break;
-		}
-		entry = NULL;
-	}
-	return entry;
+	if (position < this->length)
+		return this->entries[position];
+	return NULL;
 }
 
 /*-------------------------------------*/
-tinyrl_history_entry_t *tinyrl_history_getfirst(const tinyrl_history_t * this,
-						tinyrl_history_iterator_t *
-						iter)
+const char *tinyrl_history_getfirst(const tinyrl_history_t * this)
 {
-	tinyrl_history_entry_t *result = NULL;
+	if (this->length)
+		return this->entries[0];
+	return NULL;
+}
 
-	iter->history = this;
-	iter->offset = 0;
+/*-------------------------------------*/
+const char *tinyrl_history_getnext(const tinyrl_history_t * this,
+				   unsigned *offset)
+{
+	if (*offset < this->length - 1) {
+		(*offset)++;
+		return this->entries[*offset];
+	}
 
+	return NULL;
+}
+
+/*-------------------------------------*/
+const char *tinyrl_history_getlast(const tinyrl_history_t * this,
+				   unsigned *offset)
+{
 	if (this->length) {
-		result = this->entries[iter->offset];
+		*offset = this->length - 1;
+		return this->entries[*offset];
 	}
-	return result;
+
+	return NULL;
 }
 
 /*-------------------------------------*/
-tinyrl_history_entry_t *tinyrl_history_getnext(tinyrl_history_iterator_t * iter)
+const char *tinyrl_history_getprevious(const tinyrl_history_t * this,
+				       unsigned *offset)
 {
-	tinyrl_history_entry_t *result = NULL;
-
-	if (iter->offset < iter->history->length - 1) {
-		iter->offset++;
-		result = iter->history->entries[iter->offset];
+	if (*offset > 0 && *offset < this->length) {
+		(*offset)--;
+		return this->entries[*offset];
 	}
 
-	return result;
-}
-
-/*-------------------------------------*/
-tinyrl_history_entry_t *tinyrl_history_getlast(const tinyrl_history_t * this,
-					       tinyrl_history_iterator_t * iter)
-{
-	iter->history = this;
-	iter->offset = this->length;
-
-	return tinyrl_history_getprevious(iter);
-}
-
-/*-------------------------------------*/
-tinyrl_history_entry_t *tinyrl_history_getprevious(tinyrl_history_iterator_t *
-						   iter)
-{
-	tinyrl_history_entry_t *result = NULL;
-
-	if (iter->offset) {
-		iter->offset--;
-		result = iter->history->entries[iter->offset];
-	}
-
-	return result;
+	return NULL;
 }
 
 /*-------------------------------------*/

@@ -54,7 +54,7 @@ struct _tinyrl {
 	tinyrl_key_func_t *handlers[NUM_HANDLERS];
 
 	tinyrl_history_t *history;
-	tinyrl_history_iterator_t hist_iter;
+	unsigned hist_iter;
 	void *context;		/* context supplied by caller
 				 * to tinyrl_readline()
 				 */
@@ -304,19 +304,19 @@ static bool tinyrl_key_crlf(tinyrl_t * this, int key)
 static bool tinyrl_key_up(tinyrl_t * this, int key)
 {
 	bool result = false;
-	tinyrl_history_entry_t *entry = NULL;
+	const char *entry = NULL;
 	if (this->line == this->buffer) {
 		/* go to the last history entry */
 		entry = tinyrl_history_getlast(this->history, &this->hist_iter);
 	} else {
 		/* already traversing the history list so get previous */
-		entry = tinyrl_history_getprevious(&this->hist_iter);
+		entry = tinyrl_history_getprevious(this->history, &this->hist_iter);
 	}
 	if (NULL != entry) {
 		/* display the entry moving the insertion point
 		 * to the end of the line 
 		 */
-		this->line = tinyrl_history_entry__get_line(entry);
+		this->line = entry;
 		this->point = this->end = strlen(this->line);
 		result = true;
 	}
@@ -330,13 +330,13 @@ static bool tinyrl_key_down(tinyrl_t * this, int key)
 	if (this->line != this->buffer) {
 		/* we are not already at the bottom */
 		/* the iterator will have been set up by the key_up() function */
-		tinyrl_history_entry_t *entry =
-			tinyrl_history_getnext(&this->hist_iter);
+		const char *entry =
+			tinyrl_history_getnext(this->history, &this->hist_iter);
 		if (NULL == entry) {
 			/* nothing more in the history list */
 			this->line = this->buffer;
 		} else {
-			this->line = tinyrl_history_entry__get_line(entry);
+			this->line = entry;
 		}
 		/* display the entry moving the insertion point
 		 * to the end of the line 
