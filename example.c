@@ -4,39 +4,29 @@
 #include "tinyrl.h"
 #include "complete.h"
 
-static char **add_match(char **matches, const char *match,
-			const char *text, unsigned len)
-{
-	if (!len || strncmp(match, text, len) == 0)
-		matches = tinyrl_add_match(matches, match);
-	return matches;
-}
-
 static bool complete(tinyrl_t *t, bool allow_prefix, bool allow_empty)
 {
 	const char *text;
 	unsigned start;
-	unsigned len;
+	unsigned end;
 	char **matches;
 	bool ret = false;
 
 	/* find the start of the current word */
 	text = tinyrl__get_line(t);
-	start = len = tinyrl__get_point(t);
+	start = end = tinyrl__get_point(t);
 	while (start && !isspace(text[start - 1]))
 		start--;
-	text += start;
-	len -= start;
-	if (!len && allow_empty)
+	if (start == end && allow_empty)
 		return true;
 
 	/* build a list of possible completions */
 	matches = NULL;
-	matches = add_match(matches, "exit", text, len);
-	matches = add_match(matches, "help", text, len);
-	matches = add_match(matches, "hello", text, len);
-	matches = add_match(matches, "vi", text, len);
-	matches = add_match(matches, "view", text, len);
+	matches = tinyrl_add_match(t, start, matches, "exit");
+	matches = tinyrl_add_match(t, start, matches, "help");
+	matches = tinyrl_add_match(t, start, matches, "hello");
+	matches = tinyrl_add_match(t, start, matches, "vi");
+	matches = tinyrl_add_match(t, start, matches, "view");
 	if (!matches)
 		return false;
 

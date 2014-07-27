@@ -6,10 +6,18 @@
 #include <stdlib.h>
 
 /*-------------------------------------------------------- */
-char **tinyrl_add_match(char **matches, const char *match)
+char **tinyrl_add_match(
+	const tinyrl_t *this, unsigned start, char **matches, const char *match)
 {
+	const char *line;
+	unsigned end;
 	size_t len;
 	char **m;
+
+	line = tinyrl__get_line(this);
+	end = tinyrl__get_point(this);
+	if (strncmp(match, line + start, end - start) != 0)
+		return matches;
 
 	len = 0;
 	if (matches) {

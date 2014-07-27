@@ -3,7 +3,8 @@
 
 #include "tinyrl.h"
 
-char **tinyrl_add_match(char **matches, const char *match);
+char **tinyrl_add_match(
+	const tinyrl_t *this, unsigned start, char **matches, const char *match);
 void tinyrl_delete_matches(char **matches);
 void tinyrl_display_matches(const tinyrl_t * this, char *const *matches);
 
