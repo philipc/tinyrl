@@ -89,7 +89,7 @@ bool tinyrl_complete(
 	const char *line;
 	unsigned end, len;
 	bool completion = false;
-	bool prefix = false;
+	bool prefix;
 	int i;
 
 	if (!matches)
@@ -99,12 +99,16 @@ bool tinyrl_complete(
 	end = tinyrl__get_point(this);
 	/* identify and insert a common prefix if there is one */
 	len = strlen(matches[0]);
+	prefix = true;
 	for (i = 1; matches[i]; i++) {
 		unsigned common;
 		for (common = 0; common < len; common++)
 			if (matches[0][common] != matches[i][common])
 				break;
-		len = common;
+		if (len != common) {
+			len = common;
+			prefix = !matches[i][len];
+		}
 	}
 	if (end - start < len
 	    || strncmp(line + start, matches[0], len) != 0) {
@@ -113,12 +117,6 @@ bool tinyrl_complete(
 			return false;
 		tinyrl_redisplay(this);
 		completion = true;
-	}
-	for (i = 0; matches[i]; i++) {
-		if (strlen(matches[i]) == len) {
-			/* this is just a prefix string */
-			prefix = true;
-		}
 	}
 
 	/* is there more than one completion? */
