@@ -86,7 +86,6 @@ void tinyrl_display_matches(const tinyrl_t * this, char *const *matches)
 bool tinyrl_complete(
 	tinyrl_t *this, unsigned start, char **matches, bool allow_prefix)
 {
-	char *common;
 	const char *line;
 	unsigned end, len;
 	bool completion = false;
@@ -99,34 +98,28 @@ bool tinyrl_complete(
 	line = tinyrl__get_line(this);
 	end = tinyrl__get_point(this);
 	/* identify and insert a common prefix if there is one */
-	common = strdup(matches[0]);
+	len = strlen(matches[0]);
 	for (i = 1; matches[i]; i++) {
-		char *p = common;
-		char *q = matches[i];
-		while (*p && tolower(*p) == tolower(*q)) {
-			p++;
-			q++;
-		}
-		*p = '\0';
+		unsigned common;
+		for (common = 0; common < len; common++)
+			if (matches[0][common] != matches[i][common])
+				break;
+		len = common;
 	}
-	len = strlen(common);
 	if (end - start < len
-	    || strncmp(line + start, common, len) != 0) {
+	    || strncmp(line + start, matches[0], len) != 0) {
 		tinyrl_delete_text(this, start, end);
-		if (!tinyrl_insert_text_len(this, common, len)) {
-			free(common);
+		if (!tinyrl_insert_text_len(this, matches[0], len))
 			return false;
-		}
 		tinyrl_redisplay(this);
 		completion = true;
 	}
 	for (i = 0; matches[i]; i++) {
-		if (strcmp(common, matches[i]) == 0) {
+		if (strlen(matches[i]) == len) {
 			/* this is just a prefix string */
 			prefix = true;
 		}
 	}
-	free(common);
 
 	/* is there more than one completion? */
 	if (matches[1] == NULL)
