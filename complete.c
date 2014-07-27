@@ -92,7 +92,7 @@ bool tinyrl_complete(
 	bool prefix;
 	int i;
 
-	if (!matches)
+	if (!matches || !matches[0])
 		return false;
 
 	/* identify common prefix */
