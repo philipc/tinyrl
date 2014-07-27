@@ -12,16 +12,6 @@ static char **add_match(char **matches, const char *match,
 	return matches;
 }
 
-static char **complete(const char *text, unsigned len)
-{
-	char **matches = NULL;
-
-	matches = add_match(matches, "exit", text, len);
-	matches = add_match(matches, "help", text, len);
-	matches = add_match(matches, "hello", text, len);
-	return matches;
-}
-
 static bool complete_key(tinyrl_t * t, int key)
 {
 	tinyrl_match_e status;
@@ -40,11 +30,15 @@ static bool complete_key(tinyrl_t * t, int key)
 	text += start;
 	len -= start;
 
-	/* try and complete the word */
-	matches = complete(text, len);
+	/* build a list of possible completions */
+	matches = NULL;
+	matches = add_match(matches, "exit", text, len);
+	matches = add_match(matches, "help", text, len);
+	matches = add_match(matches, "hello", text, len);
 	if (!matches)
 		return false;
 
+	/* select the longest completion */
 	status = tinyrl_complete(t, start, matches);
 	switch (status) {
 	case TINYRL_MATCH:
