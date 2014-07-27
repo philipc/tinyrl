@@ -14,7 +14,6 @@ static char **add_match(char **matches, const char *match,
 
 static bool complete_key(tinyrl_t * t, int key)
 {
-	tinyrl_match_e status;
 	const char *text;
 	unsigned start;
 	unsigned len;
@@ -39,22 +38,8 @@ static bool complete_key(tinyrl_t * t, int key)
 		return false;
 
 	/* select the longest completion */
-	status = tinyrl_complete(t, start, matches);
-	switch (status) {
-	case TINYRL_MATCH:
-	case TINYRL_COMPLETED_MATCH:
+	if (tinyrl_complete(t, start, matches, false))
 		ret = tinyrl_insert_text(t, " ");
-		break;
-	case TINYRL_AMBIGUOUS:
-	case TINYRL_COMPLETED_AMBIGUOUS:
-	case TINYRL_MATCH_WITH_EXTENSIONS:
-		tinyrl_crlf(t);
-		tinyrl_display_matches(t, matches);
-		tinyrl_reset_line_state(t);
-		break;
-	case TINYRL_NO_MATCH:
-		break;
-	}
 
 	tinyrl_delete_matches(matches);
 

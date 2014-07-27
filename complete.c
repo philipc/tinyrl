@@ -75,10 +75,9 @@ void tinyrl_display_matches(const tinyrl_t * this, char *const *matches)
 }
 
 /*-------------------------------------------------------- */
-tinyrl_match_e tinyrl_complete(
-	tinyrl_t * this, unsigned start, char **matches)
+bool tinyrl_complete(
+	tinyrl_t *this, unsigned start, char **matches, bool allow_prefix)
 {
-	tinyrl_match_e result = TINYRL_NO_MATCH;
 	char *common;
 	const char *line;
 	unsigned end, len;
@@ -112,8 +111,9 @@ tinyrl_match_e tinyrl_complete(
 			}
 			if (!tinyrl_insert_text(this, common)) {
 				free(common);
-				return TINYRL_NO_MATCH;
+				return false;
 			}
+			tinyrl_redisplay(this);
 			completion = true;
 		}
 		for (i = 0; matches[i]; i++) {
@@ -123,19 +123,19 @@ tinyrl_match_e tinyrl_complete(
 			}
 		}
 		free(common);
+
 		/* is there more than one completion? */
-		if (matches[1] != NULL) {
-			if (completion) {
-				result = TINYRL_COMPLETED_AMBIGUOUS;
-			} else if (prefix) {
-				result = TINYRL_MATCH_WITH_EXTENSIONS;
-			} else {
-				result = TINYRL_AMBIGUOUS;
-			}
-		} else {
-			result =
-				completion ? TINYRL_COMPLETED_MATCH : TINYRL_MATCH;
+		if (matches[1] == NULL)
+			return true;
+		/* is the prefix valid? */
+		if (prefix && allow_prefix)
+			return true;
+		/* display matches if no progress was made */
+		if (!completion) {
+			tinyrl_crlf(this);
+			tinyrl_display_matches(this, matches);
+			tinyrl_reset_line_state(this);
 		}
 	}
-	return result;
+	return false;
 }
