@@ -75,9 +75,13 @@ extern void tinyrl_ding(const tinyrl_t * instance);
 
 extern void tinyrl_reset_line_state(tinyrl_t * instance);
 
-extern bool tinyrl_insert_text(tinyrl_t * instance, const char *text);
-extern void
-tinyrl_delete_text(tinyrl_t * instance, unsigned start, unsigned end);
+extern bool tinyrl_insert_text(
+	tinyrl_t * instance, const char *text);
+extern bool tinyrl_insert_text_len(
+	tinyrl_t * instance, const char *text, unsigned len);
+extern void tinyrl_delete_text(
+	tinyrl_t * instance, unsigned start, unsigned end);
+
 extern void tinyrl_redisplay(tinyrl_t * instance);
 
 extern void

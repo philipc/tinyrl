@@ -113,7 +113,7 @@ bool tinyrl_complete(
 	if (end - start < len
 	    || strncmp(line + start, common, len) != 0) {
 		tinyrl_delete_text(this, start, end);
-		if (!tinyrl_insert_text(this, common)) {
+		if (!tinyrl_insert_text_len(this, common, len)) {
 			free(common);
 			return false;
 		}

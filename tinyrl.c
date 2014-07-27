@@ -231,10 +231,8 @@ static bool tinyrl_key_default(tinyrl_t * this, int key)
 {
 	bool result;
 	if (key > 31) {
-		char tmp[2];
-		tmp[0] = (key & 0xFF), tmp[1] = '\0';
-		/* inject this text into the buffer */
-		result = tinyrl_insert_text(this, tmp);
+		char tmp = key & 0xFF;
+		result = tinyrl_insert_text_len(this, &tmp, 1);
 	} else {
 		char tmp[10];
 		sprintf(tmp, "~%d", key);
@@ -870,10 +868,8 @@ static bool tinyrl_extend_line_buffer(tinyrl_t * this, unsigned len)
 /*
  * Insert text into the line at the current cursor position.
  */
-bool tinyrl_insert_text(tinyrl_t * this, const char *text)
+bool tinyrl_insert_text_len(tinyrl_t * this, const char *text, unsigned delta)
 {
-	unsigned delta = strlen(text);
-
 	/* 
 	 * If the client wants to change the line ensure that the line and buffer
 	 * references are in sync
@@ -905,6 +901,11 @@ bool tinyrl_insert_text(tinyrl_t * this, const char *text)
 	this->end += delta;
 
 	return true;
+}
+
+bool tinyrl_insert_text(tinyrl_t * this, const char *text)
+{
+	return tinyrl_insert_text_len(this, text, strlen(text));
 }
 
 /*----------------------------------------------------------------------- */
