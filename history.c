@@ -62,23 +62,6 @@ static void insert_entry(tinyrl_history_t * this, const char *line)
 
 /*------------------------------------- */
 /*
- * This frees the specified entries from the 
- * entries vector. NB it doesn't perform any shuffling.
- * This function is inclusive of start and end
- */
-static void
-free_entries(const tinyrl_history_t * this, unsigned start, unsigned end)
-{
-	unsigned i;
-	assert(start <= end);
-	assert(end < this->length);
-
-	for (i = start; i <= end; i++)
-		free(this->entries[i]);
-}
-
-/*------------------------------------- */
-/*
  * This removes the specified entries from the 
  * entries vector. Shuffling up the array as necessary 
  * This function is inclusive of start and end
@@ -86,11 +69,15 @@ free_entries(const tinyrl_history_t * this, unsigned start, unsigned end)
 static void
 remove_entries(tinyrl_history_t * this, unsigned start, unsigned end)
 {
+	unsigned i;
 	unsigned delta = (end - start) + 1;	/* number of entries being deleted */
 	/* number of entries to shuffle */
 	unsigned num_entries = (this->length - end) - 1;
 	assert(start <= end);
 	assert(end < this->length);
+
+	for (i = start; i <= end; i++)
+		free(this->entries[i]);
 
 	if (num_entries) {
 		/* move the remaining entries down to close the array */
@@ -122,9 +109,7 @@ static void append_entry(tinyrl_history_t * this, const char *line)
    */
 static void add_n_replace(tinyrl_history_t * this, const char *line)
 {
-	/* free the oldest entry */
-	free_entries(this, 0, 0);
-	/* shuffle the array */
+	/* remove the oldest entry */
 	remove_entries(this, 0, 0);
 	/* add the new entry */
 	append_entry(this, line);
@@ -164,7 +149,6 @@ void tinyrl_history_remove(tinyrl_history_t *this, unsigned offset)
 {
 	if (offset < this->length) {
 		/* do the biz */
-		free_entries(this, offset, offset);
 		remove_entries(this, offset, offset);
 	}
 }
@@ -173,8 +157,6 @@ void tinyrl_history_remove(tinyrl_history_t *this, unsigned offset)
 void tinyrl_history_clear(tinyrl_history_t * this)
 {
 	/* free all the entries */
-	free_entries(this, 0, this->length - 1);
-	/* and shuffle the array */
 	remove_entries(this, 0, this->length - 1);
 }
 
@@ -189,8 +171,6 @@ void tinyrl_history_stifle(tinyrl_history_t * this, unsigned stifle)
 		if (stifle < this->length) {
 			unsigned num_deletes = this->length - stifle;
 			/* free the entries */
-			free_entries(this, 0, num_deletes - 1);
-			/* shuffle the array shut */
 			remove_entries(this, 0, num_deletes - 1);
 		}
 		this->stifle = stifle;
