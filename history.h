@@ -38,10 +38,6 @@ extern void tinyrl_history_stifle(tinyrl_history_t * instance, unsigned stifle);
 extern unsigned tinyrl_history_unstifle(tinyrl_history_t * instance);
 extern bool tinyrl_history_is_stifled(const tinyrl_history_t * instance);
 
-/*
-   INFORMATION ABOUT THE HISTORY LIST 
-   */
-extern const char **tinyrl_history_list(const tinyrl_history_t *instance);
 extern const char *tinyrl_history_get(const tinyrl_history_t *instance,
 				      unsigned offset);
 
