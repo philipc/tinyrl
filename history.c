@@ -160,16 +160,13 @@ void tinyrl_history_add(tinyrl_history_t * this, const char *line)
 }
 
 /*------------------------------------- */
-char *tinyrl_history_remove(tinyrl_history_t *this, unsigned offset)
+void tinyrl_history_remove(tinyrl_history_t *this, unsigned offset)
 {
-	char *result = NULL;
-
 	if (offset < this->length) {
-		result = this->entries[offset];
 		/* do the biz */
+		free_entries(this, offset, offset);
 		remove_entries(this, offset, offset);
 	}
-	return result;
 }
 
 /*------------------------------------- */

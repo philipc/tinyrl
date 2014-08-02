@@ -24,7 +24,7 @@ extern void tinyrl_history_add(tinyrl_history_t * instance, const char *line);
 /*
    HISTORY LIST MANAGEMENT 
    */
-extern char *tinyrl_history_remove(tinyrl_history_t *instance, unsigned offset);
+extern void tinyrl_history_remove(tinyrl_history_t *instance, unsigned offset);
 extern void tinyrl_history_clear(tinyrl_history_t * instance);
 extern void tinyrl_history_stifle(tinyrl_history_t * instance, unsigned stifle);
 extern unsigned tinyrl_history_unstifle(tinyrl_history_t * instance);
