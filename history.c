@@ -49,18 +49,6 @@ void tinyrl_history_delete(tinyrl_history_t * this)
    HISTORY LIST MANAGEMENT 
    */
 /*------------------------------------- */
-/* insert a new entry at the current offset */
-static void insert_entry(tinyrl_history_t * this, const char *line)
-{
-	char *new_entry = strdup(line);
-	assert(this->length);
-	assert(this->entries);
-	if (new_entry) {
-		this->entries[this->length - 1] = new_entry;
-	}
-}
-
-/*------------------------------------- */
 /*
  * This removes the specified entries from the 
  * entries vector. Shuffling up the array as necessary 
@@ -97,9 +85,8 @@ remove_entries(tinyrl_history_t * this, unsigned start, unsigned end)
 static void append_entry(tinyrl_history_t * this, const char *line)
 {
 	if (this->length < this->size) {
+		this->entries[this->length] = strdup(line);
 		this->length++;
-
-		insert_entry(this, line);
 	}
 }
 
