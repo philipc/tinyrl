@@ -91,20 +91,8 @@ static void append_entry(tinyrl_history_t * this, const char *line)
 }
 
 /*------------------------------------- */
-/*
-   add a new history entry replacing the oldest one 
-   */
-static void add_n_replace(tinyrl_history_t * this, const char *line)
-{
-	/* remove the oldest entry */
-	remove_entries(this, 0, 0);
-	/* add the new entry */
-	append_entry(this, line);
-}
-
-/*------------------------------------- */
-/* add a new history entry growing the array if necessary */
-static void add_n_grow(tinyrl_history_t * this, const char *line)
+/* grow the array if necessary */
+static void grow(tinyrl_history_t * this)
 {
 	if (this->size == this->length) {
 		/* increment the history memory by 10 entries each time we grow */
@@ -118,17 +106,18 @@ static void add_n_grow(tinyrl_history_t * this, const char *line)
 			this->entries = new_entries;
 		}
 	}
-	append_entry(this, line);
 }
 
 /*------------------------------------- */
 void tinyrl_history_add(tinyrl_history_t * this, const char *line)
 {
 	if (this->length && (this->length == this->stifle)) {
-		add_n_replace(this, line);
+		/* remove the oldest entry */
+		remove_entries(this, 0, 0);
 	} else {
-		add_n_grow(this, line);
+		grow(this);
 	}
+	append_entry(this, line);
 }
 
 /*------------------------------------- */
