@@ -40,6 +40,7 @@ extern bool tinyrl_history_is_stifled(const tinyrl_history_t * instance);
 
 extern const char *tinyrl_history_get(const tinyrl_history_t *instance,
 				      unsigned offset);
+extern size_t tinyrl_history_length(const tinyrl_history_t *instance);
 
 #endif				/* _tinyrl_history_h */
 /** @} tinyrl_history */

@@ -251,6 +251,11 @@ const char *tinyrl_history_get(const tinyrl_history_t * this,
 	return NULL;
 }
 
+size_t tinyrl_history_length(const tinyrl_history_t * this)
+{
+	return this->length;
+}
+
 /*-------------------------------------*/
 const char *tinyrl_history_getfirst(const tinyrl_history_t * this)
 {
