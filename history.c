@@ -104,27 +104,6 @@ remove_entries(tinyrl_history_t * this, unsigned start, unsigned end)
 
 /*------------------------------------- */
 /* 
-   Search the current history buffer for the specified 
-   line and if found remove it.
-   */
-static bool remove_duplicate(tinyrl_history_t * this, const char *line)
-{
-	bool result = false;
-	unsigned i;
-
-	for (i = 0; i < this->length; i++) {
-		if (strcmp(line, this->entries[i]) == 0) {
-			free_entries(this, i, i);
-			remove_entries(this, i, i);
-			result = true;
-			break;
-		}
-	}
-	return result;
-}
-
-/*------------------------------------- */
-/* 
    add an entry to the end of the current array 
    if there is no space returns -1 else 0
    */
@@ -143,12 +122,10 @@ static void append_entry(tinyrl_history_t * this, const char *line)
    */
 static void add_n_replace(tinyrl_history_t * this, const char *line)
 {
-	if (!remove_duplicate(this, line)) {
-		/* free the oldest entry */
-		free_entries(this, 0, 0);
-		/* shuffle the array */
-		remove_entries(this, 0, 0);
-	}
+	/* free the oldest entry */
+	free_entries(this, 0, 0);
+	/* shuffle the array */
+	remove_entries(this, 0, 0);
 	/* add the new entry */
 	append_entry(this, line);
 }
@@ -169,7 +146,6 @@ static void add_n_grow(tinyrl_history_t * this, const char *line)
 			this->entries = new_entries;
 		}
 	}
-	(void)remove_duplicate(this, line);
 	append_entry(this, line);
 }
 
