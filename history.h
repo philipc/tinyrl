@@ -21,14 +21,6 @@ extern tinyrl_history_t *tinyrl_history_new(unsigned stifle);
 extern void tinyrl_history_delete(tinyrl_history_t * instance);
 extern void tinyrl_history_add(tinyrl_history_t * instance, const char *line);
 
-extern const char *tinyrl_history_getfirst(const tinyrl_history_t *instance);
-extern const char *tinyrl_history_getlast(const tinyrl_history_t *instance,
-					  unsigned *offset);
-extern const char *tinyrl_history_getnext(const tinyrl_history_t *instance,
-					  unsigned *offset);
-extern const char *tinyrl_history_getprevious(const tinyrl_history_t *instance,
-					      unsigned *offset);
-
 /*
    HISTORY LIST MANAGEMENT 
    */

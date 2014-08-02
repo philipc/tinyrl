@@ -304,19 +304,14 @@ static bool tinyrl_key_crlf(tinyrl_t * this, int key)
 static bool tinyrl_key_up(tinyrl_t * this, int key)
 {
 	bool result = false;
-	const char *entry = NULL;
-	if (this->line == this->buffer) {
-		/* go to the last history entry */
-		entry = tinyrl_history_getlast(this->history, &this->hist_iter);
-	} else {
-		/* already traversing the history list so get previous */
-		entry = tinyrl_history_getprevious(this->history, &this->hist_iter);
-	}
-	if (NULL != entry) {
+	if (this->line == this->buffer)
+		this->hist_iter = tinyrl_history_length(this->history);
+	if (this->hist_iter > 0) {
 		/* display the entry moving the insertion point
 		 * to the end of the line 
 		 */
-		this->line = entry;
+		this->hist_iter--;
+		this->line = tinyrl_history_get(this->history, this->hist_iter);
 		this->point = this->end = strlen(this->line);
 		result = true;
 	}
@@ -330,13 +325,11 @@ static bool tinyrl_key_down(tinyrl_t * this, int key)
 	if (this->line != this->buffer) {
 		/* we are not already at the bottom */
 		/* the iterator will have been set up by the key_up() function */
-		const char *entry =
-			tinyrl_history_getnext(this->history, &this->hist_iter);
-		if (NULL == entry) {
+		this->hist_iter++;
+		this->line = tinyrl_history_get(this->history, this->hist_iter);
+		if (!this->line) {
 			/* nothing more in the history list */
 			this->line = this->buffer;
-		} else {
-			this->line = entry;
 		}
 		/* display the entry moving the insertion point
 		 * to the end of the line 
