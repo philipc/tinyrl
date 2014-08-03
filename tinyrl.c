@@ -21,26 +21,11 @@
 
 #include "tinyrl.h"
 
-/**
- * This enumeration is used to identify the types of escape code 
- */
-typedef enum {
-	tinyrl_vt100_UNKNOWN,	   /**< Undefined escape sequence */
-	tinyrl_vt100_CURSOR_UP,	   /**< Move the cursor up        */
-	tinyrl_vt100_CURSOR_DOWN,  /**< Move the cursor down      */
-	tinyrl_vt100_CURSOR_LEFT,  /**< Move the cursor left      */
-	tinyrl_vt100_CURSOR_RIGHT  /**< Move the cursor right     */
-} tinyrl_vt100_escape_t;
-
-typedef struct {
-	const char terminator;
-	tinyrl_vt100_escape_t code;
-} vt100_decode_t;
-
 #define KEYMAP_SIZE 256
 
 struct tinyrl_keymap {
 	tinyrl_key_func_t *handler[KEYMAP_SIZE];
+	struct tinyrl_keymap *keymap[KEYMAP_SIZE];
 };
 
 /* define the class member data and virtual methods */
@@ -56,7 +41,7 @@ struct _tinyrl {
 	unsigned point;
 	unsigned end;
 	char *kill_string;
-	struct tinyrl_keymap keymap;
+	struct tinyrl_keymap *keymap;
 
 	struct tinyrl_history *history;
 	unsigned hist_iter;
@@ -73,16 +58,9 @@ struct _tinyrl {
 				   cursor position for redisplay purposes */
 };
 
+#define ESCAPESEQ "\x1b["
 #define ESCAPE 27
 #define BACKSPACE 127
-
-/* This table maps the vt100 escape codes to an enumeration */
-static vt100_decode_t cmds[] = {
-	{'A', tinyrl_vt100_CURSOR_UP},
-	{'B', tinyrl_vt100_CURSOR_DOWN},
-	{'C', tinyrl_vt100_CURSOR_RIGHT},
-	{'D', tinyrl_vt100_CURSOR_LEFT},
-};
 
 /*--------------------------------------------------------- */
 static void _tinyrl_vt100_setInputNonBlocking(const tinyrl_t * this)
@@ -100,56 +78,6 @@ static void _tinyrl_vt100_setInputBlocking(const tinyrl_t * this)
 	int flags = (fcntl(STDIN_FILENO, F_GETFL, 0) & ~O_NONBLOCK);
 	fcntl(STDIN_FILENO, F_SETFL, flags);
 #endif				/* STDIN_FILENO */
-}
-
-/*--------------------------------------------------------- */
-static tinyrl_vt100_escape_t tinyrl_vt100_escape_decode(const tinyrl_t * this)
-{
-	tinyrl_vt100_escape_t result = tinyrl_vt100_UNKNOWN;
-	char sequence[10], *p = sequence;
-	int c;
-	unsigned i;
-	/* before the while loop, set the input as non-blocking */
-	_tinyrl_vt100_setInputNonBlocking(this);
-
-	/* dump the control sequence into our sequence buffer 
-	 * ANSI standard control sequences will end 
-	 * with a character between 64 - 126
-	 */
-	while (1) {
-		c = getc(this->istream);
-
-		/* ignore no-character condition */
-		if (-1 != c) {
-			*p++ = (c & 0xFF);
-			if ((c != '[') && (c > 63)) {
-				/* this is an ANSI control sequence terminator code */
-				result = tinyrl_vt100_CURSOR_UP;	/* just a non-UNKNOWN value */
-				break;
-			}
-		} else {
-			result = tinyrl_vt100_UNKNOWN;
-			break;
-		}
-	}
-	/* terminate the string (for debug purposes) */
-	*p = '\0';
-
-	/* restore the blocking status */
-	_tinyrl_vt100_setInputBlocking(this);
-
-	if (tinyrl_vt100_UNKNOWN != result) {
-		/* now decode the sequence */
-		for (i = 0; i < sizeof(cmds) / sizeof(vt100_decode_t); i++) {
-			if (cmds[i].terminator == c) {
-				/* found the code in the lookup table */
-				result = cmds[i].code;
-				break;
-			}
-		}
-	}
-
-	return result;
 }
 
 /*-------------------------------------------------------- */
@@ -409,21 +337,29 @@ static bool tinyrl_key_erase_line(tinyrl_t * this, int key)
 }
 
 /*-------------------------------------------------------- */
-static bool tinyrl_key_escape(tinyrl_t * this, int key)
+static struct tinyrl_keymap *tinyrl_keymap_new()
 {
-	switch (tinyrl_vt100_escape_decode(this)) {
-	case tinyrl_vt100_CURSOR_UP:
-		return tinyrl_key_up(this, key);
-	case tinyrl_vt100_CURSOR_DOWN:
-		return tinyrl_key_down(this, key);
-	case tinyrl_vt100_CURSOR_LEFT:
-		return tinyrl_key_left(this, key);
-	case tinyrl_vt100_CURSOR_RIGHT:
-		return tinyrl_key_right(this, key);
-	case tinyrl_vt100_UNKNOWN:
-		break;
+	struct tinyrl_keymap *keymap;
+	int i;
+
+	keymap = malloc(sizeof(*keymap));
+
+	for (i = 0; i < KEYMAP_SIZE; i++) {
+		keymap->handler[i] = NULL;
+		keymap->keymap[i] = NULL;
 	}
-	return false;
+
+	return keymap;
+}
+
+static void tinyrl_keymap_free(struct tinyrl_keymap *keymap)
+{
+	int i;
+
+	for (i = 0; i < KEYMAP_SIZE; i++)
+		if (keymap->keymap[i])
+			tinyrl_keymap_free(keymap->keymap[i]);
+	free(keymap);
 }
 
 /*-------------------------------------------------------- */
@@ -439,6 +375,7 @@ static void tinyrl_fini(tinyrl_t * this)
 	this->kill_string = NULL;
 	free(this->last_buffer);
 	this->last_buffer = NULL;
+	tinyrl_keymap_free(this->keymap);
 }
 
 /*-------------------------------------------------------- */
@@ -448,22 +385,25 @@ tinyrl_init(tinyrl_t * this, FILE * instream, FILE * outstream,
 {
 	int i;
 
-	for (i = 0; i < KEYMAP_SIZE; i++)
-		this->keymap.handler[i] = tinyrl_key_default;
-	/* default handlers */
+	this->keymap = tinyrl_keymap_new();
+	for (i = 32; i < 256; i++)
+		tinyrl_bind_key(this, i, tinyrl_key_default);
 	tinyrl_bind_key(this, '\r', tinyrl_key_crlf);
 	tinyrl_bind_key(this, '\n', tinyrl_key_crlf);
 	tinyrl_bind_key(this, CTRL('C'), tinyrl_key_interrupt);
 	tinyrl_bind_key(this, BACKSPACE, tinyrl_key_backspace);
 	tinyrl_bind_key(this, CTRL('H'), tinyrl_key_backspace);
 	tinyrl_bind_key(this, CTRL('D'), tinyrl_key_delete);
-	tinyrl_bind_key(this, ESCAPE, tinyrl_key_escape);
 	tinyrl_bind_key(this, CTRL('L'), tinyrl_key_clear_screen);
 	tinyrl_bind_key(this, CTRL('U'), tinyrl_key_erase_line);
 	tinyrl_bind_key(this, CTRL('A'), tinyrl_key_start_of_line);
 	tinyrl_bind_key(this, CTRL('E'), tinyrl_key_end_of_line);
 	tinyrl_bind_key(this, CTRL('K'), tinyrl_key_kill);
 	tinyrl_bind_key(this, CTRL('Y'), tinyrl_key_yank);
+	tinyrl_bind_keyseq(this, ESCAPESEQ "A", tinyrl_key_up);
+	tinyrl_bind_keyseq(this, ESCAPESEQ "B", tinyrl_key_down);
+	tinyrl_bind_keyseq(this, ESCAPESEQ "C", tinyrl_key_right);
+	tinyrl_bind_keyseq(this, ESCAPESEQ "D", tinyrl_key_left);
 
 	this->line = NULL;
 	this->max_line_length = 0;
@@ -677,6 +617,39 @@ tinyrl_t *tinyrl_new(FILE * instream, FILE * outstream, unsigned stifle)
 }
 
 /*----------------------------------------------------------------------- */
+/* Call the handler for the longest matching key sequence.
+ * Note: if there is a partial match, then the extra keys are discarded.  This
+ * shouldn't matter in practice.
+ */
+static void tinyrl_handle_key(tinyrl_t *this, int key)
+{
+	struct tinyrl_keymap *keymap;
+	tinyrl_key_func_t *handler;
+	int c;
+
+	handler = NULL;
+	keymap = this->keymap;
+	c = key;
+	for (;;) {
+		if (keymap->handler[c])
+			handler = keymap->handler[c];
+		keymap = keymap->keymap[c];
+		if (!keymap)
+			break;
+
+		_tinyrl_vt100_setInputNonBlocking(this);
+		c = getc(this->istream);
+		_tinyrl_vt100_setInputBlocking(this);
+		if (c == EOF)
+			break;
+	}
+
+	if (!handler || !handler(this, key)) {
+		/* an issue has occured */
+		tinyrl_ding(this);
+	}
+}
+
 char *tinyrl_readline(tinyrl_t * this, const char *prompt, void *context)
 {
 	/* initialise for reading a line */
@@ -706,10 +679,7 @@ char *tinyrl_readline(tinyrl_t * this, const char *prompt, void *context)
 			/* has the input stream terminated? */
 			if (EOF != key) {
 				/* call the handler for this key */
-				if (!this->keymap.handler[key](this, key)) {
-					/* an issue has occured */
-					tinyrl_ding(this);
-				}
+				tinyrl_handle_key(this, key);
 
 				if (this->done) {
 					/*
@@ -936,9 +906,30 @@ void tinyrl_delete_text(tinyrl_t * this, unsigned start, unsigned end)
 }
 
 /*----------------------------------------------------------------------- */
+void tinyrl_bind_keyseq(tinyrl_t * this, const char *seq, tinyrl_key_func_t * fn)
+{
+	struct tinyrl_keymap *keymap;
+	unsigned char key;
+
+	if (!*seq)
+		return;
+
+	keymap = this->keymap;
+	key = *seq++;
+
+	while (*seq) {
+		if (!keymap->keymap[key])
+			keymap->keymap[key] = tinyrl_keymap_new();
+		keymap = keymap->keymap[key];
+		key = *seq++;
+	}
+
+	keymap->handler[key] = fn;
+}
+
 void tinyrl_bind_key(tinyrl_t * this, unsigned char key, tinyrl_key_func_t * fn)
 {
-	this->keymap.handler[key] = fn;
+	this->keymap->handler[key] = fn;
 }
 
 /*-------------------------------------------------------- */
