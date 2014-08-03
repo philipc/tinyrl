@@ -14,23 +14,22 @@
 /**************************************
  * tinyrl_history class interface
  ************************************** */
-typedef struct _tinyrl_history tinyrl_history_t;
 
-extern tinyrl_history_t *tinyrl_history_new(unsigned limit);
+extern struct tinyrl_history *tinyrl_history_new(unsigned limit);
 
-extern void tinyrl_history_delete(tinyrl_history_t * instance);
-extern void tinyrl_history_add(tinyrl_history_t * instance, const char *line);
+extern void tinyrl_history_delete(struct tinyrl_history * instance);
+extern void tinyrl_history_add(struct tinyrl_history * instance, const char *line);
 
 /*
    HISTORY LIST MANAGEMENT 
    */
-extern void tinyrl_history_remove(tinyrl_history_t *instance, unsigned offset);
-extern void tinyrl_history_clear(tinyrl_history_t * instance);
-extern void tinyrl_history_limit(tinyrl_history_t * instance, unsigned limit);
+extern void tinyrl_history_remove(struct tinyrl_history *instance, unsigned offset);
+extern void tinyrl_history_clear(struct tinyrl_history * instance);
+extern void tinyrl_history_limit(struct tinyrl_history * instance, unsigned limit);
 
-extern const char *tinyrl_history_get(const tinyrl_history_t *instance,
+extern const char *tinyrl_history_get(const struct tinyrl_history *instance,
 				      unsigned offset);
-extern size_t tinyrl_history_length(const tinyrl_history_t *instance);
+extern size_t tinyrl_history_length(const struct tinyrl_history *instance);
 
 #endif				/* _tinyrl_history_h */
 /** @} tinyrl_history */

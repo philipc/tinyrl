@@ -11,7 +11,7 @@
 
 #include "history.h"
 
-struct _tinyrl_history {
+struct tinyrl_history {
 	char **entries;	/* pointer entries */
 	unsigned length;	/* Number of elements within this array */
 	unsigned size;		/* Number of slots allocated in this array */
@@ -19,9 +19,9 @@ struct _tinyrl_history {
 };
 
 /*------------------------------------- */
-tinyrl_history_t *tinyrl_history_new(unsigned limit)
+struct tinyrl_history *tinyrl_history_new(unsigned limit)
 {
-	tinyrl_history_t *this;
+	struct tinyrl_history *this;
        
 	this = malloc(sizeof(*this));
 	if (!this)
@@ -35,7 +35,7 @@ tinyrl_history_t *tinyrl_history_new(unsigned limit)
 }
 
 /*------------------------------------- */
-void tinyrl_history_delete(tinyrl_history_t * this)
+void tinyrl_history_delete(struct tinyrl_history * this)
 {
 	unsigned i;
 
@@ -54,7 +54,7 @@ void tinyrl_history_delete(tinyrl_history_t * this)
  * entries vector. Shuffling up the array as necessary 
  */
 static void
-remove_entries(tinyrl_history_t * this, unsigned start, unsigned delta)
+remove_entries(struct tinyrl_history * this, unsigned start, unsigned delta)
 {
 	unsigned end = start + delta;
 	unsigned i;
@@ -73,7 +73,7 @@ remove_entries(tinyrl_history_t * this, unsigned start, unsigned delta)
    add an entry to the end of the current array 
    if there is no space returns -1 else 0
    */
-static void append_entry(tinyrl_history_t * this, const char *line)
+static void append_entry(struct tinyrl_history * this, const char *line)
 {
 	if (this->length < this->size) {
 		this->entries[this->length] = strdup(line);
@@ -83,7 +83,7 @@ static void append_entry(tinyrl_history_t * this, const char *line)
 
 /*------------------------------------- */
 /* grow the array if necessary */
-static void grow(tinyrl_history_t * this)
+static void grow(struct tinyrl_history * this)
 {
 	if (this->size == this->length) {
 		/* increment the history memory by 10 entries each time we grow */
@@ -100,7 +100,7 @@ static void grow(tinyrl_history_t * this)
 }
 
 /*------------------------------------- */
-void tinyrl_history_add(tinyrl_history_t * this, const char *line)
+void tinyrl_history_add(struct tinyrl_history * this, const char *line)
 {
 	if (this->length && (this->length == this->limit)) {
 		/* remove the oldest entry */
@@ -112,7 +112,7 @@ void tinyrl_history_add(tinyrl_history_t * this, const char *line)
 }
 
 /*------------------------------------- */
-void tinyrl_history_remove(tinyrl_history_t *this, unsigned offset)
+void tinyrl_history_remove(struct tinyrl_history *this, unsigned offset)
 {
 	if (offset < this->length) {
 		/* do the biz */
@@ -121,14 +121,14 @@ void tinyrl_history_remove(tinyrl_history_t *this, unsigned offset)
 }
 
 /*------------------------------------- */
-void tinyrl_history_clear(tinyrl_history_t * this)
+void tinyrl_history_clear(struct tinyrl_history * this)
 {
 	/* free all the entries */
 	remove_entries(this, 0, this->length);
 }
 
 /*------------------------------------- */
-void tinyrl_history_limit(tinyrl_history_t * this, unsigned limit)
+void tinyrl_history_limit(struct tinyrl_history * this, unsigned limit)
 {
 	if (limit && limit < this->length)
 		remove_entries(this, 0, this->length - limit);
@@ -138,7 +138,7 @@ void tinyrl_history_limit(tinyrl_history_t * this, unsigned limit)
 /*
    INFORMATION ABOUT THE HISTORY LIST 
    */
-const char *tinyrl_history_get(const tinyrl_history_t * this,
+const char *tinyrl_history_get(const struct tinyrl_history * this,
 			       unsigned position)
 {
 	if (position < this->length)
@@ -146,7 +146,7 @@ const char *tinyrl_history_get(const tinyrl_history_t * this,
 	return NULL;
 }
 
-size_t tinyrl_history_length(const tinyrl_history_t * this)
+size_t tinyrl_history_length(const struct tinyrl_history * this)
 {
 	return this->length;
 }

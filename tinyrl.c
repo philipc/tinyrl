@@ -53,7 +53,7 @@ struct _tinyrl {
 #define NUM_HANDLERS 256
 	tinyrl_key_func_t *handlers[NUM_HANDLERS];
 
-	tinyrl_history_t *history;
+	struct tinyrl_history *history;
 	unsigned hist_iter;
 	void *context;		/* context supplied by caller
 				 * to tinyrl_readline()
@@ -1023,7 +1023,7 @@ unsigned tinyrl__get_width(const tinyrl_t * this)
 }
 
 /*--------------------------------------------------------- */
-tinyrl_history_t *tinyrl__get_history(const tinyrl_t * this)
+struct tinyrl_history *tinyrl__get_history(const tinyrl_t * this)
 {
 	return this->history;
 }

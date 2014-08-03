@@ -37,7 +37,7 @@ extern int tinyrl_printf(const tinyrl_t * instance, const char *fmt, ...);
 
 extern void tinyrl_delete(tinyrl_t * instance);
 
-extern tinyrl_history_t *tinyrl__get_history(const tinyrl_t * instance);
+extern struct tinyrl_history *tinyrl__get_history(const tinyrl_t * instance);
 
 extern const char *tinyrl__get_prompt(const tinyrl_t * instance);
 
