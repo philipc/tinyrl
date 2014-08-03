@@ -52,28 +52,19 @@ void tinyrl_history_delete(tinyrl_history_t * this)
 /*
  * This removes the specified entries from the 
  * entries vector. Shuffling up the array as necessary 
- * This function is inclusive of start and end
  */
 static void
-remove_entries(tinyrl_history_t * this, unsigned start, unsigned end)
+remove_entries(tinyrl_history_t * this, unsigned start, unsigned delta)
 {
+	unsigned end = start + delta;
 	unsigned i;
-	unsigned delta = (end - start) + 1;	/* number of entries being deleted */
-	/* number of entries to shuffle */
-	unsigned num_entries = (this->length - end) - 1;
-	assert(start <= end);
-	assert(end < this->length);
 
-	for (i = start; i <= end; i++)
+	assert(end <= this->length);
+
+	for (i = start; i < end; i++)
 		free(this->entries[i]);
-
-	if (num_entries) {
-		/* move the remaining entries down to close the array */
-		memmove(&this->entries[start],
-			&this->entries[end + 1],
-			sizeof(*this->entries) * num_entries);
-	}
-	/* now fix up the length variables */
+	memmove(this->entries + start, this->entries + end,
+		sizeof(*this->entries) * (this->length - end));
 	this->length -= delta;
 }
 
@@ -113,7 +104,7 @@ void tinyrl_history_add(tinyrl_history_t * this, const char *line)
 {
 	if (this->length && (this->length == this->stifle)) {
 		/* remove the oldest entry */
-		remove_entries(this, 0, 0);
+		remove_entries(this, 0, 1);
 	} else {
 		grow(this);
 	}
@@ -125,7 +116,7 @@ void tinyrl_history_remove(tinyrl_history_t *this, unsigned offset)
 {
 	if (offset < this->length) {
 		/* do the biz */
-		remove_entries(this, offset, offset);
+		remove_entries(this, offset, 1);
 	}
 }
 
@@ -133,7 +124,7 @@ void tinyrl_history_remove(tinyrl_history_t *this, unsigned offset)
 void tinyrl_history_clear(tinyrl_history_t * this)
 {
 	/* free all the entries */
-	remove_entries(this, 0, this->length - 1);
+	remove_entries(this, 0, this->length);
 }
 
 /*------------------------------------- */
@@ -147,7 +138,7 @@ void tinyrl_history_stifle(tinyrl_history_t * this, unsigned stifle)
 		if (stifle < this->length) {
 			unsigned num_deletes = this->length - stifle;
 			/* free the entries */
-			remove_entries(this, 0, num_deletes - 1);
+			remove_entries(this, 0, num_deletes);
 		}
 		this->stifle = stifle;
 	}
