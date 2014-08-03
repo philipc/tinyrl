@@ -16,7 +16,7 @@
  ************************************** */
 typedef struct _tinyrl_history tinyrl_history_t;
 
-extern tinyrl_history_t *tinyrl_history_new(unsigned stifle);
+extern tinyrl_history_t *tinyrl_history_new(unsigned limit);
 
 extern void tinyrl_history_delete(tinyrl_history_t * instance);
 extern void tinyrl_history_add(tinyrl_history_t * instance, const char *line);
@@ -26,7 +26,7 @@ extern void tinyrl_history_add(tinyrl_history_t * instance, const char *line);
    */
 extern void tinyrl_history_remove(tinyrl_history_t *instance, unsigned offset);
 extern void tinyrl_history_clear(tinyrl_history_t * instance);
-extern void tinyrl_history_stifle(tinyrl_history_t * instance, unsigned stifle);
+extern void tinyrl_history_limit(tinyrl_history_t * instance, unsigned limit);
 
 extern const char *tinyrl_history_get(const tinyrl_history_t *instance,
 				      unsigned offset);

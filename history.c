@@ -15,11 +15,11 @@ struct _tinyrl_history {
 	char **entries;	/* pointer entries */
 	unsigned length;	/* Number of elements within this array */
 	unsigned size;		/* Number of slots allocated in this array */
-	unsigned stifle;
+	unsigned limit;
 };
 
 /*------------------------------------- */
-tinyrl_history_t *tinyrl_history_new(unsigned stifle)
+tinyrl_history_t *tinyrl_history_new(unsigned limit)
 {
 	tinyrl_history_t *this;
        
@@ -28,7 +28,7 @@ tinyrl_history_t *tinyrl_history_new(unsigned stifle)
 		return NULL;
 
 	this->entries = NULL;
-	this->stifle = stifle;
+	this->limit = limit;
 	this->length = 0;
 	this->size = 0;
 	return this;
@@ -102,7 +102,7 @@ static void grow(tinyrl_history_t * this)
 /*------------------------------------- */
 void tinyrl_history_add(tinyrl_history_t * this, const char *line)
 {
-	if (this->length && (this->length == this->stifle)) {
+	if (this->length && (this->length == this->limit)) {
 		/* remove the oldest entry */
 		remove_entries(this, 0, 1);
 	} else {
@@ -128,11 +128,11 @@ void tinyrl_history_clear(tinyrl_history_t * this)
 }
 
 /*------------------------------------- */
-void tinyrl_history_stifle(tinyrl_history_t * this, unsigned stifle)
+void tinyrl_history_limit(tinyrl_history_t * this, unsigned limit)
 {
-	if (stifle && stifle < this->length)
-		remove_entries(this, 0, this->length - stifle);
-	this->stifle = stifle;
+	if (limit && limit < this->length)
+		remove_entries(this, 0, this->length - limit);
+	this->limit = limit;
 }
 
 /*
