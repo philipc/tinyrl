@@ -135,12 +135,6 @@ void tinyrl_history_stifle(tinyrl_history_t * this, unsigned stifle)
 	this->stifle = stifle;
 }
 
-/*------------------------------------- */
-bool tinyrl_history_is_stifled(const tinyrl_history_t * this)
-{
-	return this->stifle != 0;
-}
-
 /*
    INFORMATION ABOUT THE HISTORY LIST 
    */
