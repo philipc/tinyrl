@@ -30,14 +30,12 @@ typedef bool tinyrl_key_func_t(tinyrl_t * instance, int key);
 /* exported functions */
 extern tinyrl_t *tinyrl_new(FILE * instream,
 			    FILE * outstream,
-			    unsigned stifle);
+			    struct tinyrl_history *history);
 
 /*lint -esym(534,tinyrl_printf)  Ignoring return value of function */
 extern int tinyrl_printf(const tinyrl_t * instance, const char *fmt, ...);
 
 extern void tinyrl_delete(tinyrl_t * instance);
-
-extern struct tinyrl_history *tinyrl__get_history(const tinyrl_t * instance);
 
 extern const char *tinyrl__get_prompt(const tinyrl_t * instance);
 

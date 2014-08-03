@@ -63,10 +63,12 @@ static bool enter_key(tinyrl_t *t, int key)
 
 int main(int argc, char *argv[])
 {
+	struct tinyrl_history *history;
 	tinyrl_t *t;
 	char *line;
 
-	t = tinyrl_new(stdin, stdout, 0);
+	history = tinyrl_history_new(0);
+	t = tinyrl_new(stdin, stdout, history);
 	tinyrl_bind_key(t, '\t', tab_key);
 	tinyrl_bind_key(t, '\r', enter_key);
 	tinyrl_bind_key(t, ' ', space_key);
@@ -83,11 +85,12 @@ int main(int argc, char *argv[])
 
 		printf("echo: %s\n", line);
 
-		tinyrl_history_add(tinyrl__get_history(t), line);
+		tinyrl_history_add(history, line);
 		free(line);
 	}
 
 	tinyrl_delete(t);
+	tinyrl_history_delete(history);
 	return 0;
 }
 

@@ -237,6 +237,8 @@ static bool tinyrl_key_crlf(tinyrl_t * this, int key)
 static bool tinyrl_key_up(tinyrl_t * this, int key)
 {
 	bool result = false;
+	if (!this->history)
+		return false;
 	if (this->line == this->buffer)
 		this->hist_iter = tinyrl_history_length(this->history);
 	if (this->hist_iter > 0) {
@@ -255,6 +257,8 @@ static bool tinyrl_key_up(tinyrl_t * this, int key)
 static bool tinyrl_key_down(tinyrl_t * this, int key)
 {
 	bool result = false;
+	if (!this->history)
+		return false;
 	if (this->line != this->buffer) {
 		/* we are not already at the bottom */
 		/* the iterator will have been set up by the key_up() function */
@@ -365,9 +369,6 @@ static void tinyrl_keymap_free(struct tinyrl_keymap *keymap)
 /*-------------------------------------------------------- */
 static void tinyrl_fini(tinyrl_t * this)
 {
-	/* delete the history session */
-	tinyrl_history_delete(this->history);
-
 	/* free up any dynamic strings */
 	free(this->buffer);
 	this->buffer = NULL;
@@ -381,7 +382,7 @@ static void tinyrl_fini(tinyrl_t * this)
 /*-------------------------------------------------------- */
 static void
 tinyrl_init(tinyrl_t * this, FILE * instream, FILE * outstream,
-	    unsigned stifle)
+	    struct tinyrl_history *history)
 {
 	int i;
 
@@ -422,9 +423,7 @@ tinyrl_init(tinyrl_t * this, FILE * instream, FILE * outstream,
 
 	this->istream = instream;
 	this->ostream = outstream;
-
-	/* create the history */
-	this->history = tinyrl_history_new(stifle);
+	this->history = history;
 }
 
 /*-------------------------------------------------------- */
@@ -604,13 +603,14 @@ void tinyrl_redisplay(tinyrl_t * this)
 }
 
 /*----------------------------------------------------------------------- */
-tinyrl_t *tinyrl_new(FILE * instream, FILE * outstream, unsigned stifle)
+tinyrl_t *tinyrl_new(FILE * instream, FILE * outstream,
+		     struct tinyrl_history *history)
 {
 	tinyrl_t *this = NULL;
 
 	this = malloc(sizeof(tinyrl_t));
 	if (NULL != this) {
-		tinyrl_init(this, instream, outstream, stifle);
+		tinyrl_init(this, instream, outstream, history);
 	}
 
 	return this;
@@ -1007,12 +1007,6 @@ unsigned tinyrl__get_width(const tinyrl_t * this)
 {
 	/* hard code until we suss out how to do it properly */
 	return 80;
-}
-
-/*--------------------------------------------------------- */
-struct tinyrl_history *tinyrl__get_history(const tinyrl_t * this)
-{
-	return this->history;
 }
 
 /*--------------------------------------------------------- */
