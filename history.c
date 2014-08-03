@@ -130,28 +130,9 @@ void tinyrl_history_clear(tinyrl_history_t * this)
 /*------------------------------------- */
 void tinyrl_history_stifle(tinyrl_history_t * this, unsigned stifle)
 {
-	/* 
-	 * if we are stifling (i.e. non zero value) then 
-	 * delete the obsolete entries
-	 */
-	if (stifle) {
-		if (stifle < this->length) {
-			unsigned num_deletes = this->length - stifle;
-			/* free the entries */
-			remove_entries(this, 0, num_deletes);
-		}
-		this->stifle = stifle;
-	}
-}
-
-/*------------------------------------- */
-unsigned tinyrl_history_unstifle(tinyrl_history_t * this)
-{
-	unsigned result = this->stifle;
-
-	this->stifle = 0;
-
-	return result;
+	if (stifle && stifle < this->length)
+		remove_entries(this, 0, this->length - stifle);
+	this->stifle = stifle;
 }
 
 /*------------------------------------- */
