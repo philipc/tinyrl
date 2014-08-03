@@ -37,6 +37,12 @@ typedef struct {
 	tinyrl_vt100_escape_t code;
 } vt100_decode_t;
 
+#define KEYMAP_SIZE 256
+
+struct tinyrl_keymap {
+	tinyrl_key_func_t *handler[KEYMAP_SIZE];
+};
+
 /* define the class member data and virtual methods */
 struct _tinyrl {
 	FILE *istream;
@@ -50,8 +56,7 @@ struct _tinyrl {
 	unsigned point;
 	unsigned end;
 	char *kill_string;
-#define NUM_HANDLERS 256
-	tinyrl_key_func_t *handlers[NUM_HANDLERS];
+	struct tinyrl_keymap keymap;
 
 	struct tinyrl_history *history;
 	unsigned hist_iter;
@@ -443,23 +448,22 @@ tinyrl_init(tinyrl_t * this, FILE * instream, FILE * outstream,
 {
 	int i;
 
-	for (i = 0; i < NUM_HANDLERS; i++) {
-		this->handlers[i] = tinyrl_key_default;
-	}
+	for (i = 0; i < KEYMAP_SIZE; i++)
+		this->keymap.handler[i] = tinyrl_key_default;
 	/* default handlers */
-	this->handlers['\r'] = tinyrl_key_crlf;
-	this->handlers['\n'] = tinyrl_key_crlf;
-	this->handlers[CTRL('C')] = tinyrl_key_interrupt;
-	this->handlers[BACKSPACE] = tinyrl_key_backspace;
-	this->handlers[CTRL('H')] = tinyrl_key_backspace;
-	this->handlers[CTRL('D')] = tinyrl_key_delete;
-	this->handlers[ESCAPE] = tinyrl_key_escape;
-	this->handlers[CTRL('L')] = tinyrl_key_clear_screen;
-	this->handlers[CTRL('U')] = tinyrl_key_erase_line;
-	this->handlers[CTRL('A')] = tinyrl_key_start_of_line;
-	this->handlers[CTRL('E')] = tinyrl_key_end_of_line;
-	this->handlers[CTRL('K')] = tinyrl_key_kill;
-	this->handlers[CTRL('Y')] = tinyrl_key_yank;
+	tinyrl_bind_key(this, '\r', tinyrl_key_crlf);
+	tinyrl_bind_key(this, '\n', tinyrl_key_crlf);
+	tinyrl_bind_key(this, CTRL('C'), tinyrl_key_interrupt);
+	tinyrl_bind_key(this, BACKSPACE, tinyrl_key_backspace);
+	tinyrl_bind_key(this, CTRL('H'), tinyrl_key_backspace);
+	tinyrl_bind_key(this, CTRL('D'), tinyrl_key_delete);
+	tinyrl_bind_key(this, ESCAPE, tinyrl_key_escape);
+	tinyrl_bind_key(this, CTRL('L'), tinyrl_key_clear_screen);
+	tinyrl_bind_key(this, CTRL('U'), tinyrl_key_erase_line);
+	tinyrl_bind_key(this, CTRL('A'), tinyrl_key_start_of_line);
+	tinyrl_bind_key(this, CTRL('E'), tinyrl_key_end_of_line);
+	tinyrl_bind_key(this, CTRL('K'), tinyrl_key_kill);
+	tinyrl_bind_key(this, CTRL('Y'), tinyrl_key_yank);
 
 	this->line = NULL;
 	this->max_line_length = 0;
@@ -702,7 +706,7 @@ char *tinyrl_readline(tinyrl_t * this, const char *prompt, void *context)
 			/* has the input stream terminated? */
 			if (EOF != key) {
 				/* call the handler for this key */
-				if (!this->handlers[key](this, key)) {
+				if (!this->keymap.handler[key](this, key)) {
 					/* an issue has occured */
 					tinyrl_ding(this);
 				}
@@ -932,17 +936,9 @@ void tinyrl_delete_text(tinyrl_t * this, unsigned start, unsigned end)
 }
 
 /*----------------------------------------------------------------------- */
-bool tinyrl_bind_key(tinyrl_t * this, int key, tinyrl_key_func_t * fn)
+void tinyrl_bind_key(tinyrl_t * this, unsigned char key, tinyrl_key_func_t * fn)
 {
-	bool result = false;
-
-	if ((key >= 0) && (key < NUM_HANDLERS)) {
-		/* set the key handling function */
-		this->handlers[key] = fn;
-		result = true;
-	}
-
-	return result;
+	this->keymap.handler[key] = fn;
 }
 
 /*-------------------------------------------------------- */

@@ -68,8 +68,8 @@ extern FILE *tinyrl__get_ostream(const tinyrl_t * instance);
 
 extern char *tinyrl_readline(tinyrl_t * instance,
 			     const char *prompt, void *context);
-extern bool
-tinyrl_bind_key(tinyrl_t * instance, int key, tinyrl_key_func_t * fn);
+extern void
+tinyrl_bind_key(tinyrl_t * instance, unsigned char key, tinyrl_key_func_t * fn);
 extern void tinyrl_crlf(const tinyrl_t * instance);
 extern void tinyrl_ding(const tinyrl_t * instance);
 
