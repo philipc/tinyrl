@@ -19,19 +19,19 @@ struct tinyrl;
 
 struct tinyrl_history *tinyrl_history_new(struct tinyrl *tinyrl, unsigned limit);
 
-extern void tinyrl_history_delete(struct tinyrl_history *history);
-extern void tinyrl_history_add(struct tinyrl_history *history, const char *line);
+void tinyrl_history_delete(struct tinyrl_history *history);
+void tinyrl_history_add(struct tinyrl_history *history, const char *line);
 
 /*
    HISTORY LIST MANAGEMENT 
    */
-extern void tinyrl_history_remove(struct tinyrl_history *history, unsigned offset);
-extern void tinyrl_history_clear(struct tinyrl_history *history);
-extern void tinyrl_history_limit(struct tinyrl_history *history, unsigned limit);
+void tinyrl_history_remove(struct tinyrl_history *history, unsigned offset);
+void tinyrl_history_clear(struct tinyrl_history *history);
+void tinyrl_history_limit(struct tinyrl_history *history, unsigned limit);
 
-extern const char *tinyrl_history_get(const struct tinyrl_history *history,
+const char *tinyrl_history_get(const struct tinyrl_history *history,
 				      unsigned offset);
-extern size_t tinyrl_history_length(const struct tinyrl_history *history);
+size_t tinyrl_history_length(const struct tinyrl_history *history);
 
 #endif				/* _tinyrl_history_h */
 /** @} tinyrl_history */
