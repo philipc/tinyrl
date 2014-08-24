@@ -12,7 +12,6 @@
 
 #include <stdbool.h>
 #include <stdio.h>
-#include "history.h"
 
 typedef struct _tinyrl tinyrl_t;
 
@@ -29,8 +28,7 @@ typedef bool tinyrl_key_func_t(void * context, int key);
 
 /* exported functions */
 extern tinyrl_t *tinyrl_new(FILE * instream,
-			    FILE * outstream,
-			    struct tinyrl_history *history);
+			    FILE * outstream);
 
 /*lint -esym(534,tinyrl_printf)  Ignoring return value of function */
 extern int tinyrl_printf(const tinyrl_t * instance, const char *fmt, ...);

@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "tinyrl.h"
+#include "history.h"
 #include "complete.h"
 
 static bool complete(tinyrl_t *t, bool allow_prefix, bool allow_empty)
@@ -73,11 +74,12 @@ int main(int argc, char *argv[])
 	tinyrl_t *t;
 	char *line;
 
-	history = tinyrl_history_new(0);
-	t = tinyrl_new(stdin, stdout, history);
+	t = tinyrl_new(stdin, stdout);
 	tinyrl_bind_key(t, '\t', tab_key, t);
 	tinyrl_bind_key(t, '\r', enter_key, t);
 	tinyrl_bind_key(t, ' ', space_key, t);
+
+	history = tinyrl_history_new(t, 0);
 
 	for (;;) {
 		line = tinyrl_readline(t, "> ");
@@ -95,8 +97,8 @@ int main(int argc, char *argv[])
 		free(line);
 	}
 
-	tinyrl_delete(t);
 	tinyrl_history_delete(history);
+	tinyrl_delete(t);
 	return 0;
 }
 

@@ -44,9 +44,6 @@ struct _tinyrl {
 	char *kill_string;
 	struct tinyrl_keymap *keymap;
 
-	struct tinyrl_history *history;
-	unsigned hist_iter;
-
 	char echo_char;
 	bool echo_enabled;
 	struct termios default_termios;
@@ -245,36 +242,6 @@ static bool tinyrl_key_crlf(void *context, int key)
 }
 
 /*-------------------------------------------------------- */
-static bool tinyrl_key_up(void *context, int key)
-{
-	tinyrl_t *this = context;
-
-	if (!this->history)
-		return false;
-	if (tinyrl_history_get(this->history, this->hist_iter) != tinyrl__get_line(this))
-		this->hist_iter = tinyrl_history_length(this->history);
-	if (this->hist_iter == 0)
-		return false;
-	this->hist_iter--;
-	tinyrl_set_line(this, tinyrl_history_get(this->history, this->hist_iter));
-	return true;
-}
-
-/*-------------------------------------------------------- */
-static bool tinyrl_key_down(void *context, int key)
-{
-	tinyrl_t *this = context;
-
-	if (!this->history)
-		return false;
-	if (tinyrl_history_get(this->history, this->hist_iter) != tinyrl__get_line(this))
-		return false;
-	this->hist_iter++;
-	tinyrl_set_line(this, tinyrl_history_get(this->history, this->hist_iter));
-	return true;
-}
-
-/*-------------------------------------------------------- */
 static bool tinyrl_key_left(void *context, int key)
 {
 	tinyrl_t *this = context;
@@ -386,8 +353,7 @@ static void tinyrl_fini(tinyrl_t * this)
 
 /*-------------------------------------------------------- */
 static void
-tinyrl_init(tinyrl_t * this, FILE * instream, FILE * outstream,
-	    struct tinyrl_history *history)
+tinyrl_init(tinyrl_t * this, FILE * instream, FILE * outstream)
 {
 	int i;
 
@@ -406,8 +372,6 @@ tinyrl_init(tinyrl_t * this, FILE * instream, FILE * outstream,
 	tinyrl_bind_key(this, CTRL('E'), tinyrl_key_end_of_line, this);
 	tinyrl_bind_key(this, CTRL('K'), tinyrl_key_kill, this);
 	tinyrl_bind_key(this, CTRL('Y'), tinyrl_key_yank, this);
-	tinyrl_bind_keyseq(this, ESCAPESEQ "A", tinyrl_key_up, this);
-	tinyrl_bind_keyseq(this, ESCAPESEQ "B", tinyrl_key_down, this);
 	tinyrl_bind_keyseq(this, ESCAPESEQ "C", tinyrl_key_right, this);
 	tinyrl_bind_keyseq(this, ESCAPESEQ "D", tinyrl_key_left, this);
 
@@ -428,8 +392,6 @@ tinyrl_init(tinyrl_t * this, FILE * instream, FILE * outstream,
 
 	this->istream = instream;
 	this->ostream = outstream;
-	this->history = history;
-	this->hist_iter = 0;
 }
 
 /*-------------------------------------------------------- */
@@ -609,14 +571,13 @@ void tinyrl_redisplay(tinyrl_t * this)
 }
 
 /*----------------------------------------------------------------------- */
-tinyrl_t *tinyrl_new(FILE * instream, FILE * outstream,
-		     struct tinyrl_history *history)
+tinyrl_t *tinyrl_new(FILE * instream, FILE * outstream)
 {
 	tinyrl_t *this = NULL;
 
 	this = malloc(sizeof(tinyrl_t));
 	if (NULL != this) {
-		tinyrl_init(this, instream, outstream, history);
+		tinyrl_init(this, instream, outstream);
 	}
 
 	return this;

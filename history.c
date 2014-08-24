@@ -9,17 +9,48 @@
 
 #include <stdlib.h>
 
+#include "tinyrl.h"
 #include "history.h"
 
 struct tinyrl_history {
+	tinyrl_t *tinyrl;
 	char **entries;	/* pointer entries */
 	unsigned length;	/* Number of elements within this array */
 	unsigned size;		/* Number of slots allocated in this array */
 	unsigned limit;
+	unsigned iter;
 };
 
+#define ESCAPESEQ "\x1b["
+
+/*-------------------------------------------------------- */
+static bool tinyrl_history_key_up(void *context, int key)
+{
+	struct tinyrl_history *history = context;
+
+	if (tinyrl_history_get(history, history->iter) != tinyrl__get_line(history->tinyrl))
+		history->iter = tinyrl_history_length(history);
+	if (history->iter == 0)
+		return false;
+	history->iter--;
+	tinyrl_set_line(history->tinyrl, tinyrl_history_get(history, history->iter));
+	return true;
+}
+
+/*-------------------------------------------------------- */
+static bool tinyrl_history_key_down(void *context, int key)
+{
+	struct tinyrl_history *history = context;
+
+	if (tinyrl_history_get(history, history->iter) != tinyrl__get_line(history->tinyrl))
+		return false;
+	history->iter++;
+	tinyrl_set_line(history->tinyrl, tinyrl_history_get(history, history->iter));
+	return true;
+}
+
 /*------------------------------------- */
-struct tinyrl_history *tinyrl_history_new(unsigned limit)
+struct tinyrl_history *tinyrl_history_new(tinyrl_t *tinyrl, unsigned limit)
 {
 	struct tinyrl_history *history;
        
@@ -27,10 +58,15 @@ struct tinyrl_history *tinyrl_history_new(unsigned limit)
 	if (!history)
 		return NULL;
 
+	history->tinyrl = tinyrl;
 	history->entries = NULL;
 	history->limit = limit;
 	history->length = 0;
 	history->size = 0;
+	history->iter = 0;
+
+	tinyrl_bind_keyseq(tinyrl, ESCAPESEQ "A", tinyrl_history_key_up, history);
+	tinyrl_bind_keyseq(tinyrl, ESCAPESEQ "B", tinyrl_history_key_down, history);
 	return history;
 }
 

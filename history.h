@@ -15,7 +15,9 @@
  * tinyrl_history class interface
  ************************************** */
 
-extern struct tinyrl_history *tinyrl_history_new(unsigned limit);
+typedef struct _tinyrl tinyrl_t;
+
+struct tinyrl_history *tinyrl_history_new(tinyrl_t *tinyrl, unsigned limit);
 
 extern void tinyrl_history_delete(struct tinyrl_history *history);
 extern void tinyrl_history_add(struct tinyrl_history *history, const char *line);
