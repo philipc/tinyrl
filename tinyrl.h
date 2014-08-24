@@ -15,6 +15,13 @@
 
 typedef struct _tinyrl tinyrl_t;
 
+enum tinyrl_key {
+	TINYRL_KEY_UP,
+	TINYRL_KEY_DOWN,
+	TINYRL_KEY_LEFT,
+	TINYRL_KEY_RIGHT,
+};
+
 /* virtual methods */
 typedef int tinyrl_hook_func_t(tinyrl_t * instance);
 
@@ -63,9 +70,9 @@ extern FILE *tinyrl__get_ostream(const tinyrl_t * instance);
 char *tinyrl_readline(tinyrl_t * instance, const char *prompt);
 
 void tinyrl_bind_key(tinyrl_t * instance, unsigned char key,
-		     tinyrl_key_func_t * fn, void *context);
-void tinyrl_bind_keyseq(tinyrl_t * instance, const char *seq,
-			tinyrl_key_func_t * fn, void *context);
+		     tinyrl_key_func_t *handler, void *context);
+void tinyrl_bind_special(tinyrl_t * instance, enum tinyrl_key key,
+			 tinyrl_key_func_t *handler, void *context);
 
 extern void tinyrl_crlf(const tinyrl_t * instance);
 extern void tinyrl_ding(const tinyrl_t * instance);

@@ -372,8 +372,8 @@ tinyrl_init(tinyrl_t * this, FILE * instream, FILE * outstream)
 	tinyrl_bind_key(this, CTRL('E'), tinyrl_key_end_of_line, this);
 	tinyrl_bind_key(this, CTRL('K'), tinyrl_key_kill, this);
 	tinyrl_bind_key(this, CTRL('Y'), tinyrl_key_yank, this);
-	tinyrl_bind_keyseq(this, ESCAPESEQ "C", tinyrl_key_right, this);
-	tinyrl_bind_keyseq(this, ESCAPESEQ "D", tinyrl_key_left, this);
+	tinyrl_bind_special(this, TINYRL_KEY_RIGHT, tinyrl_key_right, this);
+	tinyrl_bind_special(this, TINYRL_KEY_LEFT, tinyrl_key_left, this);
 
 	this->line = NULL;
 	this->max_line_length = 0;
@@ -876,8 +876,8 @@ void tinyrl_delete_text(tinyrl_t * this, unsigned start, unsigned end)
 }
 
 /*----------------------------------------------------------------------- */
-void tinyrl_bind_keyseq(tinyrl_t * this, const char *seq,
-			tinyrl_key_func_t * fn, void *context)
+static void tinyrl_bind_keyseq(tinyrl_t * this, const char *seq,
+			       tinyrl_key_func_t *handler, void *context)
 {
 	struct tinyrl_keymap *keymap;
 	unsigned char key;
@@ -895,14 +895,33 @@ void tinyrl_bind_keyseq(tinyrl_t * this, const char *seq,
 		key = *seq++;
 	}
 
-	keymap->handler[key] = fn;
+	keymap->handler[key] = handler;
 	keymap->context[key] = context;
 }
 
-void tinyrl_bind_key(tinyrl_t * this, unsigned char key,
-		     tinyrl_key_func_t * fn, void *context)
+void tinyrl_bind_special(tinyrl_t * this, enum tinyrl_key key,
+			 tinyrl_key_func_t *handler, void *context)
 {
-	this->keymap->handler[key] = fn;
+	switch (key) {
+	case TINYRL_KEY_UP:
+		tinyrl_bind_keyseq(this, ESCAPESEQ "A", handler, context);
+		break;
+	case TINYRL_KEY_DOWN:
+		tinyrl_bind_keyseq(this, ESCAPESEQ "B", handler, context);
+		break;
+	case TINYRL_KEY_LEFT:
+		tinyrl_bind_keyseq(this, ESCAPESEQ "D", handler, context);
+		break;
+	case TINYRL_KEY_RIGHT:
+		tinyrl_bind_keyseq(this, ESCAPESEQ "C", handler, context);
+		break;
+	}
+}
+
+void tinyrl_bind_key(tinyrl_t * this, unsigned char key,
+		     tinyrl_key_func_t *handler, void *context)
+{
+	this->keymap->handler[key] = handler;
 	this->keymap->context[key] = context;
 }
 

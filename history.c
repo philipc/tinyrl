@@ -21,8 +21,6 @@ struct tinyrl_history {
 	unsigned iter;
 };
 
-#define ESCAPESEQ "\x1b["
-
 /*-------------------------------------------------------- */
 static bool tinyrl_history_key_up(void *context, int key)
 {
@@ -65,8 +63,8 @@ struct tinyrl_history *tinyrl_history_new(tinyrl_t *tinyrl, unsigned limit)
 	history->size = 0;
 	history->iter = 0;
 
-	tinyrl_bind_keyseq(tinyrl, ESCAPESEQ "A", tinyrl_history_key_up, history);
-	tinyrl_bind_keyseq(tinyrl, ESCAPESEQ "B", tinyrl_history_key_down, history);
+	tinyrl_bind_special(tinyrl, TINYRL_KEY_UP, tinyrl_history_key_up, history);
+	tinyrl_bind_special(tinyrl, TINYRL_KEY_DOWN, tinyrl_history_key_down, history);
 	return history;
 }
 
