@@ -5,7 +5,7 @@
 #include "history.h"
 #include "complete.h"
 
-static bool complete(tinyrl_t *t, bool allow_prefix, bool allow_empty)
+static bool complete(struct tinyrl *t, bool allow_prefix, bool allow_empty)
 {
 	const char *text;
 	unsigned start;
@@ -41,7 +41,7 @@ static bool complete(tinyrl_t *t, bool allow_prefix, bool allow_empty)
 
 static bool tab_key(void *context, int key)
 {
-	tinyrl_t *t = context;
+	struct tinyrl *t = context;
 
 	if (complete(t, false, false))
 		return tinyrl_insert_text(t, " ");
@@ -50,7 +50,7 @@ static bool tab_key(void *context, int key)
 
 static bool space_key(void *context, int key)
 {
-	tinyrl_t *t = context;
+	struct tinyrl *t = context;
 
 	if (complete(t, true, false))
 		return tinyrl_insert_text(t, " ");
@@ -59,7 +59,7 @@ static bool space_key(void *context, int key)
 
 static bool enter_key(void *context, int key)
 {
-	tinyrl_t *t = context;
+	struct tinyrl *t = context;
 
 	if (complete(t, true, true)) {
 		tinyrl_crlf(t);
@@ -71,7 +71,7 @@ static bool enter_key(void *context, int key)
 int main(int argc, char *argv[])
 {
 	struct tinyrl_history *history;
-	tinyrl_t *t;
+	struct tinyrl *t;
 	char *line;
 
 	t = tinyrl_new(stdin, stdout);
