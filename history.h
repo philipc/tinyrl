@@ -15,7 +15,7 @@
  * tinyrl_history class interface
  ************************************** */
 
-typedef struct _tinyrl tinyrl_t;
+typedef struct tinyrl tinyrl_t;
 
 struct tinyrl_history *tinyrl_history_new(tinyrl_t *tinyrl, unsigned limit);
 

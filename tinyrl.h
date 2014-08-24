@@ -13,7 +13,7 @@
 #include <stdbool.h>
 #include <stdio.h>
 
-typedef struct _tinyrl tinyrl_t;
+typedef struct tinyrl tinyrl_t;
 
 enum tinyrl_key {
 	TINYRL_KEY_UP,

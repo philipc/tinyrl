@@ -30,7 +30,7 @@ struct tinyrl_keymap {
 };
 
 /* define the class member data and virtual methods */
-struct _tinyrl {
+struct tinyrl {
 	FILE *istream;
 	FILE *ostream;
 	const char *line;
