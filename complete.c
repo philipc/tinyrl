@@ -4,10 +4,11 @@
 #include <ctype.h>
 #include <string.h>
 #include <stdlib.h>
+#include "tinyrl.h"
 
 /*-------------------------------------------------------- */
-char **tinyrl_add_match(
-	const tinyrl_t *this, unsigned start, char **matches, const char *match)
+char **tinyrl_add_match(const struct tinyrl *this, unsigned start,
+			char **matches, const char *match)
 {
 	const char *line;
 	unsigned end;
@@ -47,7 +48,7 @@ void tinyrl_delete_matches(char **matches)
  * format on Readline's output stream. matches is the list of strings,
  * in argv format, such as a list of completion matches.
  */
-void tinyrl_display_matches(const tinyrl_t * this, char *const *matches)
+void tinyrl_display_matches(const struct tinyrl *this, char *const *matches)
 {
 	char *const *m;
 	size_t max;
@@ -74,8 +75,8 @@ void tinyrl_display_matches(const tinyrl_t * this, char *const *matches)
 }
 
 /*-------------------------------------------------------- */
-bool tinyrl_complete(
-	tinyrl_t *this, unsigned start, char **matches, bool allow_prefix)
+bool tinyrl_complete(struct tinyrl *this, unsigned start,
+		     char **matches, bool allow_prefix)
 {
 	const char *line;
 	unsigned end, len;
