@@ -13,7 +13,7 @@
 #include "history.h"
 
 struct tinyrl_history {
-	tinyrl_t *tinyrl;
+	struct tinyrl *tinyrl;
 	char **entries;	/* pointer entries */
 	unsigned length;	/* Number of elements within this array */
 	unsigned size;		/* Number of slots allocated in this array */
@@ -48,7 +48,7 @@ static bool tinyrl_history_key_down(void *context, int key)
 }
 
 /*------------------------------------- */
-struct tinyrl_history *tinyrl_history_new(tinyrl_t *tinyrl, unsigned limit)
+struct tinyrl_history *tinyrl_history_new(struct tinyrl *tinyrl, unsigned limit)
 {
 	struct tinyrl_history *history;
        
