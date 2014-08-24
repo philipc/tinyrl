@@ -84,6 +84,9 @@ extern void tinyrl_delete_text(
 
 extern void tinyrl_redisplay(tinyrl_t * instance);
 
+/* text must be persistent */
+extern void tinyrl_set_line(tinyrl_t * instance, const char *text);
+
 extern void
 tinyrl_replace_line(tinyrl_t * instance, const char *text, int clear_undo);
 

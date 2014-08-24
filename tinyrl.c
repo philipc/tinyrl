@@ -236,45 +236,27 @@ static bool tinyrl_key_crlf(tinyrl_t * this, int key)
 /*-------------------------------------------------------- */
 static bool tinyrl_key_up(tinyrl_t * this, int key)
 {
-	bool result = false;
 	if (!this->history)
 		return false;
-	if (this->line == this->buffer)
+	if (tinyrl_history_get(this->history, this->hist_iter) != tinyrl__get_line(this))
 		this->hist_iter = tinyrl_history_length(this->history);
-	if (this->hist_iter > 0) {
-		/* display the entry moving the insertion point
-		 * to the end of the line 
-		 */
-		this->hist_iter--;
-		this->line = tinyrl_history_get(this->history, this->hist_iter);
-		this->point = this->end = strlen(this->line);
-		result = true;
-	}
-	return result;
+	if (this->hist_iter == 0)
+		return false;
+	this->hist_iter--;
+	tinyrl_set_line(this, tinyrl_history_get(this->history, this->hist_iter));
+	return true;
 }
 
 /*-------------------------------------------------------- */
 static bool tinyrl_key_down(tinyrl_t * this, int key)
 {
-	bool result = false;
 	if (!this->history)
 		return false;
-	if (this->line != this->buffer) {
-		/* we are not already at the bottom */
-		/* the iterator will have been set up by the key_up() function */
-		this->hist_iter++;
-		this->line = tinyrl_history_get(this->history, this->hist_iter);
-		if (!this->line) {
-			/* nothing more in the history list */
-			this->line = this->buffer;
-		}
-		/* display the entry moving the insertion point
-		 * to the end of the line 
-		 */
-		this->point = this->end = strlen(this->line);
-		result = true;
-	}
-	return result;
+	if (tinyrl_history_get(this->history, this->hist_iter) != tinyrl__get_line(this))
+		return false;
+	this->hist_iter++;
+	tinyrl_set_line(this, tinyrl_history_get(this->history, this->hist_iter));
+	return true;
 }
 
 /*-------------------------------------------------------- */
@@ -424,6 +406,7 @@ tinyrl_init(tinyrl_t * this, FILE * instream, FILE * outstream,
 	this->istream = instream;
 	this->ostream = outstream;
 	this->history = history;
+	this->hist_iter = 0;
 }
 
 /*-------------------------------------------------------- */
@@ -956,6 +939,13 @@ void tinyrl_reset_line_state(tinyrl_t * this)
 	this->last_buffer = NULL;
 
 	tinyrl_redisplay(this);
+}
+
+/*-------------------------------------------------------- */
+void tinyrl_set_line(tinyrl_t * this, const char *text)
+{
+	this->line = text ?: this->buffer;
+	this->point = this->end = strlen(this->line);
 }
 
 /*-------------------------------------------------------- */
