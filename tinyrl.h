@@ -88,7 +88,7 @@ void tinyrl_redisplay(struct tinyrl *instance);
 /* text must be persistent */
 void tinyrl_set_line(struct tinyrl *instance, const char *text);
 
-void tinyrl_replace_line(struct tinyrl *instance, const char *text, int clear_undo);
+void tinyrl_replace_line(struct tinyrl *instance, const char *text);
 
 /**
  * Disable echoing of input characters when a line in input.

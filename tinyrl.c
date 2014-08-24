@@ -959,20 +959,12 @@ void tinyrl_set_line(struct tinyrl *this, const char *text)
 }
 
 /*-------------------------------------------------------- */
-void tinyrl_replace_line(struct tinyrl *this, const char *text, int clear_undo)
+void tinyrl_replace_line(struct tinyrl *this, const char *text)
 {
 	size_t new_len = strlen(text);
 
-	/* ignored for now */
-	clear_undo = clear_undo;
-
-	/* ensure there is sufficient space */
 	if (tinyrl_extend_line_buffer(this, new_len)) {
-
-		/* overwrite the current contents of the buffer */
 		strcpy(this->buffer, text);
-
-		/* set the insert point and end point */
 		this->point = this->end = new_len;
 	}
 	tinyrl_redisplay(this);
