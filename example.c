@@ -38,22 +38,28 @@ static bool complete(tinyrl_t *t, bool allow_prefix, bool allow_empty)
 	return ret;
 }
 
-static bool tab_key(tinyrl_t *t, int key)
+static bool tab_key(void *context, int key)
 {
+	tinyrl_t *t = context;
+
 	if (complete(t, false, false))
 		return tinyrl_insert_text(t, " ");
 	return false;
 }
 
-static bool space_key(tinyrl_t *t, int key)
+static bool space_key(void *context, int key)
 {
+	tinyrl_t *t = context;
+
 	if (complete(t, true, false))
 		return tinyrl_insert_text(t, " ");
 	return false;
 }
 
-static bool enter_key(tinyrl_t *t, int key)
+static bool enter_key(void *context, int key)
 {
+	tinyrl_t *t = context;
+
 	if (complete(t, true, true)) {
 		tinyrl_crlf(t);
 		tinyrl_done(t);
@@ -69,12 +75,12 @@ int main(int argc, char *argv[])
 
 	history = tinyrl_history_new(0);
 	t = tinyrl_new(stdin, stdout, history);
-	tinyrl_bind_key(t, '\t', tab_key);
-	tinyrl_bind_key(t, '\r', enter_key);
-	tinyrl_bind_key(t, ' ', space_key);
+	tinyrl_bind_key(t, '\t', tab_key, t);
+	tinyrl_bind_key(t, '\r', enter_key, t);
+	tinyrl_bind_key(t, ' ', space_key, t);
 
 	for (;;) {
-		line = tinyrl_readline(t, "> ", NULL);
+		line = tinyrl_readline(t, "> ");
 		if (!line)
 			break;
 

@@ -25,7 +25,7 @@ typedef int tinyrl_hook_func_t(tinyrl_t * instance);
  *   been performed successfully
  * - false if the action was not successful
  */
-typedef bool tinyrl_key_func_t(tinyrl_t * instance, int key);
+typedef bool tinyrl_key_func_t(void * context, int key);
 
 /* exported functions */
 extern tinyrl_t *tinyrl_new(FILE * instream,
@@ -40,8 +40,6 @@ extern void tinyrl_delete(tinyrl_t * instance);
 extern const char *tinyrl__get_prompt(const tinyrl_t * instance);
 
 extern void tinyrl_done(tinyrl_t * instance);
-
-extern void *tinyrl__get_context(const tinyrl_t * instance);
 
 /**
  * This operation returns the current line in use by the tinyrl instance
@@ -64,12 +62,13 @@ extern FILE *tinyrl__get_istream(const tinyrl_t * instance);
 
 extern FILE *tinyrl__get_ostream(const tinyrl_t * instance);
 
-extern char *tinyrl_readline(tinyrl_t * instance,
-			     const char *prompt, void *context);
-extern void
-tinyrl_bind_key(tinyrl_t * instance, unsigned char key, tinyrl_key_func_t * fn);
-extern void tinyrl_bind_keyseq(
-	tinyrl_t * instance, const char *seq, tinyrl_key_func_t * fn);
+char *tinyrl_readline(tinyrl_t * instance, const char *prompt);
+
+void tinyrl_bind_key(tinyrl_t * instance, unsigned char key,
+		     tinyrl_key_func_t * fn, void *context);
+void tinyrl_bind_keyseq(tinyrl_t * instance, const char *seq,
+			tinyrl_key_func_t * fn, void *context);
+
 extern void tinyrl_crlf(const tinyrl_t * instance);
 extern void tinyrl_ding(const tinyrl_t * instance);
 

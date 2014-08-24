@@ -26,6 +26,7 @@
 struct tinyrl_keymap {
 	tinyrl_key_func_t *handler[KEYMAP_SIZE];
 	struct tinyrl_keymap *keymap[KEYMAP_SIZE];
+	void *context[KEYMAP_SIZE];
 };
 
 /* define the class member data and virtual methods */
@@ -45,9 +46,7 @@ struct _tinyrl {
 
 	struct tinyrl_history *history;
 	unsigned hist_iter;
-	void *context;		/* context supplied by caller
-				 * to tinyrl_readline()
-				 */
+
 	char echo_char;
 	bool echo_enabled;
 	struct termios default_termios;
@@ -160,8 +159,9 @@ static void changed_line(tinyrl_t * this)
 }
 
 /*----------------------------------------------------------------------- */
-static bool tinyrl_key_default(tinyrl_t * this, int key)
+static bool tinyrl_key_default(void *context, int key)
 {
+	tinyrl_t *this = context;
 	bool result;
 	if (key > 31) {
 		char tmp = key & 0xFF;
@@ -176,8 +176,10 @@ static bool tinyrl_key_default(tinyrl_t * this, int key)
 }
 
 /*-------------------------------------------------------- */
-static bool tinyrl_key_interrupt(tinyrl_t * this, int key)
+static bool tinyrl_key_interrupt(void *context, int key)
 {
+	tinyrl_t *this = context;
+
 	tinyrl_delete_text(this, 0, this->end);
 	this->done = true;
 
@@ -185,24 +187,30 @@ static bool tinyrl_key_interrupt(tinyrl_t * this, int key)
 }
 
 /*-------------------------------------------------------- */
-static bool tinyrl_key_start_of_line(tinyrl_t * this, int key)
+static bool tinyrl_key_start_of_line(void *context, int key)
 {
+	tinyrl_t *this = context;
+
 	/* set the insertion point to the start of the line */
 	this->point = 0;
 	return true;
 }
 
 /*-------------------------------------------------------- */
-static bool tinyrl_key_end_of_line(tinyrl_t * this, int key)
+static bool tinyrl_key_end_of_line(void *context, int key)
 {
+	tinyrl_t *this = context;
+
 	/* set the insertion point to the end of the line */
 	this->point = this->end;
 	return true;
 }
 
 /*-------------------------------------------------------- */
-static bool tinyrl_key_kill(tinyrl_t * this, int key)
+static bool tinyrl_key_kill(void *context, int key)
 {
+	tinyrl_t *this = context;
+
 	/* release any old kill string */
 	free(this->kill_string);
 
@@ -215,8 +223,9 @@ static bool tinyrl_key_kill(tinyrl_t * this, int key)
 }
 
 /*-------------------------------------------------------- */
-static bool tinyrl_key_yank(tinyrl_t * this, int key)
+static bool tinyrl_key_yank(void *context, int key)
 {
+	tinyrl_t *this = context;
 	bool result = false;
 	if (this->kill_string) {
 		/* insert the kill string at the current insertion point */
@@ -226,16 +235,20 @@ static bool tinyrl_key_yank(tinyrl_t * this, int key)
 }
 
 /*-------------------------------------------------------- */
-static bool tinyrl_key_crlf(tinyrl_t * this, int key)
+static bool tinyrl_key_crlf(void *context, int key)
 {
+	tinyrl_t *this = context;
+
 	tinyrl_crlf(this);
 	this->done = true;
 	return true;
 }
 
 /*-------------------------------------------------------- */
-static bool tinyrl_key_up(tinyrl_t * this, int key)
+static bool tinyrl_key_up(void *context, int key)
 {
+	tinyrl_t *this = context;
+
 	if (!this->history)
 		return false;
 	if (tinyrl_history_get(this->history, this->hist_iter) != tinyrl__get_line(this))
@@ -248,8 +261,10 @@ static bool tinyrl_key_up(tinyrl_t * this, int key)
 }
 
 /*-------------------------------------------------------- */
-static bool tinyrl_key_down(tinyrl_t * this, int key)
+static bool tinyrl_key_down(void *context, int key)
 {
+	tinyrl_t *this = context;
+
 	if (!this->history)
 		return false;
 	if (tinyrl_history_get(this->history, this->hist_iter) != tinyrl__get_line(this))
@@ -260,8 +275,9 @@ static bool tinyrl_key_down(tinyrl_t * this, int key)
 }
 
 /*-------------------------------------------------------- */
-static bool tinyrl_key_left(tinyrl_t * this, int key)
+static bool tinyrl_key_left(void *context, int key)
 {
+	tinyrl_t *this = context;
 	bool result = false;
 	if (this->point > 0) {
 		this->point--;
@@ -271,8 +287,9 @@ static bool tinyrl_key_left(tinyrl_t * this, int key)
 }
 
 /*-------------------------------------------------------- */
-static bool tinyrl_key_right(tinyrl_t * this, int key)
+static bool tinyrl_key_right(void *context, int key)
 {
+	tinyrl_t *this = context;
 	bool result = false;
 	if (this->point < this->end) {
 		this->point++;
@@ -282,8 +299,9 @@ static bool tinyrl_key_right(tinyrl_t * this, int key)
 }
 
 /*-------------------------------------------------------- */
-static bool tinyrl_key_backspace(tinyrl_t * this, int key)
+static bool tinyrl_key_backspace(void *context, int key)
 {
+	tinyrl_t *this = context;
 	bool result = false;
 	if (this->point) {
 		this->point--;
@@ -294,8 +312,9 @@ static bool tinyrl_key_backspace(tinyrl_t * this, int key)
 }
 
 /*-------------------------------------------------------- */
-static bool tinyrl_key_delete(tinyrl_t * this, int key)
+static bool tinyrl_key_delete(void *context, int key)
 {
+	tinyrl_t *this = context;
 	bool result = false;
 	if (this->point < this->end) {
 		tinyrl_delete_text(this, this->point, this->point + 1);
@@ -305,8 +324,10 @@ static bool tinyrl_key_delete(tinyrl_t * this, int key)
 }
 
 /*-------------------------------------------------------- */
-static bool tinyrl_key_clear_screen(tinyrl_t * this, int key)
+static bool tinyrl_key_clear_screen(void *context, int key)
 {
+	tinyrl_t *this = context;
+
 	tinyrl_vt100_clear_screen(this);
 	tinyrl_vt100_cursor_home(this);
 	tinyrl_reset_line_state(this);
@@ -314,8 +335,9 @@ static bool tinyrl_key_clear_screen(tinyrl_t * this, int key)
 }
 
 /*-------------------------------------------------------- */
-static bool tinyrl_key_erase_line(tinyrl_t * this, int key)
+static bool tinyrl_key_erase_line(void *context, int key)
 {
+	tinyrl_t *this = context;
 
 	tinyrl_delete_text(this, 0, this->point);
 	this->point = 0;
@@ -333,6 +355,7 @@ static struct tinyrl_keymap *tinyrl_keymap_new()
 	for (i = 0; i < KEYMAP_SIZE; i++) {
 		keymap->handler[i] = NULL;
 		keymap->keymap[i] = NULL;
+		keymap->context[i] = NULL;
 	}
 
 	return keymap;
@@ -370,23 +393,23 @@ tinyrl_init(tinyrl_t * this, FILE * instream, FILE * outstream,
 
 	this->keymap = tinyrl_keymap_new();
 	for (i = 32; i < 256; i++)
-		tinyrl_bind_key(this, i, tinyrl_key_default);
-	tinyrl_bind_key(this, '\r', tinyrl_key_crlf);
-	tinyrl_bind_key(this, '\n', tinyrl_key_crlf);
-	tinyrl_bind_key(this, CTRL('C'), tinyrl_key_interrupt);
-	tinyrl_bind_key(this, BACKSPACE, tinyrl_key_backspace);
-	tinyrl_bind_key(this, CTRL('H'), tinyrl_key_backspace);
-	tinyrl_bind_key(this, CTRL('D'), tinyrl_key_delete);
-	tinyrl_bind_key(this, CTRL('L'), tinyrl_key_clear_screen);
-	tinyrl_bind_key(this, CTRL('U'), tinyrl_key_erase_line);
-	tinyrl_bind_key(this, CTRL('A'), tinyrl_key_start_of_line);
-	tinyrl_bind_key(this, CTRL('E'), tinyrl_key_end_of_line);
-	tinyrl_bind_key(this, CTRL('K'), tinyrl_key_kill);
-	tinyrl_bind_key(this, CTRL('Y'), tinyrl_key_yank);
-	tinyrl_bind_keyseq(this, ESCAPESEQ "A", tinyrl_key_up);
-	tinyrl_bind_keyseq(this, ESCAPESEQ "B", tinyrl_key_down);
-	tinyrl_bind_keyseq(this, ESCAPESEQ "C", tinyrl_key_right);
-	tinyrl_bind_keyseq(this, ESCAPESEQ "D", tinyrl_key_left);
+		tinyrl_bind_key(this, i, tinyrl_key_default, this);
+	tinyrl_bind_key(this, '\r', tinyrl_key_crlf, this);
+	tinyrl_bind_key(this, '\n', tinyrl_key_crlf, this);
+	tinyrl_bind_key(this, CTRL('C'), tinyrl_key_interrupt, this);
+	tinyrl_bind_key(this, BACKSPACE, tinyrl_key_backspace, this);
+	tinyrl_bind_key(this, CTRL('H'), tinyrl_key_backspace, this);
+	tinyrl_bind_key(this, CTRL('D'), tinyrl_key_delete, this);
+	tinyrl_bind_key(this, CTRL('L'), tinyrl_key_clear_screen, this);
+	tinyrl_bind_key(this, CTRL('U'), tinyrl_key_erase_line, this);
+	tinyrl_bind_key(this, CTRL('A'), tinyrl_key_start_of_line, this);
+	tinyrl_bind_key(this, CTRL('E'), tinyrl_key_end_of_line, this);
+	tinyrl_bind_key(this, CTRL('K'), tinyrl_key_kill, this);
+	tinyrl_bind_key(this, CTRL('Y'), tinyrl_key_yank, this);
+	tinyrl_bind_keyseq(this, ESCAPESEQ "A", tinyrl_key_up, this);
+	tinyrl_bind_keyseq(this, ESCAPESEQ "B", tinyrl_key_down, this);
+	tinyrl_bind_keyseq(this, ESCAPESEQ "C", tinyrl_key_right, this);
+	tinyrl_bind_keyseq(this, ESCAPESEQ "D", tinyrl_key_left, this);
 
 	this->line = NULL;
 	this->max_line_length = 0;
@@ -608,14 +631,18 @@ static void tinyrl_handle_key(tinyrl_t *this, int key)
 {
 	struct tinyrl_keymap *keymap;
 	tinyrl_key_func_t *handler;
+	void *context;
 	int c;
 
 	handler = NULL;
+	context = NULL;
 	keymap = this->keymap;
 	c = key;
 	for (;;) {
-		if (keymap->handler[c])
+		if (keymap->handler[c]) {
 			handler = keymap->handler[c];
+			context = keymap->context[c];
+		}
 		keymap = keymap->keymap[c];
 		if (!keymap)
 			break;
@@ -627,13 +654,13 @@ static void tinyrl_handle_key(tinyrl_t *this, int key)
 			break;
 	}
 
-	if (!handler || !handler(this, key)) {
+	if (!handler || !handler(context, key)) {
 		/* an issue has occured */
 		tinyrl_ding(this);
 	}
 }
 
-char *tinyrl_readline(tinyrl_t * this, const char *prompt, void *context)
+char *tinyrl_readline(tinyrl_t * this, const char *prompt)
 {
 	/* initialise for reading a line */
 	this->done = false;
@@ -643,7 +670,6 @@ char *tinyrl_readline(tinyrl_t * this, const char *prompt, void *context)
 	this->buffer_size = strlen(this->buffer);
 	this->line = this->buffer;
 	this->prompt = prompt;
-	this->context = context;
 
 	if (this->isatty) {
 		/* set the terminal into raw input mode */
@@ -889,7 +915,8 @@ void tinyrl_delete_text(tinyrl_t * this, unsigned start, unsigned end)
 }
 
 /*----------------------------------------------------------------------- */
-void tinyrl_bind_keyseq(tinyrl_t * this, const char *seq, tinyrl_key_func_t * fn)
+void tinyrl_bind_keyseq(tinyrl_t * this, const char *seq,
+			tinyrl_key_func_t * fn, void *context)
 {
 	struct tinyrl_keymap *keymap;
 	unsigned char key;
@@ -908,11 +935,14 @@ void tinyrl_bind_keyseq(tinyrl_t * this, const char *seq, tinyrl_key_func_t * fn
 	}
 
 	keymap->handler[key] = fn;
+	keymap->context[key] = context;
 }
 
-void tinyrl_bind_key(tinyrl_t * this, unsigned char key, tinyrl_key_func_t * fn)
+void tinyrl_bind_key(tinyrl_t * this, unsigned char key,
+		     tinyrl_key_func_t * fn, void *context)
 {
 	this->keymap->handler[key] = fn;
+	this->keymap->context[key] = context;
 }
 
 /*-------------------------------------------------------- */
@@ -966,12 +996,6 @@ void tinyrl_replace_line(tinyrl_t * this, const char *text, int clear_undo)
 		this->point = this->end = new_len;
 	}
 	tinyrl_redisplay(this);
-}
-
-/*-------------------------------------------------------- */
-void *tinyrl__get_context(const tinyrl_t * this)
-{
-	return this->context;
 }
 
 /*--------------------------------------------------------- */
