@@ -621,8 +621,101 @@ static void tinyrl_handle_key(struct tinyrl *this, int key)
 	}
 }
 
+static void tinyrl_readtty(struct tinyrl *this)
+{
+	/* set the terminal into raw input mode */
+	tty_set_raw_mode(this);
+
+	tinyrl_reset_line_state(this);
+
+	while (!this->done) {
+		int key;
+		/* update the display */
+		tinyrl_redisplay(this);
+
+		/* get a key */
+		key = tinyrl_getchar(this);
+
+		/* has the input stream terminated? */
+		if (EOF != key) {
+			/* call the handler for this key */
+			tinyrl_handle_key(this, key);
+
+			if (this->done) {
+				/*
+				 * If the last character in the line (other than 
+				 * the null) is a space remove it.
+				 */
+				if (this->end
+				    && isspace(this-> line[this->end - 1])) {
+					tinyrl_delete_text(this, this->end - 1,
+							   this->end);
+				}
+			}
+		} else {
+			/* time to finish the session */
+			this->done = true;
+			this->line = NULL;
+		}
+	}
+	/* restores the terminal mode */
+	tty_restore_mode(this);
+}
+
+static void tinyrl_readraw(struct tinyrl *this)
+{
+	/* This is a non-interactive set of commands */
+	char *s = 0, buffer[80];
+	size_t len = sizeof(buffer);
+
+	/* manually reset the line state without redisplaying */
+	free(this->last_buffer);
+	this->last_buffer = NULL;
+
+	while ((sizeof(buffer) == len) &&
+	       (s = fgets(buffer, sizeof(buffer), this->istream))) {
+		char *p;
+		/* strip any spurious '\r' or '\n' */
+		p = strchr(buffer, '\r');
+		if (NULL == p) {
+			p = strchr(buffer, '\n');
+		}
+		if (NULL != p) {
+			*p = '\0';
+		}
+		/* skip any whitespace at the beginning of the line */
+		if (0 == this->point) {
+			while (*s && isspace(*s)) {
+				s++;
+			}
+		}
+		if (*s) {
+			/* append this string to the input buffer */
+			(void)tinyrl_insert_text(this, s);
+			/* echo the command to the output stream */
+			tinyrl_redisplay(this);
+		}
+		len = strlen(buffer) + 1;	/* account for the '\0' */
+	}
+
+	/*
+	 * check against fgets returning null as either error or end of file.
+	 * This is a measure to stop potential task spin on encountering an
+	 * error from fgets.
+	 */
+	if (s == NULL || (this->line[0] == '\0' && feof(this->istream))) {
+		/* time to finish the session */
+		this->line = NULL;
+	} else {
+		tinyrl_crlf(this);
+		this->done = true;
+	}
+}
+
 char *tinyrl_readline(struct tinyrl *this, const char *prompt)
 {
+	char *result;
+
 	/* initialise for reading a line */
 	this->done = false;
 	this->point = 0;
@@ -633,112 +726,27 @@ char *tinyrl_readline(struct tinyrl *this, const char *prompt)
 	this->prompt = prompt;
 
 	if (this->isatty) {
-		/* set the terminal into raw input mode */
-		tty_set_raw_mode(this);
-
-		tinyrl_reset_line_state(this);
-
-		while (!this->done) {
-			int key;
-			/* update the display */
-			tinyrl_redisplay(this);
-
-			/* get a key */
-			key = tinyrl_getchar(this);
-
-			/* has the input stream terminated? */
-			if (EOF != key) {
-				/* call the handler for this key */
-				tinyrl_handle_key(this, key);
-
-				if (this->done) {
-					/*
-					 * If the last character in the line (other than 
-					 * the null) is a space remove it.
-					 */
-					if (this->end
-					    && isspace(this->
-						       line[this->end - 1])) {
-						tinyrl_delete_text(this,
-								   this->end -
-								   1,
-								   this->end);
-					}
-				}
-			} else {
-				/* time to finish the session */
-				this->done = true;
-				this->line = NULL;
-			}
-		}
-		/* restores the terminal mode */
-		tty_restore_mode(this);
+		tinyrl_readtty(this);
 	} else {
-		/* This is a non-interactive set of commands */
-		char *s = 0, buffer[80];
-		size_t len = sizeof(buffer);
-
-		/* manually reset the line state without redisplaying */
-		free(this->last_buffer);
-		this->last_buffer = NULL;
-
-		while ((sizeof(buffer) == len) &&
-		       (s = fgets(buffer, sizeof(buffer), this->istream))) {
-			char *p;
-			/* strip any spurious '\r' or '\n' */
-			p = strchr(buffer, '\r');
-			if (NULL == p) {
-				p = strchr(buffer, '\n');
-			}
-			if (NULL != p) {
-				*p = '\0';
-			}
-			/* skip any whitespace at the beginning of the line */
-			if (0 == this->point) {
-				while (*s && isspace(*s)) {
-					s++;
-				}
-			}
-			if (*s) {
-				/* append this string to the input buffer */
-				(void)tinyrl_insert_text(this, s);
-				/* echo the command to the output stream */
-				tinyrl_redisplay(this);
-			}
-			len = strlen(buffer) + 1;	/* account for the '\0' */
-		}
-
-		/*
-		 * check against fgets returning null as either error or end of file.
-		 * This is a measure to stop potential task spin on encountering an
-		 * error from fgets.
-		 */
-		if (s == NULL || (this->line[0] == '\0' && feof(this->istream))) {
-			/* time to finish the session */
-			this->line = NULL;
-		} else {
-			tinyrl_crlf(this);
-			this->done = true;
-		}
+		tinyrl_readraw(this);
 	}
+
 	/*
 	 * duplicate the string for return to the client 
 	 * we have to duplicate as we may be referencing a
 	 * history entry or our internal buffer
 	 */
-	{
-		char *result = this->line ? strdup(this->line) : NULL;
+	result = this->line ? strdup(this->line) : NULL;
 
-		/* free our internal buffer */
-		free(this->buffer);
-		this->buffer = NULL;
+	/* free our internal buffer */
+	free(this->buffer);
+	this->buffer = NULL;
 
-		if ((NULL == result) || '\0' == *result) {
-			/* make sure we're not left on a prompt line */
-			tinyrl_crlf(this);
-		}
-		return result;
+	if ((NULL == result) || '\0' == *result) {
+		/* make sure we're not left on a prompt line */
+		tinyrl_crlf(this);
 	}
+	return result;
 }
 
 /*----------------------------------------------------------------------- */
