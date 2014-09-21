@@ -43,15 +43,6 @@ void tinyrl_delete(struct tinyrl *instance);
 
 void tinyrl_done(struct tinyrl *instance);
 
-/**
- * This operation returns the current line in use by the tinyrl instance
- * NB. the pointer will become invalid after any further operation on the 
- * instance.
- */
-const char *tinyrl__get_line(const struct tinyrl *instance);
-
-unsigned tinyrl__get_point(const struct tinyrl *instance);
-
 unsigned tinyrl__get_width(const struct tinyrl *instance);
 
 void tinyrl__set_istream(struct tinyrl *instance, FILE * istream);
@@ -85,6 +76,15 @@ void tinyrl_redisplay(struct tinyrl *instance);
 void tinyrl_set_line(struct tinyrl *instance, const char *text);
 
 void tinyrl_replace_line(struct tinyrl *instance, const char *text);
+
+/**
+ * This operation returns the current line in use by the tinyrl instance
+ * NB. the pointer will become invalid after any further operation on the 
+ * instance.
+ */
+const char *tinyrl_get_line(const struct tinyrl *instance);
+
+unsigned tinyrl_get_point(const struct tinyrl *instance);
 
 /**
  * Disable echoing of input characters when a line in input.

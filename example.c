@@ -14,8 +14,8 @@ static bool complete(struct tinyrl *t, bool allow_prefix, bool allow_empty)
 	bool ret = false;
 
 	/* find the start of the current word */
-	text = tinyrl__get_line(t);
-	start = end = tinyrl__get_point(t);
+	text = tinyrl_get_line(t);
+	start = end = tinyrl_get_point(t);
 	while (start && !isspace(text[start - 1]))
 		start--;
 	if (start == end && allow_empty)

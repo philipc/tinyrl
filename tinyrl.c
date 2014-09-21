@@ -971,13 +971,13 @@ void tinyrl_replace_line(struct tinyrl *this, const char *text)
 }
 
 /*--------------------------------------------------------- */
-const char *tinyrl__get_line(const struct tinyrl *this)
+const char *tinyrl_get_line(const struct tinyrl *this)
 {
 	return this->line;
 }
 
 /*--------------------------------------------------------- */
-unsigned tinyrl__get_point(const struct tinyrl *this)
+unsigned tinyrl_get_point(const struct tinyrl *this)
 {
 	return this->point;
 }

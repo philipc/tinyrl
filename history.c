@@ -26,7 +26,7 @@ static bool tinyrl_history_key_up(void *context, int key)
 {
 	struct tinyrl_history *history = context;
 
-	if (tinyrl_history_get(history, history->iter) != tinyrl__get_line(history->tinyrl))
+	if (tinyrl_history_get(history, history->iter) != tinyrl_get_line(history->tinyrl))
 		history->iter = tinyrl_history_length(history);
 	if (history->iter == 0)
 		return false;
@@ -40,7 +40,7 @@ static bool tinyrl_history_key_down(void *context, int key)
 {
 	struct tinyrl_history *history = context;
 
-	if (tinyrl_history_get(history, history->iter) != tinyrl__get_line(history->tinyrl))
+	if (tinyrl_history_get(history, history->iter) != tinyrl_get_line(history->tinyrl))
 		return false;
 	history->iter++;
 	tinyrl_set_line(history->tinyrl, tinyrl_history_get(history, history->iter));

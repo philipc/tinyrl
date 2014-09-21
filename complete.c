@@ -15,8 +15,8 @@ char **tinyrl_add_match(const struct tinyrl *this, unsigned start,
 	size_t len;
 	char **m;
 
-	line = tinyrl__get_line(this);
-	end = tinyrl__get_point(this);
+	line = tinyrl_get_line(this);
+	end = tinyrl_get_point(this);
 	if (strncmp(match, line + start, end - start) != 0)
 		return matches;
 
@@ -102,8 +102,8 @@ bool tinyrl_complete(struct tinyrl *this, unsigned start,
 	}
 
 	/* insert common prefix */
-	line = tinyrl__get_line(this);
-	end = tinyrl__get_point(this);
+	line = tinyrl_get_line(this);
+	end = tinyrl_get_point(this);
 	if (end - start < len
 	    || strncmp(line + start, matches[0], len) != 0) {
 		tinyrl_delete_text(this, start, end);
