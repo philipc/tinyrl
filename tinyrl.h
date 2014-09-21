@@ -52,8 +52,6 @@ const char *tinyrl__get_line(const struct tinyrl *instance);
 
 unsigned tinyrl__get_point(const struct tinyrl *instance);
 
-unsigned tinyrl__get_end(const struct tinyrl *instance);
-
 unsigned tinyrl__get_width(const struct tinyrl *instance);
 
 void tinyrl__set_istream(struct tinyrl *instance, FILE * istream);

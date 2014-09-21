@@ -983,12 +983,6 @@ unsigned tinyrl__get_point(const struct tinyrl *this)
 }
 
 /*--------------------------------------------------------- */
-unsigned tinyrl__get_end(const struct tinyrl *this)
-{
-	return this->end;
-}
-
-/*--------------------------------------------------------- */
 unsigned tinyrl__get_width(const struct tinyrl *this)
 {
 	/* hard code until we suss out how to do it properly */
