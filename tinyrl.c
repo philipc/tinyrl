@@ -46,7 +46,6 @@ struct tinyrl {
 
 	char echo_char;
 	bool echo_enabled;
-	struct termios default_termios;
 	bool isatty;
 	char *last_buffer;	/* hold record of the previous 
 				   buffer for redisplay purposes */
@@ -107,13 +106,13 @@ static void tinyrl_vt100_erase(const struct tinyrl *this, unsigned count)
 }
 
 /*----------------------------------------------------------------------- */
-static void tty_set_raw_mode(struct tinyrl *this)
+static void tty_set_raw_mode(FILE *istream, struct termios *old_termios)
 {
 	struct termios new_termios;
-	int fd = fileno(this->istream);
+	int fd = fileno(istream);
 	int status;
 
-	status = tcgetattr(fd, &this->default_termios);
+	status = tcgetattr(fd, old_termios);
 	if (-1 != status) {
 		status = tcgetattr(fd, &new_termios);
 		assert(-1 != status);
@@ -129,12 +128,11 @@ static void tty_set_raw_mode(struct tinyrl *this)
 }
 
 /*----------------------------------------------------------------------- */
-static void tty_restore_mode(const struct tinyrl *this)
+static void tty_restore_mode(FILE *istream, struct termios *old_termios)
 {
-	int fd = fileno(this->istream);
+	int fd = fileno(istream);
 
-	/* Do the mode switch */
-	(void)tcsetattr(fd, TCSAFLUSH, &this->default_termios);
+	tcsetattr(fd, TCSAFLUSH, old_termios);
 }
 
 /*----------------------------------------------------------------------- */
@@ -623,8 +621,9 @@ static void tinyrl_handle_key(struct tinyrl *this, int key)
 
 static void tinyrl_readtty(struct tinyrl *this)
 {
-	/* set the terminal into raw input mode */
-	tty_set_raw_mode(this);
+	struct termios default_termios;
+
+	tty_set_raw_mode(this->istream, &default_termios);
 
 	tinyrl_reset_line_state(this);
 
@@ -658,8 +657,8 @@ static void tinyrl_readtty(struct tinyrl *this)
 			this->line = NULL;
 		}
 	}
-	/* restores the terminal mode */
-	tty_restore_mode(this);
+
+	tty_restore_mode(this->istream, &default_termios);
 }
 
 static void tinyrl_readraw(struct tinyrl *this)
