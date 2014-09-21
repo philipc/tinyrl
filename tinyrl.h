@@ -42,13 +42,7 @@ void tinyrl_done(struct tinyrl *instance);
 
 unsigned tinyrl__get_width(const struct tinyrl *instance);
 
-void tinyrl__set_istream(struct tinyrl *instance, FILE * istream);
-
 bool tinyrl__get_isatty(const struct tinyrl *instance);
-
-FILE *tinyrl__get_istream(const struct tinyrl *instance);
-
-FILE *tinyrl__get_ostream(const struct tinyrl *instance);
 
 char *tinyrl_readline(struct tinyrl *instance, const char *prompt);
 

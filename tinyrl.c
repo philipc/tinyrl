@@ -1008,29 +1008,10 @@ void tinyrl_disable_echo(struct tinyrl *this, char echo_char)
 	this->echo_char = echo_char;
 }
 
-/*--------------------------------------------------------- */
-void tinyrl__set_istream(struct tinyrl *this, FILE * istream)
-{
-	this->istream = istream;
-	this->isatty = isatty(fileno(istream));
-}
-
 /*-------------------------------------------------------- */
 bool tinyrl__get_isatty(const struct tinyrl *this)
 {
 	return this->isatty;
-}
-
-/*-------------------------------------------------------- */
-FILE *tinyrl__get_istream(const struct tinyrl *this)
-{
-	return this->istream;
-}
-
-/*-------------------------------------------------------- */
-FILE *tinyrl__get_ostream(const struct tinyrl *this)
-{
-	return this->ostream;
 }
 
 /*--------------------------------------------------------- */
