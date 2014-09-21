@@ -41,8 +41,6 @@ int tinyrl_printf(const struct tinyrl *instance, const char *fmt, ...);
 
 void tinyrl_delete(struct tinyrl *instance);
 
-const char *tinyrl__get_prompt(const struct tinyrl *instance);
-
 void tinyrl_done(struct tinyrl *instance);
 
 /**

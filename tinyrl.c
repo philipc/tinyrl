@@ -1039,12 +1039,6 @@ FILE *tinyrl__get_ostream(const struct tinyrl *this)
 	return this->ostream;
 }
 
-/*-------------------------------------------------------- */
-const char *tinyrl__get_prompt(const struct tinyrl *this)
-{
-	return this->prompt;
-}
-
 /*--------------------------------------------------------- */
 void tinyrl_limit_line_length(struct tinyrl *this, unsigned length)
 {
