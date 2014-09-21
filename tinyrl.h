@@ -22,9 +22,6 @@ enum tinyrl_key {
 	TINYRL_KEY_RIGHT,
 };
 
-/* virtual methods */
-typedef int tinyrl_hook_func_t(struct tinyrl *instance);
-
 /**
  * \return
  * - true if the action associated with the key has
