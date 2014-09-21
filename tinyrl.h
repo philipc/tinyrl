@@ -42,8 +42,6 @@ void tinyrl_done(struct tinyrl *instance);
 
 unsigned tinyrl__get_width(const struct tinyrl *instance);
 
-bool tinyrl__get_isatty(const struct tinyrl *instance);
-
 char *tinyrl_readline(struct tinyrl *instance, const char *prompt);
 
 void tinyrl_bind_key(struct tinyrl *instance, unsigned char key,

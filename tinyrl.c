@@ -1008,12 +1008,6 @@ void tinyrl_disable_echo(struct tinyrl *this, char echo_char)
 	this->echo_char = echo_char;
 }
 
-/*-------------------------------------------------------- */
-bool tinyrl__get_isatty(const struct tinyrl *this)
-{
-	return this->isatty;
-}
-
 /*--------------------------------------------------------- */
 void tinyrl_limit_line_length(struct tinyrl *this, unsigned length)
 {
