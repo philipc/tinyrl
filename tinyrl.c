@@ -73,12 +73,6 @@ static void tinyrl_vt100_clear_screen(const struct tinyrl *this)
 }
 
 /*-------------------------------------------------------- */
-static void tinyrl_vt100_cursor_forward(const struct tinyrl *this, unsigned count)
-{
-	tinyrl_printf(this, "\x1b[%dC", count);
-}
-
-/*-------------------------------------------------------- */
 static void tinyrl_vt100_cursor_back(const struct tinyrl *this, unsigned count)
 {
 	tinyrl_printf(this, "\x1b[%dD", count);
@@ -440,120 +434,26 @@ static void tinyrl_internal_print(const struct tinyrl *this, const char *text)
 /*----------------------------------------------------------------------- */
 void tinyrl_redisplay(struct tinyrl *this)
 {
-	int delta;
-	unsigned line_len, last_line_len, count;
-	line_len = strlen(this->line);
-	last_line_len = (this->last_buffer ? strlen(this->last_buffer) : 0);
+	size_t line_len;
 
-	do {
-		if (this->last_buffer) {
-			delta = (int)(line_len - last_line_len);
-			if (delta > 0) {
-				count = (unsigned)delta;
-				/* is the current line simply an extension of the previous one? */
-				if (0 ==
-				    strncmp(this->line, this->last_buffer,
-					    last_line_len)) {
-					/* output the line accounting for the echo behaviour */
-					tinyrl_internal_print(this,
-							      &this->
-							      line[line_len -
-							      count]);
-					break;
-				}
-			} else if (delta < 0) {
-				/* is the current line simply a deletion of some characters from the end? */
-				if (0 ==
-				    strncmp(this->line, this->last_buffer,
-					    line_len)) {
-					if (this->echo_enabled
-					    || this->echo_char) {
-						int shift =
-							(int)(this->last_point -
-							      this->point);
-						/* just get the terminal to delete the characters */
-						if (shift > 0) {
-							count = (unsigned)shift;
-							/* we've moved the cursor backwards */
-							tinyrl_vt100_cursor_back
-								(this, count);
-						} else if (shift < 0) {
-							count =
-								(unsigned)-shift;
-							/* we've moved the cursor forwards */
-							tinyrl_vt100_cursor_forward
-								(this, count);
-						}
-						/* now delete the characters */
-						count = (unsigned)-delta;
-						tinyrl_vt100_erase(this, count);
-					}
-					break;
-				}
-			} else {
-				/* are the lines are the same content? */
-				if (0 == strcmp(this->line, this->last_buffer)) {
-					if (this->echo_enabled
-					    || this->echo_char) {
-						delta =
-							(int)(this->point -
-							      this->last_point);
-						if (delta > 0) {
-							count = (unsigned)delta;
-							/* move the point forwards */
-							tinyrl_vt100_cursor_forward
-								(this, count);
-						} else if (delta < 0) {
-							count =
-								(unsigned)-delta;
-							/* move the cursor backwards */
-							tinyrl_vt100_cursor_back
-								(this, count);
-						}
-					}
-					/* done for now */
-					break;
-				}
-			}
-		} else {
-			/* simply display the prompt and the line */
-			tinyrl_printf(this, "%s", this->prompt);
-			tinyrl_internal_print(this, this->line);
-			if (this->point < line_len) {
-				/* move the cursor to the insertion point */
-				tinyrl_vt100_cursor_back(this,
-							 line_len -
-							 this->point);
-			}
-			break;
-		}
-		/* 
-		 * to have got this far we must have edited the middle of a line.
-		 */
+	if (this->last_buffer) {
 		if (this->last_point) {
-			/* move to just after the prompt of the line */
 			tinyrl_vt100_cursor_back(this, this->last_point);
 		}
-		/* erase the previous line */
 		tinyrl_vt100_erase(this, strlen(this->last_buffer));
+	} else {
+		tinyrl_printf(this, "%s", this->prompt);
+	}
 
-		/* output the line accounting for the echo behaviour */
-		tinyrl_internal_print(this, this->line);
+	tinyrl_internal_print(this, this->line);
 
-		delta = (int)(line_len - this->point);
-		if (delta) {
-			/* move the cursor back to the insertion point */
-			tinyrl_vt100_cursor_back(this,
-						 (strlen(this->line) -
-						  this->point));
-		}
-	} /*lint -e717 */ while (0)	/*lint +e717 */
-	;
+	line_len = strlen(this->line);
+	if (line_len > this->point) {
+		tinyrl_vt100_cursor_back(this, line_len - this->point);
+	}
 
-	/* update the display */
 	fflush(this->ostream);
 
-	/* set up the last line buffer */
 	free(this->last_buffer);
 	this->last_buffer = strdup(this->line);
 	this->last_point = this->point;
