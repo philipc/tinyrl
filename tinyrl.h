@@ -40,7 +40,7 @@ void tinyrl_delete(struct tinyrl *instance);
 
 void tinyrl_done(struct tinyrl *instance);
 
-unsigned tinyrl__get_width(const struct tinyrl *instance);
+size_t tinyrl__get_width(const struct tinyrl *instance);
 
 char *tinyrl_readline(struct tinyrl *instance, const char *prompt);
 

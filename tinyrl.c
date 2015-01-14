@@ -38,10 +38,9 @@ struct tinyrl {
 	char echo_char;
 	bool echo_enabled;
 	bool isatty;
-	char *last_buffer;	/* hold record of the previous 
-				   buffer for redisplay purposes */
-	unsigned last_point;	/* hold record of the previous 
-				   cursor position for redisplay purposes */
+
+	size_t last_rows;
+	size_t last_point_rows;
 };
 
 #define ESCAPESEQ "\x1b["
@@ -73,21 +72,33 @@ static void tinyrl_vt100_clear_screen(const struct tinyrl *this)
 }
 
 /*-------------------------------------------------------- */
-static void tinyrl_vt100_cursor_back(const struct tinyrl *this, unsigned count)
+static void tinyrl_vt100_erase_line(const struct tinyrl *this)
 {
-	tinyrl_printf(this, "\x1b[%dD", count);
+	tinyrl_printf(this, "\x1b[2K");
+}
+
+/*-------------------------------------------------------- */
+static void tinyrl_vt100_cursor_up(const struct tinyrl *this, unsigned count)
+{
+	tinyrl_printf(this, "\x1b[%dA", count);
+}
+
+/*-------------------------------------------------------- */
+static void tinyrl_vt100_cursor_down(const struct tinyrl *this, unsigned count)
+{
+	tinyrl_printf(this, "\x1b[%dB", count);
+}
+
+/*-------------------------------------------------------- */
+static void tinyrl_vt100_cursor_forward(const struct tinyrl *this, unsigned count)
+{
+	tinyrl_printf(this, "\x1b[%dC", count);
 }
 
 /*-------------------------------------------------------- */
 static void tinyrl_vt100_cursor_home(const struct tinyrl *this)
 {
 	tinyrl_printf(this, "\x1b[H");
-}
-
-/*-------------------------------------------------------- */
-static void tinyrl_vt100_erase(const struct tinyrl *this, unsigned count)
-{
-	tinyrl_printf(this, "\x1b[%dP", count);
 }
 
 /*----------------------------------------------------------------------- */
@@ -329,8 +340,6 @@ static void tinyrl_fini(struct tinyrl *this)
 	this->buffer = NULL;
 	free(this->kill_string);
 	this->kill_string = NULL;
-	free(this->last_buffer);
-	this->last_buffer = NULL;
 	tinyrl_keymap_free(this->keymap);
 }
 
@@ -370,8 +379,8 @@ tinyrl_init(struct tinyrl *this, FILE * instream, FILE * outstream)
 	this->echo_char = '\0';
 	this->echo_enabled = true;
 	this->isatty = isatty(fileno(instream));
-	this->last_buffer = NULL;
-	this->last_point = 0;
+	this->last_rows = 0;
+	this->last_point_rows = 0;
 
 	this->istream = instream;
 	this->ostream = outstream;
@@ -434,29 +443,53 @@ static void tinyrl_internal_print(const struct tinyrl *this, const char *text)
 /*----------------------------------------------------------------------- */
 void tinyrl_redisplay(struct tinyrl *this)
 {
-	size_t line_len;
+	size_t prompt_len, width;
+	size_t rows, point_rows, point_col;
+	size_t i;
 
-	if (this->last_buffer) {
-		if (this->last_point) {
-			tinyrl_vt100_cursor_back(this, this->last_point);
+	/* erase previous line */
+	if (this->last_rows) {
+		/* move cursor to the start of the last displayed row */
+		tinyrl_printf(this, "\r");
+		if (this->last_rows > this->last_point_rows) {
+			tinyrl_vt100_cursor_down(this, this->last_rows - this->last_point_rows);
 		}
-		tinyrl_vt100_erase(this, strlen(this->last_buffer));
-	} else {
-		tinyrl_printf(this, "%s", this->prompt);
+
+		/* erase all previously displayed rows */
+		for (i = 0; i < this->last_rows - 1; i++) {
+			tinyrl_vt100_erase_line(this);
+			tinyrl_vt100_cursor_up(this, 1);
+		}
+		tinyrl_vt100_erase_line(this);
 	}
 
+	/* display updated line */
+	tinyrl_printf(this, "%s", this->prompt);
 	tinyrl_internal_print(this, this->line);
 
-	line_len = strlen(this->line);
-	if (line_len > this->point) {
-		tinyrl_vt100_cursor_back(this, line_len - this->point);
+	/* move cursor to point */
+	prompt_len = strlen(this->prompt);
+	width = tinyrl__get_width(this);
+	rows = (prompt_len + this->end + width - 1) / width;
+	point_rows = (prompt_len + this->point + width) / width;
+	point_col = (prompt_len + this->point) % width;
+	if (rows < point_rows) {
+		tinyrl_printf(this, "\n");
+		rows = point_rows;
 	}
+	if (this->end > this->point) {
+		if (rows > point_rows) {
+			tinyrl_vt100_cursor_up(this, rows - point_rows);
+		}
+		tinyrl_printf(this, "\r");
+		if (point_col) {
+			tinyrl_vt100_cursor_forward(this, point_col);
+		}
+	}
+	this->last_rows = rows;
+	this->last_point_rows = point_rows;
 
 	fflush(this->ostream);
-
-	free(this->last_buffer);
-	this->last_buffer = strdup(this->line);
-	this->last_point = this->point;
 }
 
 /*----------------------------------------------------------------------- */
@@ -559,8 +592,7 @@ static void tinyrl_readraw(struct tinyrl *this)
 	size_t len = sizeof(buffer);
 
 	/* manually reset the line state without redisplaying */
-	free(this->last_buffer);
-	this->last_buffer = NULL;
+	this->last_rows = 0;
 
 	while ((sizeof(buffer) == len) &&
 	       (s = fgets(buffer, sizeof(buffer), this->istream))) {
@@ -843,8 +875,7 @@ void tinyrl_ding(const struct tinyrl *this)
 void tinyrl_reset_line_state(struct tinyrl *this)
 {
 	/* start from scratch */
-	free(this->last_buffer);
-	this->last_buffer = NULL;
+	this->last_rows = 0;
 
 	tinyrl_redisplay(this);
 }
@@ -881,7 +912,7 @@ unsigned tinyrl_get_point(const struct tinyrl *this)
 }
 
 /*--------------------------------------------------------- */
-unsigned tinyrl__get_width(const struct tinyrl *this)
+size_t tinyrl__get_width(const struct tinyrl *this)
 {
 	struct winsize ws;
 
