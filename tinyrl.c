@@ -1,25 +1,15 @@
-/*
- * tinyrl.c
- */
+#include "tinyrl.h"
 
-/* make sure we can get fileno() */
-#undef __STRICT_ANSI__
-
-/* LIBC HEADERS */
 #include <assert.h>
+#include <ctype.h>
+#include <fcntl.h>
 #include <stdarg.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <ctype.h>
-
-/* POSIX HEADERS */
 #include <termios.h>
 #include <unistd.h>
-#include <fcntl.h>
-
-#include "tinyrl.h"
 
 #define KEYMAP_SIZE 256
 
