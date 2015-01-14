@@ -10,6 +10,7 @@
 #include <string.h>
 #include <termios.h>
 #include <unistd.h>
+#include <sys/ioctl.h>
 
 #define KEYMAP_SIZE 256
 
@@ -982,7 +983,11 @@ unsigned tinyrl_get_point(const struct tinyrl *this)
 /*--------------------------------------------------------- */
 unsigned tinyrl__get_width(const struct tinyrl *this)
 {
-	/* hard code until we suss out how to do it properly */
+	struct winsize ws;
+
+	if (ioctl(fileno(this->ostream), TIOCGWINSZ, &ws) != -1 || !ws.ws_col)
+		return ws.ws_col;
+
 	return 80;
 }
 
