@@ -916,7 +916,7 @@ size_t tinyrl__get_width(const struct tinyrl *this)
 {
 	struct winsize ws;
 
-	if (ioctl(fileno(this->ostream), TIOCGWINSZ, &ws) != -1 || !ws.ws_col)
+	if (ioctl(fileno(this->ostream), TIOCGWINSZ, &ws) != -1 && ws.ws_col)
 		return ws.ws_col;
 
 	return 80;
