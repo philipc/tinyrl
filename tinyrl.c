@@ -39,6 +39,8 @@ struct tinyrl {
 	bool echo_enabled;
 	bool isatty;
 
+	char *last_buffer;
+	size_t last_end;
 	size_t last_rows;
 	size_t last_point_rows;
 };
@@ -69,6 +71,12 @@ static void _tinyrl_vt100_setInputBlocking(const struct tinyrl *this)
 static void tinyrl_vt100_clear_screen(const struct tinyrl *this)
 {
 	tinyrl_printf(this, "\x1b[2J");
+}
+
+/*-------------------------------------------------------- */
+static void tinyrl_vt100_erase_line_end(const struct tinyrl *this)
+{
+	tinyrl_printf(this, "\x1b[0K");
 }
 
 /*-------------------------------------------------------- */
@@ -340,6 +348,7 @@ static void tinyrl_fini(struct tinyrl *this)
 	this->buffer = NULL;
 	free(this->kill_string);
 	this->kill_string = NULL;
+	free(this->last_buffer);
 	tinyrl_keymap_free(this->keymap);
 }
 
@@ -379,6 +388,8 @@ tinyrl_init(struct tinyrl *this, FILE * instream, FILE * outstream)
 	this->echo_char = '\0';
 	this->echo_enabled = true;
 	this->isatty = isatty(fileno(instream));
+	this->last_buffer = NULL;
+	this->last_end = 0;
 	this->last_rows = 0;
 	this->last_point_rows = 0;
 
@@ -446,36 +457,63 @@ void tinyrl_redisplay(struct tinyrl *this)
 	size_t prompt_len, width;
 	size_t rows, point_rows, point_col;
 	size_t i;
+	size_t keep_len, keep_rows, keep_col;
 
-	/* erase previous line */
-	if (this->last_rows) {
+	prompt_len = strlen(this->prompt);
+	width = tinyrl__get_width(this);
+
+	/* erase changed portion of previous line */
+	if (this->last_buffer) {
+		/* find out how much to keep */
+		for (keep_len = 0;
+		     keep_len < this->end
+		     && keep_len < this->last_end
+		     && this->buffer[keep_len] == this->last_buffer[keep_len];
+		     keep_len++);
+		keep_rows = (prompt_len + keep_len + width) / width;
+		keep_col = (prompt_len + keep_len) % width;
+		if (keep_len > 0 && keep_col == 0) {
+			/* never keep an empty last line, so that we can
+			 * position the cursor correctly */
+			keep_len--;
+			keep_rows--;
+			keep_col = width - 1;
+		}
+
 		/* move cursor to the start of the last displayed row */
 		tinyrl_printf(this, "\r");
 		if (this->last_rows > this->last_point_rows) {
 			tinyrl_vt100_cursor_down(this, this->last_rows - this->last_point_rows);
+		} else if (this->last_rows < this->last_point_rows) {
+			tinyrl_vt100_cursor_up(this, this->last_point_rows - this->last_rows);
 		}
 
-		/* erase all previously displayed rows */
-		for (i = 0; i < this->last_rows - 1; i++) {
+		/* erase the rows we aren't keeping */
+		for (i = keep_rows; i < this->last_rows; i++) {
 			tinyrl_vt100_erase_line(this);
 			tinyrl_vt100_cursor_up(this, 1);
 		}
-		tinyrl_vt100_erase_line(this);
+
+		/* partially erase the last kept row */
+		if (keep_col)
+			tinyrl_vt100_cursor_forward(this, keep_col);
+		tinyrl_vt100_erase_line_end(this);
+	} else {
+		keep_len = 0;
+		tinyrl_printf(this, "%s", this->prompt);
 	}
 
-	/* display updated line */
-	tinyrl_printf(this, "%s", this->prompt);
-	tinyrl_internal_print(this, this->line);
+	tinyrl_internal_print(this, this->line + keep_len);
 
 	/* move cursor to point */
-	prompt_len = strlen(this->prompt);
-	width = tinyrl__get_width(this);
 	rows = (prompt_len + this->end + width - 1) / width;
 	point_rows = (prompt_len + this->point + width) / width;
 	point_col = (prompt_len + this->point) % width;
 	if (rows < point_rows) {
+                /* if the text is a whole number of lines, then the
+                 * cursor will still be at the end of the last line,
+		 * so move it to the start of the next  */
 		tinyrl_printf(this, "\n");
-		rows = point_rows;
 	}
 	if (this->end > this->point) {
 		if (rows > point_rows) {
@@ -486,6 +524,10 @@ void tinyrl_redisplay(struct tinyrl *this)
 			tinyrl_vt100_cursor_forward(this, point_col);
 		}
 	}
+
+	free(this->last_buffer);
+	this->last_buffer = strdup(this->line);
+	this->last_end = this->end;
 	this->last_rows = rows;
 	this->last_point_rows = point_rows;
 
@@ -592,7 +634,8 @@ static void tinyrl_readraw(struct tinyrl *this)
 	size_t len = sizeof(buffer);
 
 	/* manually reset the line state without redisplaying */
-	this->last_rows = 0;
+	free(this->last_buffer);
+	this->last_buffer = NULL;
 
 	while ((sizeof(buffer) == len) &&
 	       (s = fgets(buffer, sizeof(buffer), this->istream))) {
@@ -875,7 +918,8 @@ void tinyrl_ding(const struct tinyrl *this)
 void tinyrl_reset_line_state(struct tinyrl *this)
 {
 	/* start from scratch */
-	this->last_rows = 0;
+	free(this->last_buffer);
+	this->last_buffer = NULL;
 
 	tinyrl_redisplay(this);
 }
