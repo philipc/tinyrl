@@ -45,7 +45,7 @@ struct tinyrl {
 	size_t last_point_rows;
 };
 
-#define ESCAPESEQ "\x1b["
+#define ESCAPESTR "\x1b"
 #define ESCAPE 27
 #define BACKSPACE 127
 
@@ -357,6 +357,8 @@ tinyrl_init(struct tinyrl *this, FILE * instream, FILE * outstream)
 	tinyrl_bind_key(this, CTRL('Y'), tinyrl_key_yank, this);
 	tinyrl_bind_special(this, TINYRL_KEY_RIGHT, tinyrl_key_right, this);
 	tinyrl_bind_special(this, TINYRL_KEY_LEFT, tinyrl_key_left, this);
+	tinyrl_bind_special(this, TINYRL_KEY_HOME, tinyrl_key_start_of_line, this);
+	tinyrl_bind_special(this, TINYRL_KEY_END, tinyrl_key_end_of_line, this);
 
 	this->line = NULL;
 	this->max_line_length = 0;
@@ -873,16 +875,22 @@ void tinyrl_bind_special(struct tinyrl *this, enum tinyrl_key key,
 {
 	switch (key) {
 	case TINYRL_KEY_UP:
-		tinyrl_bind_keyseq(this, ESCAPESEQ "A", handler, context);
+		tinyrl_bind_keyseq(this, ESCAPESTR "[A", handler, context);
 		break;
 	case TINYRL_KEY_DOWN:
-		tinyrl_bind_keyseq(this, ESCAPESEQ "B", handler, context);
+		tinyrl_bind_keyseq(this, ESCAPESTR "[B", handler, context);
 		break;
 	case TINYRL_KEY_LEFT:
-		tinyrl_bind_keyseq(this, ESCAPESEQ "D", handler, context);
+		tinyrl_bind_keyseq(this, ESCAPESTR "[D", handler, context);
 		break;
 	case TINYRL_KEY_RIGHT:
-		tinyrl_bind_keyseq(this, ESCAPESEQ "C", handler, context);
+		tinyrl_bind_keyseq(this, ESCAPESTR "[C", handler, context);
+		break;
+	case TINYRL_KEY_HOME:
+		tinyrl_bind_keyseq(this, ESCAPESTR "OH", handler, context);
+		break;
+	case TINYRL_KEY_END:
+		tinyrl_bind_keyseq(this, ESCAPESTR "OF", handler, context);
 		break;
 	}
 }

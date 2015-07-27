@@ -20,6 +20,8 @@ enum tinyrl_key {
 	TINYRL_KEY_DOWN,
 	TINYRL_KEY_LEFT,
 	TINYRL_KEY_RIGHT,
+	TINYRL_KEY_HOME,
+	TINYRL_KEY_END,
 };
 
 /**
