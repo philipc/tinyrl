@@ -49,24 +49,6 @@ struct tinyrl {
 #define ESCAPE 27
 #define BACKSPACE 127
 
-/*--------------------------------------------------------- */
-static void _tinyrl_vt100_setInputNonBlocking(const struct tinyrl *this)
-{
-#if defined(STDIN_FILENO)
-	int flags = (fcntl(STDIN_FILENO, F_GETFL, 0) | O_NONBLOCK);
-	fcntl(STDIN_FILENO, F_SETFL, flags);
-#endif				/* STDIN_FILENO */
-}
-
-/*--------------------------------------------------------- */
-static void _tinyrl_vt100_setInputBlocking(const struct tinyrl *this)
-{
-#if defined(STDIN_FILENO)
-	int flags = (fcntl(STDIN_FILENO, F_GETFL, 0) & ~O_NONBLOCK);
-	fcntl(STDIN_FILENO, F_SETFL, flags);
-#endif				/* STDIN_FILENO */
-}
-
 /*-------------------------------------------------------- */
 static void tinyrl_vt100_clear_screen(const struct tinyrl *this)
 {
@@ -434,6 +416,22 @@ static int tinyrl_getchar(const struct tinyrl *this)
 	return getc(this->istream);
 }
 
+static int tinyrl_getchar_nonblock(const struct tinyrl *this)
+{
+	int fd;
+	int flags;
+	int c;
+
+	fd = fileno(this->istream);
+	flags = fcntl(fd, F_GETFL, 0);
+	if (flags != -1)
+		fcntl(fd, F_SETFL, flags | O_NONBLOCK);
+	c = getc(this->istream);
+	if (flags != -1)
+		fcntl(fd, F_SETFL, flags);
+	return c;
+}
+
 /*----------------------------------------------------------------------- */
 static void tinyrl_internal_print(const struct tinyrl *this, const char *text)
 {
@@ -572,9 +570,7 @@ static void tinyrl_handle_key(struct tinyrl *this, int key)
 		if (!keymap)
 			break;
 
-		_tinyrl_vt100_setInputNonBlocking(this);
-		c = getc(this->istream);
-		_tinyrl_vt100_setInputBlocking(this);
+		c = tinyrl_getchar_nonblock(this);
 		if (c == EOF)
 			break;
 	}
