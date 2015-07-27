@@ -359,6 +359,7 @@ tinyrl_init(struct tinyrl *this, FILE * instream, FILE * outstream)
 	tinyrl_bind_special(this, TINYRL_KEY_LEFT, tinyrl_key_left, this);
 	tinyrl_bind_special(this, TINYRL_KEY_HOME, tinyrl_key_start_of_line, this);
 	tinyrl_bind_special(this, TINYRL_KEY_END, tinyrl_key_end_of_line, this);
+	tinyrl_bind_special(this, TINYRL_KEY_DELETE, tinyrl_key_delete, this);
 
 	this->line = NULL;
 	this->max_line_length = 0;
@@ -891,6 +892,12 @@ void tinyrl_bind_special(struct tinyrl *this, enum tinyrl_key key,
 		break;
 	case TINYRL_KEY_END:
 		tinyrl_bind_keyseq(this, ESCAPESTR "OF", handler, context);
+		break;
+	case TINYRL_KEY_INSERT:
+		tinyrl_bind_keyseq(this, ESCAPESTR "[2~", handler, context);
+		break;
+	case TINYRL_KEY_DELETE:
+		tinyrl_bind_keyseq(this, ESCAPESTR "[3~", handler, context);
 		break;
 	}
 }
