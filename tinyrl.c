@@ -49,49 +49,41 @@ struct tinyrl {
 #define ESCAPE 27
 #define BACKSPACE 127
 
-/*-------------------------------------------------------- */
 static void tinyrl_vt100_clear_screen(const struct tinyrl *this)
 {
 	tinyrl_printf(this, "\x1b[2J");
 }
 
-/*-------------------------------------------------------- */
 static void tinyrl_vt100_erase_line_end(const struct tinyrl *this)
 {
 	tinyrl_printf(this, "\x1b[0K");
 }
 
-/*-------------------------------------------------------- */
 static void tinyrl_vt100_erase_line(const struct tinyrl *this)
 {
 	tinyrl_printf(this, "\x1b[2K");
 }
 
-/*-------------------------------------------------------- */
 static void tinyrl_vt100_cursor_up(const struct tinyrl *this, unsigned count)
 {
 	tinyrl_printf(this, "\x1b[%dA", count);
 }
 
-/*-------------------------------------------------------- */
 static void tinyrl_vt100_cursor_down(const struct tinyrl *this, unsigned count)
 {
 	tinyrl_printf(this, "\x1b[%dB", count);
 }
 
-/*-------------------------------------------------------- */
 static void tinyrl_vt100_cursor_forward(const struct tinyrl *this, unsigned count)
 {
 	tinyrl_printf(this, "\x1b[%dC", count);
 }
 
-/*-------------------------------------------------------- */
 static void tinyrl_vt100_cursor_home(const struct tinyrl *this)
 {
 	tinyrl_printf(this, "\x1b[H");
 }
 
-/*----------------------------------------------------------------------- */
 static void tty_set_raw_mode(FILE *istream, struct termios *old_termios)
 {
 	struct termios new_termios;
@@ -113,7 +105,6 @@ static void tty_set_raw_mode(FILE *istream, struct termios *old_termios)
 	}
 }
 
-/*----------------------------------------------------------------------- */
 static void tty_restore_mode(FILE *istream, struct termios *old_termios)
 {
 	int fd = fileno(istream);
@@ -121,7 +112,6 @@ static void tty_restore_mode(FILE *istream, struct termios *old_termios)
 	tcsetattr(fd, TCSAFLUSH, old_termios);
 }
 
-/*----------------------------------------------------------------------- */
 /*
    This is called whenever a line is edited in any way.
    It signals that if we are currently viewing a history line we should transfer it
@@ -139,7 +129,6 @@ static void changed_line(struct tinyrl *this)
 	}
 }
 
-/*----------------------------------------------------------------------- */
 static bool tinyrl_key_default(void *context, int key)
 {
 	struct tinyrl *this = context;
@@ -156,7 +145,6 @@ static bool tinyrl_key_default(void *context, int key)
 	return result;
 }
 
-/*-------------------------------------------------------- */
 static bool tinyrl_key_interrupt(void *context, int key)
 {
 	struct tinyrl *this = context;
@@ -167,7 +155,6 @@ static bool tinyrl_key_interrupt(void *context, int key)
 	return true;
 }
 
-/*-------------------------------------------------------- */
 static bool tinyrl_key_start_of_line(void *context, int key)
 {
 	struct tinyrl *this = context;
@@ -177,7 +164,6 @@ static bool tinyrl_key_start_of_line(void *context, int key)
 	return true;
 }
 
-/*-------------------------------------------------------- */
 static bool tinyrl_key_end_of_line(void *context, int key)
 {
 	struct tinyrl *this = context;
@@ -187,7 +173,6 @@ static bool tinyrl_key_end_of_line(void *context, int key)
 	return true;
 }
 
-/*-------------------------------------------------------- */
 static bool tinyrl_key_kill(void *context, int key)
 {
 	struct tinyrl *this = context;
@@ -203,7 +188,6 @@ static bool tinyrl_key_kill(void *context, int key)
 	return true;
 }
 
-/*-------------------------------------------------------- */
 static bool tinyrl_key_yank(void *context, int key)
 {
 	struct tinyrl *this = context;
@@ -215,7 +199,6 @@ static bool tinyrl_key_yank(void *context, int key)
 	return result;
 }
 
-/*-------------------------------------------------------- */
 static bool tinyrl_key_crlf(void *context, int key)
 {
 	struct tinyrl *this = context;
@@ -225,7 +208,6 @@ static bool tinyrl_key_crlf(void *context, int key)
 	return true;
 }
 
-/*-------------------------------------------------------- */
 static bool tinyrl_key_left(void *context, int key)
 {
 	struct tinyrl *this = context;
@@ -237,7 +219,6 @@ static bool tinyrl_key_left(void *context, int key)
 	return result;
 }
 
-/*-------------------------------------------------------- */
 static bool tinyrl_key_right(void *context, int key)
 {
 	struct tinyrl *this = context;
@@ -249,7 +230,6 @@ static bool tinyrl_key_right(void *context, int key)
 	return result;
 }
 
-/*-------------------------------------------------------- */
 static bool tinyrl_key_backspace(void *context, int key)
 {
 	struct tinyrl *this = context;
@@ -262,7 +242,6 @@ static bool tinyrl_key_backspace(void *context, int key)
 	return result;
 }
 
-/*-------------------------------------------------------- */
 static bool tinyrl_key_delete(void *context, int key)
 {
 	struct tinyrl *this = context;
@@ -274,7 +253,6 @@ static bool tinyrl_key_delete(void *context, int key)
 	return result;
 }
 
-/*-------------------------------------------------------- */
 static bool tinyrl_key_clear_screen(void *context, int key)
 {
 	struct tinyrl *this = context;
@@ -285,7 +263,6 @@ static bool tinyrl_key_clear_screen(void *context, int key)
 	return true;
 }
 
-/*-------------------------------------------------------- */
 static bool tinyrl_key_erase_line(void *context, int key)
 {
 	struct tinyrl *this = context;
@@ -295,7 +272,6 @@ static bool tinyrl_key_erase_line(void *context, int key)
 	return true;
 }
 
-/*-------------------------------------------------------- */
 static struct tinyrl_keymap *tinyrl_keymap_new()
 {
 	struct tinyrl_keymap *keymap;
@@ -322,7 +298,6 @@ static void tinyrl_keymap_free(struct tinyrl_keymap *keymap)
 	free(keymap);
 }
 
-/*-------------------------------------------------------- */
 static void tinyrl_fini(struct tinyrl *this)
 {
 	/* free up any dynamic strings */
@@ -334,7 +309,6 @@ static void tinyrl_fini(struct tinyrl *this)
 	tinyrl_keymap_free(this->keymap);
 }
 
-/*-------------------------------------------------------- */
 static void
 tinyrl_init(struct tinyrl *this, FILE * instream, FILE * outstream)
 {
@@ -383,7 +357,6 @@ tinyrl_init(struct tinyrl *this, FILE * instream, FILE * outstream)
 	this->ostream = outstream;
 }
 
-/*-------------------------------------------------------- */
 int tinyrl_printf(const struct tinyrl *this, const char *fmt, ...)
 {
 	va_list args;
@@ -396,7 +369,6 @@ int tinyrl_printf(const struct tinyrl *this, const char *fmt, ...)
 	return len;
 }
 
-/*-------------------------------------------------------- */
 void tinyrl_delete(struct tinyrl *this)
 {
 	assert(this);
@@ -409,12 +381,6 @@ void tinyrl_delete(struct tinyrl *this)
 	}
 }
 
-/*-------------------------------------------------------- */
-
-/*#####################################
- * EXPORTED INTERFACE
- *##################################### */
-/*----------------------------------------------------------------------- */
 static int tinyrl_getchar(const struct tinyrl *this)
 {
 	return getc(this->istream);
@@ -436,7 +402,6 @@ static int tinyrl_getchar_nonblock(const struct tinyrl *this)
 	return c;
 }
 
-/*----------------------------------------------------------------------- */
 static void tinyrl_internal_print(const struct tinyrl *this, const char *text)
 {
 	if (this->echo_enabled) {
@@ -453,7 +418,6 @@ static void tinyrl_internal_print(const struct tinyrl *this, const char *text)
 	}
 }
 
-/*----------------------------------------------------------------------- */
 void tinyrl_redisplay(struct tinyrl *this)
 {
 	size_t prompt_len, width;
@@ -536,7 +500,6 @@ void tinyrl_redisplay(struct tinyrl *this)
 	fflush(this->ostream);
 }
 
-/*----------------------------------------------------------------------- */
 struct tinyrl *tinyrl_new(FILE * instream, FILE * outstream)
 {
 	struct tinyrl *this = NULL;
@@ -549,7 +512,6 @@ struct tinyrl *tinyrl_new(FILE * instream, FILE * outstream)
 	return this;
 }
 
-/*----------------------------------------------------------------------- */
 /* Call the handler for the longest matching key sequence.
  * Note: if there is a partial match, then the extra keys are discarded.  This
  * shouldn't matter in practice.
@@ -714,7 +676,6 @@ char *tinyrl_readline(struct tinyrl *this, const char *prompt)
 	return result;
 }
 
-/*----------------------------------------------------------------------- */
 /*
  * Ensure that buffer has enough space to hold len characters,
  * possibly reallocating it if necessary. The function returns true
@@ -774,7 +735,6 @@ static bool tinyrl_extend_line_buffer(struct tinyrl *this, unsigned len)
 	return result;
 }
 
-/*----------------------------------------------------------------------- */
 /*
  * Insert text into the line at the current cursor position.
  */
@@ -818,7 +778,6 @@ bool tinyrl_insert_text(struct tinyrl *this, const char *text)
 	return tinyrl_insert_text_len(this, text, strlen(text));
 }
 
-/*----------------------------------------------------------------------- */
 /*
  * Delete the text in the interval [start, end-1] in the current line.
  * This adjusts the rl_point and rl_end indexes appropriately.
@@ -848,7 +807,6 @@ void tinyrl_delete_text(struct tinyrl *this, unsigned start, unsigned end)
 	}
 }
 
-/*----------------------------------------------------------------------- */
 static void tinyrl_bind_keyseq(struct tinyrl *this, const char *seq,
 			       tinyrl_key_func_t *handler, void *context)
 {
@@ -910,13 +868,11 @@ void tinyrl_bind_key(struct tinyrl *this, unsigned char key,
 	this->keymap->context[key] = context;
 }
 
-/*-------------------------------------------------------- */
 void tinyrl_crlf(const struct tinyrl *this)
 {
 	tinyrl_printf(this, "\n");
 }
 
-/*-------------------------------------------------------- */
 /*
  * Ring the terminal bell, obeying the setting of bell-style.
  */
@@ -926,7 +882,6 @@ void tinyrl_ding(const struct tinyrl *this)
 	fflush(this->ostream);
 }
 
-/*-------------------------------------------------------- */
 void tinyrl_reset_line_state(struct tinyrl *this)
 {
 	/* start from scratch */
@@ -936,14 +891,12 @@ void tinyrl_reset_line_state(struct tinyrl *this)
 	tinyrl_redisplay(this);
 }
 
-/*-------------------------------------------------------- */
 void tinyrl_set_line(struct tinyrl *this, const char *text)
 {
 	this->line = text ?: this->buffer;
 	this->point = this->end = strlen(this->line);
 }
 
-/*-------------------------------------------------------- */
 void tinyrl_replace_line(struct tinyrl *this, const char *text)
 {
 	size_t new_len = strlen(text);
@@ -955,19 +908,16 @@ void tinyrl_replace_line(struct tinyrl *this, const char *text)
 	tinyrl_redisplay(this);
 }
 
-/*--------------------------------------------------------- */
 const char *tinyrl_get_line(const struct tinyrl *this)
 {
 	return this->line;
 }
 
-/*--------------------------------------------------------- */
 unsigned tinyrl_get_point(const struct tinyrl *this)
 {
 	return this->point;
 }
 
-/*--------------------------------------------------------- */
 size_t tinyrl__get_width(const struct tinyrl *this)
 {
 	struct winsize ws;
@@ -978,29 +928,23 @@ size_t tinyrl__get_width(const struct tinyrl *this)
 	return 80;
 }
 
-/*--------------------------------------------------------- */
 void tinyrl_done(struct tinyrl *this)
 {
 	this->done = true;
 }
 
-/*--------------------------------------------------------- */
 void tinyrl_enable_echo(struct tinyrl *this)
 {
 	this->echo_enabled = true;
 }
 
-/*--------------------------------------------------------- */
 void tinyrl_disable_echo(struct tinyrl *this, char echo_char)
 {
 	this->echo_enabled = false;
 	this->echo_char = echo_char;
 }
 
-/*--------------------------------------------------------- */
 void tinyrl_limit_line_length(struct tinyrl *this, unsigned length)
 {
 	this->max_line_length = length;
 }
-
-/*--------------------------------------------------------- */

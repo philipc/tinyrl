@@ -21,7 +21,6 @@ struct tinyrl_history {
 	unsigned iter;
 };
 
-/*-------------------------------------------------------- */
 static bool tinyrl_history_key_up(void *context, int key)
 {
 	struct tinyrl_history *history = context;
@@ -35,7 +34,6 @@ static bool tinyrl_history_key_up(void *context, int key)
 	return true;
 }
 
-/*-------------------------------------------------------- */
 static bool tinyrl_history_key_down(void *context, int key)
 {
 	struct tinyrl_history *history = context;
@@ -47,7 +45,6 @@ static bool tinyrl_history_key_down(void *context, int key)
 	return true;
 }
 
-/*------------------------------------- */
 struct tinyrl_history *tinyrl_history_new(struct tinyrl *tinyrl, unsigned limit)
 {
 	struct tinyrl_history *history;
@@ -68,7 +65,6 @@ struct tinyrl_history *tinyrl_history_new(struct tinyrl *tinyrl, unsigned limit)
 	return history;
 }
 
-/*------------------------------------- */
 void tinyrl_history_delete(struct tinyrl_history *history)
 {
 	unsigned i;
@@ -79,10 +75,6 @@ void tinyrl_history_delete(struct tinyrl_history *history)
 	free(history);
 }
 
-/*
-   HISTORY LIST MANAGEMENT 
-   */
-/*------------------------------------- */
 /*
  * This removes the specified entries from the 
  * entries vector. Shuffling up the array as necessary 
@@ -102,7 +94,6 @@ remove_entries(struct tinyrl_history *history, unsigned start, unsigned delta)
 	history->length -= delta;
 }
 
-/*------------------------------------- */
 /* 
    add an entry to the end of the current array 
    if there is no space returns -1 else 0
@@ -115,7 +106,6 @@ static void append_entry(struct tinyrl_history *history, const char *line)
 	}
 }
 
-/*------------------------------------- */
 /* grow the array if necessary */
 static void grow(struct tinyrl_history *history)
 {
@@ -133,7 +123,6 @@ static void grow(struct tinyrl_history *history)
 	}
 }
 
-/*------------------------------------- */
 void tinyrl_history_add(struct tinyrl_history *history, const char *line)
 {
 	if (history->length && (history->length == history->limit)) {
@@ -145,7 +134,6 @@ void tinyrl_history_add(struct tinyrl_history *history, const char *line)
 	append_entry(history, line);
 }
 
-/*------------------------------------- */
 void tinyrl_history_remove(struct tinyrl_history *history, unsigned offset)
 {
 	if (offset < history->length) {
@@ -154,14 +142,12 @@ void tinyrl_history_remove(struct tinyrl_history *history, unsigned offset)
 	}
 }
 
-/*------------------------------------- */
 void tinyrl_history_clear(struct tinyrl_history *history)
 {
 	/* free all the entries */
 	remove_entries(history, 0, history->length);
 }
 
-/*------------------------------------- */
 void tinyrl_history_limit(struct tinyrl_history *history, unsigned limit)
 {
 	if (limit && limit < history->length)

@@ -6,7 +6,6 @@
 #include <stdlib.h>
 #include "tinyrl.h"
 
-/*-------------------------------------------------------- */
 char **tinyrl_add_match(const struct tinyrl *this, unsigned start,
 			char **matches, const char *match)
 {
@@ -32,7 +31,6 @@ char **tinyrl_add_match(const struct tinyrl *this, unsigned start,
 	return matches;
 }
 
-/*-------------------------------------------------------- */
 void tinyrl_delete_matches(char **matches)
 {
 	char **m;
@@ -42,7 +40,6 @@ void tinyrl_delete_matches(char **matches)
 	free(matches);
 }
 
-/*----------------------------------------------------------------------- */
 /* 
  * A convenience function for displaying a list of strings in columnar
  * format on Readline's output stream. matches is the list of strings,
@@ -74,7 +71,6 @@ void tinyrl_display_matches(const struct tinyrl *this, char *const *matches)
 	}
 }
 
-/*-------------------------------------------------------- */
 bool tinyrl_complete(struct tinyrl *this, unsigned start,
 		     char **matches, bool allow_prefix)
 {
