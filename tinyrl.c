@@ -359,6 +359,7 @@ tinyrl_init(struct tinyrl *this, FILE * instream, FILE * outstream)
 	tinyrl_bind_special(this, TINYRL_KEY_LEFT, tinyrl_key_left, this);
 	tinyrl_bind_special(this, TINYRL_KEY_HOME, tinyrl_key_start_of_line, this);
 	tinyrl_bind_special(this, TINYRL_KEY_END, tinyrl_key_end_of_line, this);
+	tinyrl_bind_special(this, TINYRL_KEY_INSERT, NULL, NULL);
 	tinyrl_bind_special(this, TINYRL_KEY_DELETE, tinyrl_key_delete, this);
 
 	this->line = NULL;
