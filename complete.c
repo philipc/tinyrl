@@ -45,7 +45,7 @@ void tinyrl_delete_matches(char **matches)
  * format on Readline's output stream. matches is the list of strings,
  * in argv format, such as a list of completion matches.
  */
-void tinyrl_display_matches(const struct tinyrl *this, char *const *matches)
+void tinyrl_display_matches(struct tinyrl *this, char *const *matches)
 {
 	char *const *m;
 	size_t max;

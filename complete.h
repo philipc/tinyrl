@@ -8,7 +8,7 @@ struct tinyrl;
 char **tinyrl_add_match(const struct tinyrl *this, unsigned start,
 			char **matches, const char *match);
 void tinyrl_delete_matches(char **matches);
-void tinyrl_display_matches(const struct tinyrl * this, char *const *matches);
+void tinyrl_display_matches(struct tinyrl * this, char *const *matches);
 
 /**
  * Complete the current word in the input buffer.

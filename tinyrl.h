@@ -38,7 +38,7 @@ typedef bool tinyrl_key_func_t(void * context, int key);
 struct tinyrl *tinyrl_new(FILE * instream, FILE * outstream);
 
 /*lint -esym(534,tinyrl_printf)  Ignoring return value of function */
-int tinyrl_printf(const struct tinyrl *instance, const char *fmt, ...);
+int tinyrl_printf(struct tinyrl *instance, const char *fmt, ...);
 
 void tinyrl_delete(struct tinyrl *instance);
 
@@ -53,8 +53,8 @@ void tinyrl_bind_key(struct tinyrl *instance, unsigned char key,
 void tinyrl_bind_special(struct tinyrl *instance, enum tinyrl_key key,
 			 tinyrl_key_func_t *handler, void *context);
 
-void tinyrl_crlf(const struct tinyrl *instance);
-void tinyrl_ding(const struct tinyrl *instance);
+void tinyrl_crlf(struct tinyrl *instance);
+void tinyrl_ding(struct tinyrl *instance);
 
 void tinyrl_reset_line_state(struct tinyrl *instance);
 

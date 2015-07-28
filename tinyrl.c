@@ -49,37 +49,37 @@ struct tinyrl {
 #define ESCAPE 27
 #define BACKSPACE 127
 
-static void tinyrl_vt100_clear_screen(const struct tinyrl *this)
+static void tinyrl_vt100_clear_screen(struct tinyrl *this)
 {
 	tinyrl_printf(this, "\x1b[2J");
 }
 
-static void tinyrl_vt100_erase_line_end(const struct tinyrl *this)
+static void tinyrl_vt100_erase_line_end(struct tinyrl *this)
 {
 	tinyrl_printf(this, "\x1b[0K");
 }
 
-static void tinyrl_vt100_erase_line(const struct tinyrl *this)
+static void tinyrl_vt100_erase_line(struct tinyrl *this)
 {
 	tinyrl_printf(this, "\x1b[2K");
 }
 
-static void tinyrl_vt100_cursor_up(const struct tinyrl *this, unsigned count)
+static void tinyrl_vt100_cursor_up(struct tinyrl *this, unsigned count)
 {
 	tinyrl_printf(this, "\x1b[%dA", count);
 }
 
-static void tinyrl_vt100_cursor_down(const struct tinyrl *this, unsigned count)
+static void tinyrl_vt100_cursor_down(struct tinyrl *this, unsigned count)
 {
 	tinyrl_printf(this, "\x1b[%dB", count);
 }
 
-static void tinyrl_vt100_cursor_forward(const struct tinyrl *this, unsigned count)
+static void tinyrl_vt100_cursor_forward(struct tinyrl *this, unsigned count)
 {
 	tinyrl_printf(this, "\x1b[%dC", count);
 }
 
-static void tinyrl_vt100_cursor_home(const struct tinyrl *this)
+static void tinyrl_vt100_cursor_home(struct tinyrl *this)
 {
 	tinyrl_printf(this, "\x1b[H");
 }
@@ -357,7 +357,7 @@ tinyrl_init(struct tinyrl *this, FILE * instream, FILE * outstream)
 	this->ostream = outstream;
 }
 
-int tinyrl_printf(const struct tinyrl *this, const char *fmt, ...)
+int tinyrl_printf(struct tinyrl *this, const char *fmt, ...)
 {
 	va_list args;
 	int len;
@@ -402,7 +402,7 @@ static int tinyrl_getchar_nonblock(const struct tinyrl *this)
 	return c;
 }
 
-static void tinyrl_internal_print(const struct tinyrl *this, const char *text)
+static void tinyrl_internal_print(struct tinyrl *this, const char *text)
 {
 	if (this->echo_enabled) {
 		/* simply echo the line */
@@ -868,7 +868,7 @@ void tinyrl_bind_key(struct tinyrl *this, unsigned char key,
 	this->keymap->context[key] = context;
 }
 
-void tinyrl_crlf(const struct tinyrl *this)
+void tinyrl_crlf(struct tinyrl *this)
 {
 	tinyrl_printf(this, "\n");
 }
@@ -876,7 +876,7 @@ void tinyrl_crlf(const struct tinyrl *this)
 /*
  * Ring the terminal bell, obeying the setting of bell-style.
  */
-void tinyrl_ding(const struct tinyrl *this)
+void tinyrl_ding(struct tinyrl *this)
 {
 	tinyrl_printf(this, "\x7");
 	fflush(this->ostream);
