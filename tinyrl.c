@@ -434,7 +434,7 @@ void tinyrl_redisplay(struct tinyrl *this)
 		for (keep_len = 0;
 		     keep_len < this->end
 		     && keep_len < this->last_end
-		     && this->buffer[keep_len] == this->last_buffer[keep_len];
+		     && this->line[keep_len] == this->last_buffer[keep_len];
 		     keep_len++);
 		keep_rows = (prompt_len + keep_len + width) / width;
 		keep_col = (prompt_len + keep_len) % width;
