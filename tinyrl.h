@@ -7,10 +7,11 @@
   from a CLI in a "readline" like fashion.
 
 */
-#ifndef _tinyrl_tinyrl_h
-#define _tinyrl_tinyrl_h
+#ifndef TINYRL_TINYRL_H
+#define TINYRL_TINYRL_H
 
 #include <stdbool.h>
+#include <stdint.h>
 #include <stdio.h>
 
 struct tinyrl;
@@ -32,7 +33,7 @@ enum tinyrl_key {
  *   been performed successfully
  * - false if the action was not successful
  */
-typedef bool tinyrl_key_func_t(void * context, int key);
+typedef bool tinyrl_key_func_t(void *context, char *key);
 
 /* exported functions */
 struct tinyrl *tinyrl_new(FILE * instream, FILE * outstream);
@@ -100,5 +101,5 @@ void tinyrl_enable_echo(struct tinyrl *instance);
  */
 void tinyrl_limit_line_length(struct tinyrl *instance, unsigned length);
 
-#endif				/* _tinyrl_tinyrl_h */
+#endif
 /** @} tinyrl_tinyrl */

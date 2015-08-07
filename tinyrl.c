@@ -1,4 +1,5 @@
 #include "tinyrl.h"
+#include "utf8.h"
 
 #include <assert.h>
 #include <ctype.h>
@@ -129,23 +130,14 @@ static void changed_line(struct tinyrl *this)
 	}
 }
 
-static bool tinyrl_key_default(void *context, int key)
+static bool tinyrl_key_default(void *context, char *key)
 {
 	struct tinyrl *this = context;
-	bool result;
-	if (key > 31) {
-		char tmp = key & 0xFF;
-		result = tinyrl_insert_text_len(this, &tmp, 1);
-	} else {
-		char tmp[10];
-		sprintf(tmp, "~%d", key);
-		/* inject control characters as ~N where N is the ASCII code */
-		result = tinyrl_insert_text(this, tmp);
-	}
-	return result;
+
+	return tinyrl_insert_text(this, key);
 }
 
-static bool tinyrl_key_interrupt(void *context, int key)
+static bool tinyrl_key_interrupt(void *context, char *key)
 {
 	struct tinyrl *this = context;
 
@@ -155,7 +147,7 @@ static bool tinyrl_key_interrupt(void *context, int key)
 	return true;
 }
 
-static bool tinyrl_key_start_of_line(void *context, int key)
+static bool tinyrl_key_start_of_line(void *context, char *key)
 {
 	struct tinyrl *this = context;
 
@@ -164,7 +156,7 @@ static bool tinyrl_key_start_of_line(void *context, int key)
 	return true;
 }
 
-static bool tinyrl_key_end_of_line(void *context, int key)
+static bool tinyrl_key_end_of_line(void *context, char *key)
 {
 	struct tinyrl *this = context;
 
@@ -173,7 +165,7 @@ static bool tinyrl_key_end_of_line(void *context, int key)
 	return true;
 }
 
-static bool tinyrl_key_kill(void *context, int key)
+static bool tinyrl_key_kill(void *context, char *key)
 {
 	struct tinyrl *this = context;
 
@@ -188,7 +180,7 @@ static bool tinyrl_key_kill(void *context, int key)
 	return true;
 }
 
-static bool tinyrl_key_yank(void *context, int key)
+static bool tinyrl_key_yank(void *context, char *key)
 {
 	struct tinyrl *this = context;
 	bool result = false;
@@ -199,7 +191,7 @@ static bool tinyrl_key_yank(void *context, int key)
 	return result;
 }
 
-static bool tinyrl_key_crlf(void *context, int key)
+static bool tinyrl_key_crlf(void *context, char *key)
 {
 	struct tinyrl *this = context;
 
@@ -208,7 +200,7 @@ static bool tinyrl_key_crlf(void *context, int key)
 	return true;
 }
 
-static bool tinyrl_key_left(void *context, int key)
+static bool tinyrl_key_left(void *context, char *key)
 {
 	struct tinyrl *this = context;
 	bool result = false;
@@ -219,7 +211,7 @@ static bool tinyrl_key_left(void *context, int key)
 	return result;
 }
 
-static bool tinyrl_key_right(void *context, int key)
+static bool tinyrl_key_right(void *context, char *key)
 {
 	struct tinyrl *this = context;
 	bool result = false;
@@ -230,7 +222,7 @@ static bool tinyrl_key_right(void *context, int key)
 	return result;
 }
 
-static bool tinyrl_key_backspace(void *context, int key)
+static bool tinyrl_key_backspace(void *context, char *key)
 {
 	struct tinyrl *this = context;
 	bool result = false;
@@ -242,7 +234,7 @@ static bool tinyrl_key_backspace(void *context, int key)
 	return result;
 }
 
-static bool tinyrl_key_delete(void *context, int key)
+static bool tinyrl_key_delete(void *context, char *key)
 {
 	struct tinyrl *this = context;
 	bool result = false;
@@ -253,7 +245,7 @@ static bool tinyrl_key_delete(void *context, int key)
 	return result;
 }
 
-static bool tinyrl_key_clear_screen(void *context, int key)
+static bool tinyrl_key_clear_screen(void *context, char *key)
 {
 	struct tinyrl *this = context;
 
@@ -263,7 +255,7 @@ static bool tinyrl_key_clear_screen(void *context, int key)
 	return true;
 }
 
-static bool tinyrl_key_erase_line(void *context, int key)
+static bool tinyrl_key_erase_line(void *context, char *key)
 {
 	struct tinyrl *this = context;
 
@@ -381,25 +373,48 @@ void tinyrl_delete(struct tinyrl *this)
 	}
 }
 
-static int tinyrl_getchar(const struct tinyrl *this)
+static int tinyrl_getchar(const struct tinyrl *this, char *key)
 {
-	return getc(this->istream);
+	int c;
+	size_t i, key_len;
+
+	c = getc(this->istream);
+	if (c == EOF)
+		return -1;
+
+	key_len = utf8_char_len(c);
+	if (!key_len)
+		return -1;
+
+	key[0] = c;
+	for (i = 1; i < key_len; i++) {
+		c = getc(this->istream);
+		if (c == EOF)
+			return -1;
+		key[i] = c;
+	}
+	key[i] = 0;
+
+	if (utf8_char_get(key, key_len, NULL) != key_len)
+		return -1;
+
+	return key_len;
 }
 
-static int tinyrl_getchar_nonblock(const struct tinyrl *this)
+static int tinyrl_getchar_nonblock(const struct tinyrl *this, char *key)
 {
 	int fd;
 	int flags;
-	int c;
+	int key_len;
 
 	fd = fileno(this->istream);
 	flags = fcntl(fd, F_GETFL, 0);
 	if (flags != -1)
 		fcntl(fd, F_SETFL, flags | O_NONBLOCK);
-	c = getc(this->istream);
+	key_len = tinyrl_getchar(this, key);
 	if (flags != -1)
 		fcntl(fd, F_SETFL, flags);
-	return c;
+	return key_len;
 }
 
 static void tinyrl_internal_print(struct tinyrl *this, const char *text)
@@ -516,18 +531,20 @@ struct tinyrl *tinyrl_new(FILE * instream, FILE * outstream)
  * Note: if there is a partial match, then the extra keys are discarded.  This
  * shouldn't matter in practice.
  */
-static void tinyrl_handle_key(struct tinyrl *this, int key)
+static void tinyrl_handle_key(struct tinyrl *this, char *key, int key_len)
 {
 	struct tinyrl_keymap *keymap;
 	tinyrl_key_func_t *handler;
 	void *context;
-	int c;
+	unsigned char c;
+	int i;
 
 	handler = NULL;
 	context = NULL;
 	keymap = this->keymap;
-	c = key;
+	i = 0;
 	for (;;) {
+		c = key[i];
 		if (keymap->handler[c]) {
 			handler = keymap->handler[c];
 			context = keymap->context[c];
@@ -536,9 +553,13 @@ static void tinyrl_handle_key(struct tinyrl *this, int key)
 		if (!keymap)
 			break;
 
-		c = tinyrl_getchar_nonblock(this);
-		if (c == EOF)
-			break;
+		i++;
+		if (i >= key_len) {
+			key_len = tinyrl_getchar_nonblock(this, key);
+			if (key_len <= 0)
+				break;
+			i = 0;
+		}
 	}
 
 	if (!handler || !handler(context, key)) {
@@ -550,23 +571,24 @@ static void tinyrl_handle_key(struct tinyrl *this, int key)
 static void tinyrl_readtty(struct tinyrl *this)
 {
 	struct termios default_termios;
+	char key[5];
+	int key_len;
 
 	tty_set_raw_mode(this->istream, &default_termios);
 
 	tinyrl_reset_line_state(this);
 
 	while (!this->done) {
-		int key;
 		/* update the display */
 		tinyrl_redisplay(this);
 
 		/* get a key */
-		key = tinyrl_getchar(this);
+		key_len = tinyrl_getchar(this, key);
 
 		/* has the input stream terminated? */
-		if (EOF != key) {
+		if (key_len > 0) {
 			/* call the handler for this key */
-			tinyrl_handle_key(this, key);
+			tinyrl_handle_key(this, key, key_len);
 
 			if (this->done) {
 				/*

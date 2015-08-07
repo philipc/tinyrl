@@ -21,7 +21,7 @@ struct tinyrl_history {
 	unsigned iter;
 };
 
-static bool tinyrl_history_key_up(void *context, int key)
+static bool tinyrl_history_key_up(void *context, char *key)
 {
 	struct tinyrl_history *history = context;
 
@@ -34,7 +34,7 @@ static bool tinyrl_history_key_up(void *context, int key)
 	return true;
 }
 
-static bool tinyrl_history_key_down(void *context, int key)
+static bool tinyrl_history_key_down(void *context, char *key)
 {
 	struct tinyrl_history *history = context;
 

@@ -39,7 +39,7 @@ static bool complete(struct tinyrl *t, bool allow_prefix, bool allow_empty)
 	return ret;
 }
 
-static bool tab_key(void *context, int key)
+static bool tab_key(void *context, char *key)
 {
 	struct tinyrl *t = context;
 
@@ -48,7 +48,7 @@ static bool tab_key(void *context, int key)
 	return false;
 }
 
-static bool space_key(void *context, int key)
+static bool space_key(void *context, char *key)
 {
 	struct tinyrl *t = context;
 
@@ -57,7 +57,7 @@ static bool space_key(void *context, int key)
 	return false;
 }
 
-static bool enter_key(void *context, int key)
+static bool enter_key(void *context, char *key)
 {
 	struct tinyrl *t = context;
 
