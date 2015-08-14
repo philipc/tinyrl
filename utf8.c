@@ -135,6 +135,16 @@ size_t utf8_char_prev(const char *s, size_t len, size_t point)
 	}
 }
 
+size_t utf8_char_width(const char *s, size_t len, size_t point)
+{
+	struct utf8data *d;
+	uint32_t c;
+
+	utf8_char_get(s + point, len - point, &c);
+	d = utf8data_search(c);
+	return d ? d->width : 0;
+}
+
 static bool utf8_grapheme_break(uint32_t c1, uint32_t c2)
 {
 	struct utf8data *d;
@@ -223,4 +233,19 @@ size_t utf8_grapheme_prev(const char *s, size_t len, size_t point)
 		point = prev;
 		c2 = c1;
 	}
+}
+
+size_t utf8_grapheme_width(const char *s, size_t len, size_t point, size_t *pnext)
+{
+	size_t next;
+	size_t width;
+	size_t i;
+
+	next = utf8_grapheme_next(s, len, point);
+	if (pnext) *pnext = next;
+
+	width = 0;
+	for (i = point; i < next; i = utf8_char_next(s, len, i))
+		width += utf8_char_width(s, len, i);
+	return width;
 }

@@ -439,15 +439,35 @@ static void tinyrl_internal_print(struct tinyrl *this, const char *text)
 	}
 }
 
+static void tinyrl_string_wrap(
+	const char *s, size_t len, size_t row_width, size_t *row, size_t *col)
+{
+	size_t point, next, width;
+
+	for (point = 0; point < len; point = next) {
+		width = utf8_grapheme_width(s, len, point, &next);
+		*col += width;
+		if (*col > row_width) {
+			*row += 1;
+			*col = width;
+		}
+	}
+}
+
 void tinyrl_redisplay(struct tinyrl *this)
 {
-	size_t prompt_len, width;
-	size_t row, point_row, point_col;
+	size_t width;
+	size_t prompt_row, prompt_col;
+	size_t row, col;
+	size_t point_row, point_col;
 	size_t i;
 	size_t next_len, keep_len, keep_row, keep_col;
 
-	prompt_len = strlen(this->prompt);
 	width = tinyrl__get_width(this);
+
+	prompt_row = 0;
+	prompt_col = 0;
+	tinyrl_string_wrap(this->prompt, strlen(this->prompt), width, &prompt_row, &prompt_col);
 
 	/* erase changed portion of previous line */
 	if (this->last_buffer) {
@@ -463,14 +483,17 @@ void tinyrl_redisplay(struct tinyrl *this)
 				break;
 			keep_len = next_len;
 		}
-		keep_row = (prompt_len + keep_len + width) / width;
-		keep_col = (prompt_len + keep_len) % width;
-		if (keep_len > 0 && keep_col == 0) {
+
+		keep_row = prompt_row;
+		keep_col = prompt_col;
+		tinyrl_string_wrap(this->line, keep_len, width, &keep_row, &keep_col);
+		if (keep_len > 0 && keep_col == width) {
 			/* never keep an empty last line, so that we can
 			 * position the cursor correctly */
-			keep_len--;
-			keep_row--;
-			keep_col = width - 1;
+			keep_len = utf8_grapheme_prev(this->line, this->end, keep_len);
+			keep_row = prompt_row;
+			keep_col = prompt_col;
+			tinyrl_string_wrap(this->line, keep_len, width, &keep_row, &keep_col);
 		}
 
 		/* move cursor to the start of the last displayed row */
@@ -499,9 +522,20 @@ void tinyrl_redisplay(struct tinyrl *this)
 	tinyrl_internal_print(this, this->line + keep_len);
 
 	/* move cursor to point */
-	row = (prompt_len + this->end + width - 1) / width;
-	point_row = (prompt_len + this->point + width) / width;
-	point_col = (prompt_len + this->point) % width;
+	row = prompt_row;
+	col = prompt_col;
+	tinyrl_string_wrap(this->line, this->end, width, &row, &col);
+
+	point_row = prompt_row;
+	point_col = prompt_col;
+	tinyrl_string_wrap(this->line, this->point, width, &point_row, &point_col);
+	if (point_col == width
+	    || (this->point < this->end
+		&& point_col + utf8_grapheme_width(this->line, this->end, this->point, NULL) > width)) {
+		point_row++;
+		point_col = 0;
+	}
+
 	if (row < point_row) {
                 /* if the text is a whole number of lines, then the
                  * cursor will still be at the end of the last line,
