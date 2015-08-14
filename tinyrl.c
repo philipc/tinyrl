@@ -42,8 +42,8 @@ struct tinyrl {
 
 	char *last_buffer;
 	size_t last_end;
-	size_t last_rows;
-	size_t last_point_rows;
+	size_t last_row;
+	size_t last_point_row;
 };
 
 #define ESCAPESTR "\x1b"
@@ -348,8 +348,8 @@ tinyrl_init(struct tinyrl *this, FILE * instream, FILE * outstream)
 	this->isatty = isatty(fileno(instream));
 	this->last_buffer = NULL;
 	this->last_end = 0;
-	this->last_rows = 0;
-	this->last_point_rows = 0;
+	this->last_row = 0;
+	this->last_point_row = 0;
 
 	this->istream = instream;
 	this->ostream = outstream;
@@ -442,9 +442,9 @@ static void tinyrl_internal_print(struct tinyrl *this, const char *text)
 void tinyrl_redisplay(struct tinyrl *this)
 {
 	size_t prompt_len, width;
-	size_t rows, point_rows, point_col;
+	size_t row, point_row, point_col;
 	size_t i;
-	size_t next_len, keep_len, keep_rows, keep_col;
+	size_t next_len, keep_len, keep_row, keep_col;
 
 	prompt_len = strlen(this->prompt);
 	width = tinyrl__get_width(this);
@@ -463,26 +463,26 @@ void tinyrl_redisplay(struct tinyrl *this)
 				break;
 			keep_len = next_len;
 		}
-		keep_rows = (prompt_len + keep_len + width) / width;
+		keep_row = (prompt_len + keep_len + width) / width;
 		keep_col = (prompt_len + keep_len) % width;
 		if (keep_len > 0 && keep_col == 0) {
 			/* never keep an empty last line, so that we can
 			 * position the cursor correctly */
 			keep_len--;
-			keep_rows--;
+			keep_row--;
 			keep_col = width - 1;
 		}
 
 		/* move cursor to the start of the last displayed row */
 		tinyrl_printf(this, "\r");
-		if (this->last_rows > this->last_point_rows) {
-			tinyrl_vt100_cursor_down(this, this->last_rows - this->last_point_rows);
-		} else if (this->last_rows < this->last_point_rows) {
-			tinyrl_vt100_cursor_up(this, this->last_point_rows - this->last_rows);
+		if (this->last_row > this->last_point_row) {
+			tinyrl_vt100_cursor_down(this, this->last_row - this->last_point_row);
+		} else if (this->last_row < this->last_point_row) {
+			tinyrl_vt100_cursor_up(this, this->last_point_row - this->last_row);
 		}
 
 		/* erase the rows we aren't keeping */
-		for (i = keep_rows; i < this->last_rows; i++) {
+		for (i = keep_row; i < this->last_row; i++) {
 			tinyrl_vt100_erase_line(this);
 			tinyrl_vt100_cursor_up(this, 1);
 		}
@@ -499,18 +499,18 @@ void tinyrl_redisplay(struct tinyrl *this)
 	tinyrl_internal_print(this, this->line + keep_len);
 
 	/* move cursor to point */
-	rows = (prompt_len + this->end + width - 1) / width;
-	point_rows = (prompt_len + this->point + width) / width;
+	row = (prompt_len + this->end + width - 1) / width;
+	point_row = (prompt_len + this->point + width) / width;
 	point_col = (prompt_len + this->point) % width;
-	if (rows < point_rows) {
+	if (row < point_row) {
                 /* if the text is a whole number of lines, then the
                  * cursor will still be at the end of the last line,
 		 * so move it to the start of the next  */
 		tinyrl_printf(this, "\n");
 	}
 	if (this->end > this->point) {
-		if (rows > point_rows) {
-			tinyrl_vt100_cursor_up(this, rows - point_rows);
+		if (row > point_row) {
+			tinyrl_vt100_cursor_up(this, row - point_row);
 		}
 		tinyrl_printf(this, "\r");
 		if (point_col) {
@@ -521,8 +521,8 @@ void tinyrl_redisplay(struct tinyrl *this)
 	free(this->last_buffer);
 	this->last_buffer = strdup(this->line);
 	this->last_end = this->end;
-	this->last_rows = rows;
-	this->last_point_rows = point_rows;
+	this->last_row = row;
+	this->last_point_row = point_row;
 
 	fflush(this->ostream);
 }
