@@ -462,6 +462,8 @@ void tinyrl_redisplay(struct tinyrl *this)
 	size_t point_row, point_col;
 	size_t i;
 	size_t next_len, keep_len, keep_row, keep_col;
+	size_t point, end;
+	char *buffer;
 
 	width = tinyrl__get_width(this);
 
@@ -469,31 +471,37 @@ void tinyrl_redisplay(struct tinyrl *this)
 	prompt_col = 0;
 	tinyrl_string_wrap(this->prompt, strlen(this->prompt), width, &prompt_row, &prompt_col);
 
+	point = this->point;
+	end = this->end;
+	buffer = strdup(this->line);
+	if (!buffer)
+		return;
+
 	/* erase changed portion of previous line */
 	if (this->last_buffer) {
 		/* find out how much to keep */
 		keep_len = 0;
 		for (;;) {
-			if (keep_len >= this->end)
+			if (keep_len >= end)
 				break;
-			next_len = utf8_grapheme_next(this->line, this->end, keep_len);
+			next_len = utf8_grapheme_next(buffer, end, keep_len);
 			if (next_len > this->last_end)
 				break;
-			if (memcmp(this->line + keep_len, this->last_buffer + keep_len, next_len - keep_len) != 0)
+			if (memcmp(buffer + keep_len, this->last_buffer + keep_len, next_len - keep_len) != 0)
 				break;
 			keep_len = next_len;
 		}
 
 		keep_row = prompt_row;
 		keep_col = prompt_col;
-		tinyrl_string_wrap(this->line, keep_len, width, &keep_row, &keep_col);
+		tinyrl_string_wrap(buffer, keep_len, width, &keep_row, &keep_col);
 		if (keep_len > 0 && keep_col == width) {
 			/* never keep an empty last line, so that we can
 			 * position the cursor correctly */
-			keep_len = utf8_grapheme_prev(this->line, this->end, keep_len);
+			keep_len = utf8_grapheme_prev(buffer, end, keep_len);
 			keep_row = prompt_row;
 			keep_col = prompt_col;
-			tinyrl_string_wrap(this->line, keep_len, width, &keep_row, &keep_col);
+			tinyrl_string_wrap(buffer, keep_len, width, &keep_row, &keep_col);
 		}
 
 		/* move cursor to the start of the last displayed row */
@@ -519,19 +527,18 @@ void tinyrl_redisplay(struct tinyrl *this)
 		tinyrl_printf(this, "%s", this->prompt);
 	}
 
-	tinyrl_internal_print(this, this->line + keep_len);
+	tinyrl_internal_print(this, buffer + keep_len);
 
 	/* move cursor to point */
 	row = prompt_row;
 	col = prompt_col;
-	tinyrl_string_wrap(this->line, this->end, width, &row, &col);
+	tinyrl_string_wrap(buffer, end, width, &row, &col);
 
 	point_row = prompt_row;
 	point_col = prompt_col;
-	tinyrl_string_wrap(this->line, this->point, width, &point_row, &point_col);
+	tinyrl_string_wrap(buffer, point, width, &point_row, &point_col);
 	if (point_col == width
-	    || (this->point < this->end
-		&& point_col + utf8_grapheme_width(this->line, this->end, this->point, NULL) > width)) {
+	    || (point < end && point_col + utf8_grapheme_width(buffer, end, point, NULL) > width)) {
 		point_row++;
 		point_col = 0;
 	}
@@ -542,7 +549,7 @@ void tinyrl_redisplay(struct tinyrl *this)
 		 * so move it to the start of the next  */
 		tinyrl_printf(this, "\n");
 	}
-	if (this->end > this->point) {
+	if (end > point) {
 		if (row > point_row) {
 			tinyrl_vt100_cursor_up(this, row - point_row);
 		}
@@ -553,8 +560,8 @@ void tinyrl_redisplay(struct tinyrl *this)
 	}
 
 	free(this->last_buffer);
-	this->last_buffer = strdup(this->line);
-	this->last_end = this->end;
+	this->last_buffer = buffer;
+	this->last_end = end;
 	this->last_row = row;
 	this->last_point_row = point_row;
 
