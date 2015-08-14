@@ -444,7 +444,7 @@ void tinyrl_redisplay(struct tinyrl *this)
 	size_t prompt_len, width;
 	size_t rows, point_rows, point_col;
 	size_t i;
-	size_t keep_len, keep_rows, keep_col;
+	size_t next_len, keep_len, keep_rows, keep_col;
 
 	prompt_len = strlen(this->prompt);
 	width = tinyrl__get_width(this);
@@ -452,11 +452,17 @@ void tinyrl_redisplay(struct tinyrl *this)
 	/* erase changed portion of previous line */
 	if (this->last_buffer) {
 		/* find out how much to keep */
-		for (keep_len = 0;
-		     keep_len < this->end
-		     && keep_len < this->last_end
-		     && this->line[keep_len] == this->last_buffer[keep_len];
-		     keep_len++);
+		keep_len = 0;
+		for (;;) {
+			if (keep_len >= this->end)
+				break;
+			next_len = utf8_grapheme_next(this->line, this->end, keep_len);
+			if (next_len > this->last_end)
+				break;
+			if (memcmp(this->line + keep_len, this->last_buffer + keep_len, next_len - keep_len) != 0)
+				break;
+			keep_len = next_len;
+		}
 		keep_rows = (prompt_len + keep_len + width) / width;
 		keep_col = (prompt_len + keep_len) % width;
 		if (keep_len > 0 && keep_col == 0) {
