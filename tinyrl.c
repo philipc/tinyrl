@@ -205,7 +205,7 @@ static bool tinyrl_key_left(void *context, char *key)
 	struct tinyrl *this = context;
 	bool result = false;
 	if (this->point > 0) {
-		this->point--;
+		this->point = utf8_grapheme_prev(this->line, this->end, this->point);
 		result = true;
 	}
 	return result;
@@ -216,7 +216,7 @@ static bool tinyrl_key_right(void *context, char *key)
 	struct tinyrl *this = context;
 	bool result = false;
 	if (this->point < this->end) {
-		this->point++;
+		this->point = utf8_grapheme_next(this->line, this->end, this->point);
 		result = true;
 	}
 	return result;
@@ -226,9 +226,12 @@ static bool tinyrl_key_backspace(void *context, char *key)
 {
 	struct tinyrl *this = context;
 	bool result = false;
+	size_t end;
+
 	if (this->point) {
-		this->point--;
-		tinyrl_delete_text(this, this->point, this->point + 1);
+		end = this->point;
+		this->point = utf8_char_prev(this->line, this->end, this->point);
+		tinyrl_delete_text(this, this->point, end);
 		result = true;
 	}
 	return result;
@@ -238,8 +241,11 @@ static bool tinyrl_key_delete(void *context, char *key)
 {
 	struct tinyrl *this = context;
 	bool result = false;
+	size_t end;
+
 	if (this->point < this->end) {
-		tinyrl_delete_text(this, this->point, this->point + 1);
+		end = utf8_grapheme_next(this->line, this->end, this->point);
+		tinyrl_delete_text(this, this->point, end);
 		result = true;
 	}
 	return result;

@@ -1,4 +1,5 @@
 #include "utf8.h"
+#include <stdlib.h>
 
 enum {
 	UTF8_GRAPHEME_BREAK_OTHER,
@@ -26,6 +27,28 @@ struct utf8data {
 struct utf8data utf8data[] = {
 #include "utf8data.c"
 };
+
+static int utf8data_cmp(const void *p1, const void *p2)
+{
+	uint32_t c = *(const uint32_t *)p1;
+	const struct utf8data *d = p2;
+
+	if (c < d->lower)
+		return -1;
+	if (c > d->upper)
+		return 1;
+	return 0;
+}
+
+static struct utf8data *utf8data_search(uint32_t c)
+{
+	struct utf8data key;
+	key.lower = c;
+	key.upper = c;
+
+	return bsearch(&key, utf8data, sizeof(utf8data)/sizeof(utf8data[0]),
+		       sizeof(utf8data[0]), utf8data_cmp);
+}
 
 static bool utf8_cont(char c)
 {
@@ -88,4 +111,116 @@ size_t utf8_char_get(const char *s, size_t len, uint32_t *dst)
 	if (dst)
 		*dst = c;
 	return char_len;
+}
+
+size_t utf8_char_next(const char *s, size_t len, size_t point)
+{
+	for (;;) {
+		point++;
+		if (point >= len)
+			return point;
+		if (!utf8_cont(s[point]))
+			return point;
+	}
+}
+
+size_t utf8_char_prev(const char *s, size_t len, size_t point)
+{
+	for (;;) {
+		if (point == 0)
+			return point;
+		point--;
+		if (!utf8_cont(s[point]))
+			return point;
+	}
+}
+
+static bool utf8_grapheme_break(uint32_t c1, uint32_t c2)
+{
+	struct utf8data *d;
+	int b1, b2;
+
+	d = utf8data_search(c1);
+	b1 = d ? d->grapheme_break : UTF8_GRAPHEME_BREAK_OTHER;
+
+	d = utf8data_search(c2);
+	b2 = d ? d->grapheme_break : UTF8_GRAPHEME_BREAK_OTHER;
+
+	/* GB3 */
+	if (b1 == UTF8_GRAPHEME_BREAK_CR && b2 == UTF8_GRAPHEME_BREAK_LF)
+		return false;
+
+	/* GB4 */
+	if (b1 == UTF8_GRAPHEME_BREAK_CR || b1 == UTF8_GRAPHEME_BREAK_LF || b1 == UTF8_GRAPHEME_BREAK_CONTROL)
+		return true;
+
+	/* GB5 */
+	if (b2 == UTF8_GRAPHEME_BREAK_CR || b2 == UTF8_GRAPHEME_BREAK_LF || b2 == UTF8_GRAPHEME_BREAK_CONTROL)
+		return true;
+
+	/* GB6 */
+	if (b1 == UTF8_GRAPHEME_BREAK_L && (b2 == UTF8_GRAPHEME_BREAK_L || b2 == UTF8_GRAPHEME_BREAK_V || b2 == UTF8_GRAPHEME_BREAK_LV || b2 == UTF8_GRAPHEME_BREAK_LVT))
+		return false;
+
+	/* GB7 */
+	if ((b1 == UTF8_GRAPHEME_BREAK_LV || b1 == UTF8_GRAPHEME_BREAK_V) && (b2 == UTF8_GRAPHEME_BREAK_V || b2 == UTF8_GRAPHEME_BREAK_T))
+		return false;
+
+	/* GB8 */
+	if ((b1 == UTF8_GRAPHEME_BREAK_LVT || b1 == UTF8_GRAPHEME_BREAK_T) && b2 == UTF8_GRAPHEME_BREAK_T)
+		return false;
+
+	/* GB8a */
+	if (b1 == UTF8_GRAPHEME_BREAK_REGIONAL_INDICATOR && b2 == UTF8_GRAPHEME_BREAK_REGIONAL_INDICATOR)
+		return false;
+
+	/* GB9 */
+	if (b2 == UTF8_GRAPHEME_BREAK_EXTEND)
+		return false;
+
+	/* GB9a */
+	if (b2 == UTF8_GRAPHEME_BREAK_SPACINGMARK)
+		return false;
+
+	/* GB9b */
+	if (b1 == UTF8_GRAPHEME_BREAK_PREPEND)
+		return false;
+
+	/* GB10 */
+	return true;
+}
+
+size_t utf8_grapheme_next(const char *s, size_t len, size_t point)
+{
+	uint32_t c1, c2;
+
+	utf8_char_get(s + point, len - point, &c1);
+	for (;;) {
+		point = utf8_char_next(s, len, point);
+		if (point >= len)
+			return point;
+		utf8_char_get(s + point, len - point, &c2);
+		if (utf8_grapheme_break(c1, c2))
+			return point;
+		c1 = c2;
+	}
+}
+
+size_t utf8_grapheme_prev(const char *s, size_t len, size_t point)
+{
+	uint32_t c1, c2;
+	size_t prev;
+
+	point = utf8_char_prev(s, len, point);
+	utf8_char_get(s + point, len - point, &c2);
+	for (;;) {
+		if (point == 0)
+			return point;
+		prev = utf8_char_prev(s, len, point);
+		utf8_char_get(s + point, len - point, &c1);
+		if (utf8_grapheme_break(c1, c2))
+			return point;
+		point = prev;
+		c2 = c1;
+	}
 }
