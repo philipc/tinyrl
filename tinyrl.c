@@ -423,18 +423,38 @@ static int tinyrl_getchar_nonblock(const struct tinyrl *this, char *key)
 	return key_len;
 }
 
-static void tinyrl_internal_print(struct tinyrl *this, const char *text)
+static void tinyrl_internal_print(
+	struct tinyrl *this, char **buffer, size_t *point, size_t *end)
 {
 	if (this->echo_enabled) {
 		/* simply echo the line */
-		tinyrl_printf(this, "%s", text);
+		*point = this->point;
+		*end = this->end;
+		*buffer = strdup(this->line);
 	} else {
 		/* replace the line with echo char if defined */
 		if (this->echo_char) {
-			unsigned i = strlen(text);
-			while (i--) {
-				tinyrl_printf(this, "%c", this->echo_char);
+			size_t i;
+
+			*point = 0;
+			*end = 0;
+			for (i = 0; ; i = utf8_grapheme_next(this->line, this->end, i)) {
+				if (i == this->point)
+					*point = *end;
+				if (i >= this->end)
+					break;
+				*end += 1;
 			}
+
+			*buffer = malloc(*end + 1);
+			if (*buffer) {
+				memset(*buffer, this->echo_char, *end);
+				(*buffer)[*end] = 0;
+			}
+		} else {
+			*point = 0;
+			*end = 0;
+			*buffer = strdup("");
 		}
 	}
 }
@@ -471,9 +491,7 @@ void tinyrl_redisplay(struct tinyrl *this)
 	prompt_col = 0;
 	tinyrl_string_wrap(this->prompt, strlen(this->prompt), width, &prompt_row, &prompt_col);
 
-	point = this->point;
-	end = this->end;
-	buffer = strdup(this->line);
+	tinyrl_internal_print(this, &buffer, &point, &end);
 	if (!buffer)
 		return;
 
@@ -527,7 +545,7 @@ void tinyrl_redisplay(struct tinyrl *this)
 		tinyrl_printf(this, "%s", this->prompt);
 	}
 
-	tinyrl_internal_print(this, buffer + keep_len);
+	tinyrl_printf(this, "%s", buffer + keep_len);
 
 	/* move cursor to point */
 	row = prompt_row;
