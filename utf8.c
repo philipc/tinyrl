@@ -75,7 +75,7 @@ size_t utf8_char_get(const char *s, size_t len, uint32_t *dst)
 
 	char_len = utf8_char_len(*s);
 	if (char_len > len)
-		return 0;
+		goto err;
 
 	switch (char_len) {
 	case 1:
@@ -83,34 +83,39 @@ size_t utf8_char_get(const char *s, size_t len, uint32_t *dst)
 		break;
 	case 2:
 		if (!utf8_cont(s[1]))
-			return 0;
+			goto err;
 		c = ((s[0] & 0x1f) << 6) | (s[1] & 0x3f);
 		if (c < 0x80)
-			return 0;
+			goto err;
 		break;
 	case 3:
 		if (!utf8_cont(s[1]) || !utf8_cont(s[2]))
-			return 0;
+			goto err;
 		c = ((s[0] & 0xf) << 12) | ((s[1] & 0x3f) << 6) | (s[2] & 0x3f);
 		if (c < 0x800)
-			return 0;
+			goto err;
 		if (c >= 0xd800 && c < 0xe000)
-			return 0;
+			goto err;
 		break;
 	case 4:
 		if (!utf8_cont(s[1]) || !utf8_cont(s[2]) || !utf8_cont(s[3]))
-			return 0;
+			goto err;
 		c = ((s[0] & 0x7) << 18) | ((s[1] & 0x3f) << 12) | ((s[2] & 0x3f) << 6) | (s[3] & 0x3f);
 		if (c < 0x10000 || c >= 0x110000)
-			return 0;
+			goto err;
 		break;
 	default:
-		return 0;
+		goto err;
 	}
 
 	if (dst)
 		*dst = c;
 	return char_len;
+
+err:
+	if (dst)
+		*dst = 0;
+	return 0;
 }
 
 size_t utf8_char_next(const char *s, size_t len, size_t point)
