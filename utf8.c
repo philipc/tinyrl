@@ -141,6 +141,10 @@ size_t utf8_char_width(const char *s, size_t len, size_t point)
 	uint32_t c;
 
 	utf8_char_get(s + point, len - point, &c);
+	if (c < 0x20)
+		return 0;
+	if (c < 0x7f)
+		return 1;
 	d = utf8data_search(c);
 	return d ? d->width : 0;
 }
