@@ -24,3 +24,7 @@ add_custom_command(
 add_custom_command(
 	OUTPUT GraphemeBreakProperty.txt
 	COMMAND curl -o GraphemeBreakProperty.txt http://www.unicode.org/Public/UCD/latest/ucd/auxiliary/GraphemeBreakProperty.txt)
+
+file(GLOB headers *.h)
+install(FILES ${headers} DESTINATION include/tinyrl)
+install(TARGETS tinyrl ARCHIVE DESTINATION lib)
