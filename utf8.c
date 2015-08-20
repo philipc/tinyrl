@@ -236,7 +236,7 @@ size_t utf8_grapheme_prev(const char *s, size_t len, size_t point)
 		if (point == 0)
 			return point;
 		prev = utf8_char_prev(s, len, point);
-		utf8_char_get(s + point, len - point, &c1);
+		utf8_char_get(s + prev, len - prev, &c1);
 		if (utf8_grapheme_break(c1, c2))
 			return point;
 		point = prev;
