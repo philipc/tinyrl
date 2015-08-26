@@ -17,38 +17,7 @@ enum {
 	UTF8_GRAPHEME_BREAK_LVT,
 };
 
-struct utf8data {
-	uint32_t lower;
-	uint32_t upper;
-	uint8_t width;
-	uint8_t grapheme_break;
-};
-
-struct utf8data utf8data[] = {
 #include "utf8data.c"
-};
-
-static int utf8data_cmp(const void *p1, const void *p2)
-{
-	uint32_t c = *(const uint32_t *)p1;
-	const struct utf8data *d = p2;
-
-	if (c < d->lower)
-		return -1;
-	if (c > d->upper)
-		return 1;
-	return 0;
-}
-
-static struct utf8data *utf8data_search(uint32_t c)
-{
-	struct utf8data key;
-	key.lower = c;
-	key.upper = c;
-
-	return bsearch(&key, utf8data, sizeof(utf8data)/sizeof(utf8data[0]),
-		       sizeof(utf8data[0]), utf8data_cmp);
-}
 
 static bool utf8_cont(char c)
 {
@@ -142,28 +111,34 @@ size_t utf8_char_prev(const char *s, size_t len, size_t point)
 
 size_t utf8_char_width(const char *s, size_t len, size_t point)
 {
-	struct utf8data *d;
 	uint32_t c;
+	uint8_t i;
 
 	utf8_char_get(s + point, len - point, &c);
-	if (c < 0x20)
+	if (c >= 0x110000)
 		return 0;
-	if (c < 0x7f)
-		return 1;
-	d = utf8data_search(c);
-	return d ? d->width : 0;
+	i = width0[c >> width0_shift];
+	i = width1[i][(c >> width1_shift) & width1_mask];
+	i = width2[i][(c >> width2_shift) & width2_mask];
+	return (i >> ((c & width3_mask) * width_val_shift)) & width_val_mask;
+}
+
+static int utf8_grapheme_boundary_class(uint32_t c)
+{
+	uint8_t i;
+
+	i = grapheme_break0[c >> grapheme_break0_shift];
+	i = grapheme_break1[i][(c >> grapheme_break1_shift) & grapheme_break1_mask];
+	i = grapheme_break2[i][(c >> grapheme_break2_shift) & grapheme_break2_mask];
+	return (i >> ((c & grapheme_break3_mask) * grapheme_break_val_shift)) & grapheme_break_val_mask;
 }
 
 static bool utf8_grapheme_break(uint32_t c1, uint32_t c2)
 {
-	struct utf8data *d;
 	int b1, b2;
 
-	d = utf8data_search(c1);
-	b1 = d ? d->grapheme_break : UTF8_GRAPHEME_BREAK_OTHER;
-
-	d = utf8data_search(c2);
-	b2 = d ? d->grapheme_break : UTF8_GRAPHEME_BREAK_OTHER;
+	b1 = utf8_grapheme_boundary_class(c1);
+	b2 = utf8_grapheme_boundary_class(c2);
 
 	/* GB3 */
 	if (b1 == UTF8_GRAPHEME_BREAK_CR && b2 == UTF8_GRAPHEME_BREAK_LF)
