@@ -37,7 +37,7 @@ size_t utf8_char_len(char c)
 	return 0;
 }
 
-size_t utf8_char_get(const char *s, size_t len, uint32_t *dst)
+size_t utf8_char_decode(const char *s, size_t len, uint32_t *dst)
 {
 	size_t char_len;
 	uint32_t c;
@@ -114,7 +114,7 @@ size_t utf8_char_width(const char *s, size_t len, size_t point)
 	uint32_t c;
 	uint8_t i;
 
-	utf8_char_get(s + point, len - point, &c);
+	utf8_char_decode(s + point, len - point, &c);
 	if (c >= 0x110000)
 		return 0;
 	i = width0[c >> width0_shift];
@@ -188,12 +188,12 @@ size_t utf8_grapheme_next(const char *s, size_t len, size_t point)
 {
 	uint32_t c1, c2;
 
-	utf8_char_get(s + point, len - point, &c1);
+	utf8_char_decode(s + point, len - point, &c1);
 	for (;;) {
 		point = utf8_char_next(s, len, point);
 		if (point >= len)
 			return point;
-		utf8_char_get(s + point, len - point, &c2);
+		utf8_char_decode(s + point, len - point, &c2);
 		if (utf8_grapheme_break(c1, c2))
 			return point;
 		c1 = c2;
@@ -206,12 +206,12 @@ size_t utf8_grapheme_prev(const char *s, size_t len, size_t point)
 	size_t prev;
 
 	point = utf8_char_prev(s, len, point);
-	utf8_char_get(s + point, len - point, &c2);
+	utf8_char_decode(s + point, len - point, &c2);
 	for (;;) {
 		if (point == 0)
 			return point;
 		prev = utf8_char_prev(s, len, point);
-		utf8_char_get(s + prev, len - prev, &c1);
+		utf8_char_decode(s + prev, len - prev, &c1);
 		if (utf8_grapheme_break(c1, c2))
 			return point;
 		point = prev;

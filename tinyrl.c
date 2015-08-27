@@ -401,7 +401,7 @@ static int tinyrl_getchar(const struct tinyrl *this, char *key)
 	}
 	key[i] = 0;
 
-	if (utf8_char_get(key, key_len, NULL) != key_len)
+	if (utf8_char_decode(key, key_len, NULL) != key_len)
 		return -1;
 
 	return key_len;
