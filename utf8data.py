@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Build an ordered list of character widths and grapheme break properties
+# Build multi-stage lookup tables for character widths and grapheme break properties
 import re
 
 CatCode = dict()
