@@ -87,6 +87,39 @@ err:
 	return 0;
 }
 
+size_t utf8_char_encode(uint32_t c, char *s, size_t len)
+{
+	if (c < 0x80) {
+		if (len < 1)
+			return 0;
+		s[0] = c;
+		return 1;
+	} else if (c < 0x800) {
+		if (len < 2)
+			return 0;
+		s[0] = 0xC0 + (c >> 6);
+		s[1] = 0x80 + (c & 0x3f);
+		return 2;
+	} else if (c < 0x10000) {
+		if (len < 3)
+			return 0;
+		s[0] = 0xE0 + (c >> 12);
+		s[1] = 0x80 + ((c >> 6) & 0x3f);
+		s[2] = 0x80 + (c & 0x3f);
+		return 3;
+	} else if (c < 0x110000) {
+		if (len < 4)
+			return 0;
+		s[0] = 0xF0 + (c >> 18);
+		s[1] = 0x80 + ((c >> 12) & 0x3f);
+		s[2] = 0x80 + ((c >> 6) & 0x3f);
+		s[3] = 0x80 + (c & 0x3f);
+		return 4;
+	} else {
+		return 0;
+	}
+}
+
 size_t utf8_char_next(const char *s, size_t len, size_t point)
 {
 	for (;;) {
