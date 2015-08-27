@@ -3,7 +3,14 @@ cmake_minimum_required(VERSION 2.6)
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wmissing-prototypes -Werror")
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O2")
 
-add_library(tinyrl tinyrl.c history.c complete.c utf8.c)
+option(UTF8 "Enable UTF-8" ON)
+if(UTF8)
+	set(UTF8_SOURCE utf8.c)
+else()
+	add_definitions(-DDISABLE_UTF8)
+endif()
+
+add_library(tinyrl tinyrl.c history.c complete.c ${UTF8_SOURCE})
 
 add_executable(example example.c)
 target_link_libraries(example tinyrl)
