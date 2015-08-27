@@ -125,7 +125,7 @@ size_t utf8_char_next(const char *s, size_t len, size_t point)
 	for (;;) {
 		point++;
 		if (point >= len)
-			return point;
+			return len;
 		if (!utf8_cont(s[point]))
 			return point;
 	}
