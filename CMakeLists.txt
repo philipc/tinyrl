@@ -1,4 +1,5 @@
 cmake_minimum_required(VERSION 2.6)
+project(tinyrl C)
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wmissing-prototypes -Werror")
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O2")
